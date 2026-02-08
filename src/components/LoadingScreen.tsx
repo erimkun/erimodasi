@@ -138,15 +138,15 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({ onComplete, isLoad
                                     BİR SORUN VARSA ERİMİ DE VAR
                                 </motion.div>
                             ) : (
-                                <motion.div
+                                <motion.img
                                     key="placeholder"
+                                    src="/erder.png"
+                                    alt="Erden Erim"
                                     initial={{ opacity: 0 }}
-                                    animate={{ opacity: 0.3 }}
+                                    animate={{ opacity: 0.8 }}
                                     exit={{ opacity: 0 }}
-                                    className="dynamic-text placeholder"
-                                >
-                                    ERDEN ERİM
-                                </motion.div>
+                                    style={{ maxHeight: '60px', width: 'auto' }}
+                                />
                             )}
                         </AnimatePresence>
                     </div>

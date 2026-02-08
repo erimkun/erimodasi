@@ -124,7 +124,7 @@
 
 /* Dynamic Text below gallery */
 .dynamic-text-container {
-    height: 50px;
+    height: 80px;
     /* Fixed height to prevent shifts */
     display: flex;
     justify-content: center;
