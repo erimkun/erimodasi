@@ -95,7 +95,7 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({ onComplete, isLoad
                                 YÜKLENİYOR...
                             </motion.div>
                         ) : (
-                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '30px', perspective: 1000 }}>
                                 <motion.button
                                     key="ready"
                                     className="ready-btn"
@@ -107,14 +107,31 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({ onComplete, isLoad
                                 >
                                     HAZIR - GİRİŞ YAP
                                 </motion.button>
-                                <motion.img
-                                    src="/favicon.webp"
-                                    alt="Icon"
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 0.8 }}
-                                    transition={{ delay: 0.2 }}
-                                    style={{ width: '24px', height: '24px', opacity: 0.8 }}
-                                />
+
+                                <motion.div
+                                    style={{
+                                        rotateX,
+                                        rotateY,
+                                        cursor: 'pointer'
+                                    }}
+                                    whileHover={{ scale: 1.1 }}
+                                    transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                                >
+                                    <motion.img
+                                        src="/entry-logo.webp"
+                                        alt="Entry Icon"
+                                        initial={{ opacity: 0, y: 20 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ delay: 0.2, duration: 0.8 }}
+                                        style={{
+                                            width: '120px',
+                                            height: 'auto',
+                                            opacity: 0.9,
+                                            filter: 'drop-shadow(0 10px 20px rgba(0,0,0,0.5))',
+                                            borderRadius: '12px'
+                                        }}
+                                    />
+                                </motion.div>
                             </div>
                         )}
                     </AnimatePresence>
