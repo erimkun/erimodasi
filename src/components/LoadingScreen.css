@@ -29,7 +29,7 @@
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    padding: 3rem;
+    padding: 2rem;
     box-sizing: border-box;
     /* backdrop-filter: blur(2px); Optionally blur bg slightly */
 }
@@ -39,7 +39,8 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 60px;
+    /* height: 60px; Removed fixed height to fit content */
+    min-height: 60px;
     margin-bottom: 20px;
 }
 
@@ -124,7 +125,7 @@
 
 /* Dynamic Text below gallery */
 .dynamic-text-container {
-    height: 200px;
+    height: 100px;
     /* Fixed height to prevent shifts */
     display: flex;
     justify-content: center;
