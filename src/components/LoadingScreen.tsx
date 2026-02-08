@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useMotionValue, useTransform, useSpring } from 'framer-motion';
 import { FluidBackground } from './FluidBackground';
 import './LoadingScreen.css';
 
@@ -35,6 +35,29 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({ onComplete, isLoad
             setShowReady(true);
         }
     }, [isLoaded]);
+
+    // Mouse movement for logo rotation
+    const x = useMotionValue(0);
+    const y = useMotionValue(0);
+
+    const mouseX = useSpring(x, { stiffness: 150, damping: 15 });
+    const mouseY = useSpring(y, { stiffness: 150, damping: 15 });
+
+    const rotateX = useTransform(mouseY, [-0.5, 0.5], ["15deg", "-15deg"]);
+    const rotateY = useTransform(mouseX, [-0.5, 0.5], ["-15deg", "15deg"]);
+
+    useEffect(() => {
+        const handleMouseMove = (e: MouseEvent) => {
+            const { innerWidth, innerHeight } = window;
+            const xPct = (e.clientX / innerWidth) - 0.5;
+            const yPct = (e.clientY / innerHeight) - 0.5;
+            x.set(xPct);
+            y.set(yPct);
+        };
+
+        window.addEventListener('mousemove', handleMouseMove);
+        return () => window.removeEventListener('mousemove', handleMouseMove);
+    }, [x, y]);
 
     // Timer to show full text automatically after 10 seconds
     useEffect(() => {
