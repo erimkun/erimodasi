@@ -1,0 +1,185 @@
+.speech-bubble-container {
+    position: absolute;
+    /* Karakterin sağ üst tarafında konumlandır */
+    top: 28%;
+    left: 58%;
+    z-index: 100;
+    pointer-events: auto;
+}
+
+.speech-bubble {
+    position: relative;
+    /* Açık mavi glassmorphism */
+    background: linear-gradient(135deg,
+            rgba(180, 220, 240, 0.25) 0%,
+            rgba(200, 235, 255, 0.15) 50%,
+            rgba(170, 210, 235, 0.2) 100%);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+
+    /* Belirgin beyaz/açık mavi border */
+    border: 2px solid rgba(255, 255, 255, 0.6);
+    border-radius: 24px 24px 24px 0;
+    padding: 20px 32px;
+    min-width: 180px;
+    max-width: 300px;
+
+    /* 3D efekti için çoklu gölge */
+    box-shadow:
+        0 4px 24px rgba(100, 180, 220, 0.3),
+        0 0 60px rgba(150, 220, 255, 0.15),
+        inset 0 1px 1px rgba(255, 255, 255, 0.4),
+        inset 0 -1px 1px rgba(150, 200, 230, 0.1);
+
+    /* Giriş animasyonu - bounce efekti */
+    animation: bubbleIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.speech-bubble-content p {
+    margin: 0;
+    font-family: 'Inter', 'Segoe UI', -apple-system, sans-serif;
+    font-size: 22px;
+    font-weight: 500;
+    color: #ffffff;
+    line-height: 1.4;
+    text-align: center;
+    text-shadow:
+        0 1px 2px rgba(0, 0, 0, 0.15),
+        0 0 20px rgba(255, 255, 255, 0.1);
+    letter-spacing: 0.5px;
+}
+
+/* Yanıp sönen cursor */
+.cursor {
+    opacity: 0;
+    margin-left: 2px;
+    font-weight: 300;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.cursor.blink {
+    animation: blink 0.6s infinite;
+}
+
+/* Kuyruk kaldırıldı - artık kullanılmıyor */
+.speech-bubble-tail {
+    display: none;
+}
+
+/* Animasyonlar */
+@keyframes bubbleIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.4) translateY(30px);
+    }
+
+    60% {
+        transform: scale(1.05) translateY(-5px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+@keyframes blink {
+
+    0%,
+    50% {
+        opacity: 1;
+    }
+
+    51%,
+    100% {
+        opacity: 0;
+    }
+}
+
+/* Hover efekti */
+.speech-bubble:hover {
+    background: linear-gradient(135deg,
+            rgba(190, 230, 250, 0.3) 0%,
+            rgba(210, 240, 255, 0.2) 50%,
+            rgba(180, 220, 245, 0.25) 100%);
+    border-color: rgba(255, 255, 255, 0.75);
+    cursor: pointer;
+    transform: scale(1.02);
+    transition: all 0.2s ease;
+}
+
+/* Kapanma animasyonu */
+.speech-bubble.closing {
+    animation: bubbleOut 0.3s ease-in forwards;
+}
+
+@keyframes bubbleOut {
+    0% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+
+    100% {
+        opacity: 0;
+        transform: scale(0.6) translateY(20px);
+    }
+}
+
+/* Seçenek butonları container */
+.speech-options {
+    display: flex;
+    gap: 12px;
+    margin-top: 16px;
+    justify-content: center;
+}
+
+/* Seçenek butonu */
+.speech-option-btn {
+    padding: 12px 24px;
+    background: linear-gradient(135deg,
+            rgba(180, 220, 240, 0.25) 0%,
+            rgba(200, 235, 255, 0.15) 50%,
+            rgba(170, 210, 235, 0.2) 100%);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    border-radius: 16px;
+    color: #ffffff;
+    font-family: 'Inter', 'Segoe UI', -apple-system, sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    box-shadow:
+        0 4px 16px rgba(100, 180, 220, 0.2),
+        inset 0 1px 1px rgba(255, 255, 255, 0.3);
+
+    /* Giriş animasyonu */
+    opacity: 0;
+    transform: translateY(10px);
+    animation: optionIn 0.4s ease forwards;
+}
+
+.speech-option-btn:hover {
+    background: linear-gradient(135deg,
+            rgba(200, 240, 255, 0.35) 0%,
+            rgba(220, 250, 255, 0.25) 50%,
+            rgba(190, 230, 250, 0.3) 100%);
+    border-color: rgba(255, 255, 255, 0.7);
+    transform: translateY(-2px);
+    box-shadow:
+        0 6px 24px rgba(100, 180, 220, 0.35),
+        inset 0 1px 1px rgba(255, 255, 255, 0.4);
+}
+
+.speech-option-btn:active {
+    transform: translateY(0) scale(0.98);
+    transition-duration: 0.1s;
+}
+
+@keyframes optionIn {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

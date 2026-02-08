@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { SceneConfig, ModelConfig, PointLightConfig, DEFAULT_SCENE_CONFIG } from '../types/scene';
+import { SceneConfig, ModelConfig, PointLightConfig, StripLightConfig, BoxLightConfig, DEFAULT_SCENE_CONFIG } from '../types/scene';
 
 // Helper function to save config to public folder via API
 async function saveConfigToFile(config: SceneConfig) {
@@ -46,6 +46,12 @@ interface SceneStore {
     toggleStripLight: (lightId: string) => void;
     addStripLight: () => void;
     removeStripLight: (lightId: string) => void;
+
+    // Box Light Actions
+    updateBoxLight: (lightId: string, updates: Partial<BoxLightConfig>) => void;
+    toggleBoxLight: (lightId: string) => void;
+    addBoxLight: () => void;
+    removeBoxLight: (lightId: string) => void;
 
     saveToFile: () => void;
     resetConfig: () => void;
@@ -120,15 +126,24 @@ export const useSceneStore = create<SceneStore>()(
                 })),
 
             updateHemisphereLight: (updates) =>
-                set((state) => ({
-                    config: {
-                        ...state.config,
-                        lighting: {
-                            ...state.config.lighting,
-                            hemisphere: { ...state.config.lighting.hemisphere, ...updates },
+                set((state) => {
+                    const currentHemisphere = state.config.lighting.hemisphere || DEFAULT_SCENE_CONFIG.lighting.hemisphere || {
+                        enabled: true,
+                        skyColor: '#ffffff',
+                        groundColor: '#000000',
+                        intensity: 1
+                    };
+
+                    return {
+                        config: {
+                            ...state.config,
+                            lighting: {
+                                ...state.config.lighting,
+                                hemisphere: { ...currentHemisphere, ...updates },
+                            },
                         },
-                    },
-                })),
+                    };
+                }),
 
             updatePointLight: (lightId, updates) =>
                 set((state) => ({
@@ -248,6 +263,68 @@ export const useSceneStore = create<SceneStore>()(
                         lighting: {
                             ...state.config.lighting,
                             stripLights: (state.config.lighting.stripLights || []).filter((l) => l.id !== lightId),
+                        },
+                    },
+                })),
+
+            // Box Light Implementations
+            updateBoxLight: (lightId, updates) =>
+                set((state) => ({
+                    config: {
+                        ...state.config,
+                        lighting: {
+                            ...state.config.lighting,
+                            boxLights: (state.config.lighting.boxLights || []).map((light) =>
+                                light.id === lightId ? { ...light, ...updates } : light
+                            ),
+                        },
+                    },
+                })),
+
+            toggleBoxLight: (lightId) =>
+                set((state) => ({
+                    config: {
+                        ...state.config,
+                        lighting: {
+                            ...state.config.lighting,
+                            boxLights: (state.config.lighting.boxLights || []).map((light) =>
+                                light.id === lightId ? { ...light, enabled: !light.enabled } : light
+                            ),
+                        },
+                    },
+                })),
+
+            addBoxLight: () =>
+                set((state) => {
+                    const newId = `box_${Date.now()}`;
+                    const newLight: BoxLightConfig = {
+                        id: newId,
+                        name: `Box ${(state.config.lighting.boxLights || []).length + 1}`,
+                        enabled: true,
+                        color: '#22ff22', // Green default
+                        baseIntensity: 0.3,
+                        hoverIntensity: 3,
+                        position: [0, 0.5, 0],
+                        distance: 1.5,
+                    };
+                    return {
+                        config: {
+                            ...state.config,
+                            lighting: {
+                                ...state.config.lighting,
+                                boxLights: [...(state.config.lighting.boxLights || []), newLight],
+                            },
+                        },
+                    };
+                }),
+
+            removeBoxLight: (lightId) =>
+                set((state) => ({
+                    config: {
+                        ...state.config,
+                        lighting: {
+                            ...state.config.lighting,
+                            boxLights: (state.config.lighting.boxLights || []).filter((l) => l.id !== lightId),
                         },
                     },
                 })),

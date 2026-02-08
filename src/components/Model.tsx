@@ -1,5 +1,5 @@
 import { useGLTF } from '@react-three/drei';
-
+import * as THREE from 'three';
 import { ModelConfig } from '../types/scene';
 import { memo, useMemo } from 'react';
 
@@ -21,12 +21,15 @@ export const Model = memo(function Model({ config, onClick, isSelected, ...props
         const cloned = scene.clone();
         cloned.traverse((child) => {
             if ((child as any).isMesh) {
-                child.castShadow = true;
+                // Only larger meshes cast shadows for performance
                 child.receiveShadow = true;
-                
-                // Freeze matrix for static objects optimization
-                child.matrixAutoUpdate = false;
-                child.updateMatrix();
+                // Cast shadow only if geometry bounding sphere is large enough
+                const mesh = child as THREE.Mesh;
+                if (mesh.geometry) {
+                    mesh.geometry.computeBoundingSphere();
+                    const radius = mesh.geometry.boundingSphere?.radius || 0;
+                    child.castShadow = radius > 0.05;
+                }
             }
         });
         return cloned;
@@ -39,10 +42,12 @@ export const Model = memo(function Model({ config, onClick, isSelected, ...props
             position={config.position}
             rotation={config.rotation}
             scale={config.scale}
-            onClick={(e) => {
-                e.stopPropagation();
-                onClick?.();
-            }}
+            {...(onClick ? {
+                onClick: (e: any) => {
+                    e.stopPropagation();
+                    onClick();
+                }
+            } : {})}
             {...props}
         >
             <primitive object={clonedScene} castShadow receiveShadow />

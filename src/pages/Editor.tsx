@@ -67,6 +67,11 @@ export function Editor() {
         removeStripLight,
         updateStripLight,
         toggleStripLight,
+        // Box Lights
+        addBoxLight,
+        removeBoxLight,
+        updateBoxLight,
+        toggleBoxLight,
         saveToFile,
         resetConfig,
         exportConfig,
@@ -79,10 +84,7 @@ export function Editor() {
     );
 
     // Update selection handlers to clear the other type
-    const handleModelSelect = (id: string) => {
-        setSelectedModel(id);
-        // setSelectedLight(null); // Managed by store action now
-    }
+
 
     const handleLightSelect = (id: string) => {
         setSelectedLight(id);
@@ -417,6 +419,50 @@ export function Editor() {
                                                     <ControlRow label="Y" value={(light.rotation[1] * 180) / Math.PI} onChange={(v) => updateStripLight(light.id, { rotation: [light.rotation[0], (v * Math.PI) / 180, light.rotation[2]] })} min={-180} max={180} step={15} />
                                                     <ControlRow label="Z" value={(light.rotation[2] * 180) / Math.PI} onChange={(v) => updateStripLight(light.id, { rotation: [light.rotation[0], light.rotation[1], (v * Math.PI) / 180] })} min={-180} max={180} step={15} />
                                                 </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+
+                            {/* Box Lights (Interactive) */}
+                            <div className="panel">
+                                <div className="panel-header">
+                                    <h2>📦 Box Lights</h2>
+                                    <button className="btn-add" onClick={addBoxLight}>+ Add</button>
+                                </div>
+                                {config.lighting.boxLights?.map((light) => (
+                                    <div
+                                        key={light.id}
+                                        className={`light-item ${selectedLightId === light.id ? 'selected' : ''}`}
+                                        onClick={() => handleLightSelect(light.id)}
+                                    >
+                                        <div className="light-header">
+                                            <label className="toggle-label" onClick={(e) => e.stopPropagation()}>
+                                                <input
+                                                    type="checkbox"
+                                                    checked={light.enabled}
+                                                    onChange={() => toggleBoxLight(light.id)}
+                                                />
+                                                <input
+                                                    type="text"
+                                                    className="light-name"
+                                                    value={light.name}
+                                                    onChange={(e) => updateBoxLight(light.id, { name: e.target.value })}
+                                                    onClick={(e) => e.stopPropagation()}
+                                                />
+                                            </label>
+                                            <button className="btn-delete" onClick={(e) => { e.stopPropagation(); removeBoxLight(light.id); }}>🗑️</button>
+                                        </div>
+                                        {light.enabled && selectedLightId === light.id && (
+                                            <div className="light-controls" onClick={(e) => e.stopPropagation()}>
+                                                <div className="control-row"><label>Color</label><input type="color" value={light.color} onChange={(e) => updateBoxLight(light.id, { color: e.target.value })} /></div>
+                                                <ControlRow label="Base Int." value={light.baseIntensity} onChange={(v) => updateBoxLight(light.id, { baseIntensity: v })} min={0} max={3} step={0.1} />
+                                                <ControlRow label="Hover Int." value={light.hoverIntensity} onChange={(v) => updateBoxLight(light.id, { hoverIntensity: v })} min={0} max={10} step={0.5} />
+                                                <ControlRow label="X" value={light.position[0]} onChange={(v) => updateBoxLight(light.id, { position: [v, light.position[1], light.position[2]] })} min={-5} max={5} step={0.05} />
+                                                <ControlRow label="Y" value={light.position[1]} onChange={(v) => updateBoxLight(light.id, { position: [light.position[0], v, light.position[2]] })} min={-5} max={5} step={0.05} />
+                                                <ControlRow label="Z" value={light.position[2]} onChange={(v) => updateBoxLight(light.id, { position: [light.position[0], light.position[1], v] })} min={-5} max={5} step={0.05} />
+                                                <ControlRow label="Distance" value={light.distance} onChange={(v) => updateBoxLight(light.id, { distance: v })} min={0.5} max={5} step={0.1} />
                                             </div>
                                         )}
                                     </div>

@@ -13,19 +13,21 @@ export function Lighting({ config }: LightingProps) {
                 color={config.ambient.color}
             />
 
-            {/* Main directional light with good quality shadows */}
+            {/* Main directional light - tight frustum for sharp shadows */}
             <directionalLight
                 intensity={config.directional.intensity}
                 position={config.directional.position}
                 color={config.directional.color}
                 castShadow
                 shadow-mapSize={[1024, 1024]}
-                shadow-camera-far={20}
-                shadow-camera-left={-5}
-                shadow-camera-right={5}
-                shadow-camera-top={5}
-                shadow-camera-bottom={-5}
-                shadow-bias={-0.0005}
+                shadow-camera-far={30}
+                shadow-camera-near={0.1}
+                shadow-camera-left={-3}
+                shadow-camera-right={3}
+                shadow-camera-top={3}
+                shadow-camera-bottom={-3}
+                shadow-bias={-0.001}
+                shadow-normalBias={0.02}
             />
 
             {/* Hemisphere light for realistic sky/ground color blending */}

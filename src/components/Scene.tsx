@@ -1,18 +1,23 @@
-import { Canvas, useThree } from '@react-three/fiber';
-import { OrbitControls, Stats, TransformControls, Bvh, useTexture, SoftShadows } from '@react-three/drei';
-import { Suspense, useRef, useEffect } from 'react';
+import { Canvas, useFrame, useThree } from '@react-three/fiber';
+import { OrbitControls, Stats, TransformControls, Bvh, useTexture } from '@react-three/drei';
+import { Suspense, useRef, useEffect, useMemo } from 'react';
 import * as THREE from 'three';
 import { Model } from './Model';
+import { InteractiveBoxes } from './InteractiveBoxes';
 import { Lighting } from './Lighting';
 import { useSceneStore } from '../stores/sceneStore';
-import { STATIC_MODELS } from '../data/staticModels';
+import { STATIC_SCENE } from '../data/staticScene';
+import { ModelConfig } from '../types/scene';
 import { preloadModels } from './Model';
 
 // Preload all models immediately so they start downloading in parallel
-preloadModels(STATIC_MODELS.map(m => m.path));
+preloadModels(STATIC_SCENE.models.map(m => m.path));
 
 interface SceneProps {
     isEditor?: boolean;
+    focusedModelId?: string | null;
+    onModelClick?: (modelId: string) => void;
+    onMissed?: () => void;
 }
 
 function LoadingFallback() {
@@ -26,17 +31,33 @@ function LoadingFallback() {
 
 const Skybox = () => {
     const texture = useTexture('/sky.png');
+    // Ensure correct color space so sky doesn't look washed out
+    texture.colorSpace = THREE.SRGBColorSpace;
     return <primitive object={texture} attach="background" />;
 };
 
 // Wrapper for OrbitControls
-function AdaptiveControls(props: any) {
+function AdaptiveControls({ isEditor, ...props }: any) {
+    // Camera starts at [3, 2.5, 3] → azimuth ≈ 0.785 rad (45°)
+    // Allow ±30° (0.524 rad) from initial angle in Viewer
+    const initialAzimuth = Math.atan2(3, 3); // ~0.785 rad
+    const limit = 30 * (Math.PI / 180); // 0.524 rad
+
     return (
         <OrbitControls
             {...props}
             makeDefault
             enableDamping={true}
             dampingFactor={0.05}
+            // Viewer: no zoom, no pan, limited rotation
+            enableZoom={isEditor}
+            enablePan={isEditor}
+            mouseButtons={isEditor ? undefined : { LEFT: THREE.MOUSE.ROTATE }}
+            touches={isEditor ? undefined : { ONE: THREE.TOUCH.ROTATE }}
+            minAzimuthAngle={isEditor ? -Infinity : initialAzimuth - limit}
+            maxAzimuthAngle={isEditor ? Infinity : initialAzimuth + limit}
+            minPolarAngle={isEditor ? 0 : Math.PI / 4}
+            maxPolarAngle={isEditor ? Math.PI : Math.PI / 2}
         />
     );
 }
@@ -230,12 +251,224 @@ function EditablePointLight({ light, isSelected, onSelect, onTransformChange, or
     );
 }
 
-export function Scene({ isEditor = false }: SceneProps) {
-    const config = useSceneStore((s) => s.config);
+// Box Light Helper (shows as a small cube)
+function BoxLightHelper({ color, isSelected, onClick }: {
+    color: string;
+    isSelected: boolean;
+    onClick: () => void;
+}) {
+    return (
+        <mesh onClick={(e) => { e.stopPropagation(); onClick(); }}>
+            <boxGeometry args={[0.1, 0.1, 0.1]} />
+            <meshStandardMaterial
+                color={color}
+                emissive={color}
+                emissiveIntensity={isSelected ? 3 : 1}
+                toneMapped={false}
+            />
+            {isSelected && (
+                <lineSegments>
+                    <edgesGeometry args={[new THREE.BoxGeometry(0.12, 0.12, 0.12)]} />
+                    <lineBasicMaterial color="white" />
+                </lineSegments>
+            )}
+        </mesh>
+    );
+}
+
+// Editable Box Light wrapper
+function EditableBoxLight({ light, isSelected, onSelect, onTransformChange, orbitRef }: any) {
+    const groupRef = useRef<THREE.Group>(null);
+    const transformRef = useRef<any>(null);
+
+    useEffect(() => {
+        if (!transformRef.current || !orbitRef.current) return;
+        const controls = transformRef.current;
+        const handleDragging = (e: any) => { if (orbitRef.current) orbitRef.current.enabled = !e.value; };
+        controls.addEventListener('dragging-changed', handleDragging);
+        return () => controls.removeEventListener('dragging-changed', handleDragging);
+    }, [orbitRef]);
+
+    useEffect(() => {
+        if (!transformRef.current || !isSelected) return;
+        const controls = transformRef.current;
+        const handleChange = () => {
+            if (groupRef.current) {
+                const p = groupRef.current.position;
+                onTransformChange([p.x, p.y, p.z]);
+            }
+        };
+        controls.addEventListener('mouseUp', handleChange);
+        return () => controls.removeEventListener('mouseUp', handleChange);
+    }, [isSelected, onTransformChange]);
+
+    return (
+        <>
+            <group ref={groupRef} position={light.position} onClick={(e) => { e.stopPropagation(); onSelect(); }}>
+                <BoxLightHelper
+                    color={light.color}
+                    isSelected={isSelected}
+                    onClick={() => { }}
+                />
+                <pointLight
+                    color={light.color}
+                    intensity={light.baseIntensity}
+                    distance={light.distance}
+                    decay={2}
+                />
+            </group>
+            {isSelected && groupRef.current && (
+                <TransformControls ref={transformRef} object={groupRef.current} mode="translate" size={0.5} />
+            )}
+        </>
+    );
+}
+
+// Clickable model wrapper for Viewer mode - animates rotation on focus
+function ClickableModel({ config, isFocused, onClick }: {
+    config: ModelConfig;
+    isFocused: boolean;
+    onClick?: () => void;
+}) {
+    const groupRef = useRef<THREE.Group>(null);
+    const isAnimating = useRef(false);
+    const prevFocused = useRef(isFocused);
+
+    const targetRotY = isFocused
+        ? config.rotation[1] - (125 * Math.PI / 180)
+        : config.rotation[1];
+
+    useFrame(() => {
+        if (!groupRef.current) return;
+
+        // Detect focus change to start animation
+        if (prevFocused.current !== isFocused) {
+            prevFocused.current = isFocused;
+            isAnimating.current = true;
+        }
+
+        // Skip if not animating
+        if (!isAnimating.current) return;
+
+        const diff = Math.abs(groupRef.current.rotation.y - targetRotY);
+        if (diff < 0.01) {
+            groupRef.current.rotation.y = targetRotY;
+            isAnimating.current = false;
+            return;
+        }
+
+        groupRef.current.rotation.y = THREE.MathUtils.lerp(
+            groupRef.current.rotation.y,
+            targetRotY,
+            0.05 // Faster lerp
+        );
+    });
+
+    return (
+        <group
+            ref={groupRef}
+            position={config.position}
+            rotation={config.rotation}
+            scale={config.scale}
+            onClick={(e) => { e.stopPropagation(); onClick?.(); }}
+            onPointerOver={() => { document.body.style.cursor = 'pointer'; }}
+            onPointerOut={() => { document.body.style.cursor = 'default'; }}
+        >
+            <Model config={{ ...config, position: [0, 0, 0], rotation: [0, 0, 0], scale: [1, 1, 1] }} />
+        </group>
+    );
+}
+
+// Camera animation controller for Viewer mode
+function ViewerInteraction({
+    focusedModelId,
+    orbitRef,
+    cameraPosition
+}: {
+    focusedModelId: string | null;
+    orbitRef: React.RefObject<any>;
+    cameraPosition: [number, number, number];
+}) {
+    const { camera } = useThree();
+    const defaultCamPos = useMemo(() => new THREE.Vector3(...cameraPosition), [cameraPosition]);
+    const defaultTarget = useMemo(() => new THREE.Vector3(0, 0, 0), []);
+    const focusCamPos = useMemo(() => new THREE.Vector3(0.6, 1.0, 1.2), []);
+    const focusTarget = useMemo(() => new THREE.Vector3(0.16, 0.65, 0), []);
+
+    const currentLookAt = useRef(new THREE.Vector3(0, 0, 0));
+    const isAnimating = useRef(false);
+    const prevFocusedId = useRef<string | null>(null);
+    const animationComplete = useRef(true);
+
+    useFrame(() => {
+        const controls = orbitRef.current;
+        if (!controls) return;
+
+        // Early exit if no animation needed
+        if (animationComplete.current && !focusedModelId) {
+            return;
+        }
+
+        // Only trigger animation when focusedModelId changes
+        const focusChanged = prevFocusedId.current !== focusedModelId;
+        if (focusChanged) {
+            prevFocusedId.current = focusedModelId;
+            isAnimating.current = true;
+            animationComplete.current = false;
+            if (focusedModelId) {
+                currentLookAt.current.copy(controls.target);
+                controls.enabled = false;
+            }
+        }
+
+        // Skip heavy calculations if not animating
+        if (!isAnimating.current) {
+            return;
+        }
+
+        const goalPos = focusedModelId ? focusCamPos : defaultCamPos;
+        const goalTarget = focusedModelId ? focusTarget : defaultTarget;
+
+        // Use faster lerp for smoother, quicker animation
+        const lerpFactor = 0.12;
+        camera.position.lerp(goalPos, lerpFactor);
+        currentLookAt.current.lerp(goalTarget, lerpFactor);
+        camera.lookAt(currentLookAt.current);
+
+        // Check if animation is complete (use squared distance for performance)
+        const dx = camera.position.x - goalPos.x;
+        const dy = camera.position.y - goalPos.y;
+        const dz = camera.position.z - goalPos.z;
+        const distSq = dx * dx + dy * dy + dz * dz;
+
+        if (distSq < 0.0004) { // 0.02 squared
+            // Snap to final position
+            camera.position.copy(goalPos);
+            currentLookAt.current.copy(goalTarget);
+            camera.lookAt(goalTarget);
+            isAnimating.current = false;
+
+            if (!focusedModelId) {
+                // Returning to default - re-enable controls
+                controls.target.copy(goalTarget);
+                controls.enabled = true;
+                controls.update();
+                animationComplete.current = true;
+            }
+        }
+    });
+
+    return null;
+}
+
+export function Scene({ isEditor = false, focusedModelId = null, onModelClick, onMissed }: SceneProps) {
+    // Editor uses store config, Viewer uses hardcoded static scene
+    const storeConfig = useSceneStore((s) => s.config);
+    const config = isEditor ? storeConfig : STATIC_SCENE;
     const {
         selectedModelId, selectedLightId,
         setSelectedModel, setSelectedLight,
-        updateModel, updatePointLight, updateStripLight
+        updateModel, updatePointLight, updateStripLight, updateBoxLight
     } = useSceneStore();
 
     const orbitRef = useRef<any>(null);
@@ -252,6 +485,10 @@ export function Scene({ isEditor = false }: SceneProps) {
         updateStripLight(lightId, { position: pos, rotation: rot, scale: scl });
     };
 
+    const handleBoxLightTransform = (lightId: string) => (pos: [number, number, number]) => {
+        updateBoxLight(lightId, { position: pos });
+    };
+
     return (
         <Canvas
             shadows
@@ -261,12 +498,17 @@ export function Scene({ isEditor = false }: SceneProps) {
                 antialias: true,
                 powerPreference: 'high-performance',
                 depth: true,
-                stencil: false
+                stencil: false,
+                toneMapping: THREE.AgXToneMapping,
+                toneMappingExposure: 1.0
             }}
             onPointerMissed={() => {
                 if (isEditor) {
                     setSelectedModel(null);
                     setSelectedLight(null);
+                }
+                if (!isEditor && onMissed) {
+                    onMissed();
                 }
             }}
         >
@@ -276,14 +518,11 @@ export function Scene({ isEditor = false }: SceneProps) {
                 {/* Skybox with texture */}
                 <Skybox />
 
-                {/* Soft shadows */}
-                <SoftShadows size={10} samples={10} focus={0.5} />
-
                 <Lighting config={config.lighting} />
 
                 {/* Models - each in own Suspense for progressive loading */}
                 <Bvh firstHitOnly>
-                    {(isEditor ? config.models : STATIC_MODELS).map((model) => {
+                    {config.models.map((model) => {
                         if (!model.visible) return null;
                         if (isEditor) {
                             return (
@@ -302,13 +541,35 @@ export function Scene({ isEditor = false }: SceneProps) {
                                 </Suspense>
                             );
                         }
-                        return (
-                            <Suspense key={model.id} fallback={null}>
-                                <Model config={model} />
-                            </Suspense>
-                        );
+                        if (model.id === 'char') {
+                            return (
+                                <Suspense key={model.id} fallback={null}>
+                                    <ClickableModel
+                                        config={model}
+                                        isFocused={focusedModelId === model.id}
+                                        onClick={() => onModelClick?.(model.id)}
+                                    />
+                                </Suspense>
+                            );
+                        }
+                        return null;
                     })}
                 </Bvh>
+
+                {/* Non-clickable models rendered outside Bvh — no raycast interference */}
+                {!isEditor && config.models.map((model) => {
+                    if (!model.visible || model.id === 'char') return null;
+                    return (
+                        <Suspense key={model.id} fallback={null}>
+                            <Model config={model} />
+                        </Suspense>
+                    );
+                })}
+
+                {/* Interactive Box Lights for Viewer mode */}
+                {!isEditor && config.lighting.boxLights && config.lighting.boxLights.length > 0 && (
+                    <InteractiveBoxes boxLights={config.lighting.boxLights} />
+                )}
 
                 {/* Point Lights (With visual helpers) */}
                 {config.lighting.pointLights?.map((light) => (
@@ -366,7 +627,31 @@ export function Scene({ isEditor = false }: SceneProps) {
                     )
                 ))}
 
-                <AdaptiveControls ref={orbitRef} />
+                {/* Box Lights (Interactive) */}
+                {config.lighting.boxLights?.map((light) => (
+                    light.enabled && (
+                        isEditor ? (
+                            <EditableBoxLight
+                                key={light.id}
+                                light={light}
+                                isSelected={selectedLightId === light.id}
+                                onSelect={() => { setSelectedLight(light.id); }}
+                                onTransformChange={handleBoxLightTransform(light.id)}
+                                orbitRef={orbitRef}
+                            />
+                        ) : null
+                    )
+                ))}
+
+                <AdaptiveControls ref={orbitRef} isEditor={isEditor} />
+
+                {!isEditor && (
+                    <ViewerInteraction
+                        focusedModelId={focusedModelId}
+                        orbitRef={orbitRef}
+                        cameraPosition={config.camera.position}
+                    />
+                )}
             </Suspense>
         </Canvas>
     );
