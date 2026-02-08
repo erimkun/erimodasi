@@ -251,6 +251,92 @@
           0.01
         ]
       }
+    ],
+    "boxLights": [
+      {
+        "id": "box_1770485689055",
+        "name": "Box 1",
+        "enabled": true,
+        "color": "#22ff22",
+        "baseIntensity": 2.2,
+        "hoverIntensity": 3,
+        "position": [
+          1.00873912582467,
+          0.6675430351989381,
+          -0.5433142561866472
+        ],
+        "distance": 1.5
+      },
+      {
+        "id": "box_1770485689632",
+        "name": "Box 2",
+        "enabled": true,
+        "color": "#ffae00",
+        "baseIntensity": 2.2,
+        "hoverIntensity": 3,
+        "position": [
+          0.9992730252003981,
+          0.5651103870448466,
+          -0.5163043942201044
+        ],
+        "distance": 1.5
+      },
+      {
+        "id": "box_1770485690344",
+        "name": "Box 3",
+        "enabled": true,
+        "color": "#ff24ed",
+        "baseIntensity": 2.3,
+        "hoverIntensity": 3,
+        "position": [
+          1.0246094114486688,
+          0.4168159070494514,
+          -0.5124193173516794
+        ],
+        "distance": 1.5
+      },
+      {
+        "id": "box_1770485691326",
+        "name": "Box 4",
+        "enabled": true,
+        "color": "#24abff",
+        "baseIntensity": 2.2,
+        "hoverIntensity": 3,
+        "position": [
+          1.0507109877019292,
+          0.32353206221529135,
+          -0.4667323947349835
+        ],
+        "distance": 1.5
+      },
+      {
+        "id": "box_1770485693622",
+        "name": "Box 5",
+        "enabled": true,
+        "color": "#fff824",
+        "baseIntensity": 2.2,
+        "hoverIntensity": 3,
+        "position": [
+          1.0144043044552118,
+          0.1992690414879475,
+          -0.42793465287299637
+        ],
+        "distance": 1.5
+      },
+      {
+        "id": "box_1770485939533",
+        "name": "Box 6",
+        "enabled": true,
+        "color": "#a600ff",
+        "baseIntensity": 2.2,
+        "hoverIntensity": 3,
+        "position": [
+          1.0561360957029498,
+          0.0821728716303946,
+          -0.43535595204178246
+        ],
+        "distance": 1.5
+      }
     ]
   },
   "camera": {

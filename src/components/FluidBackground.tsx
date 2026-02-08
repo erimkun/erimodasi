@@ -112,8 +112,11 @@ function FullScreenQuad() {
 export const FluidBackground = () => {
     return (
         <div className="fluid-bg" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 0 }}>
-            {/* Lower dpr to 0.6 for significant performance boost on low-end devices/high-res screens */}
-            <Canvas camera={{ position: [0, 0, 1], ortho: true }} dpr={[0.6, 0.6]}>
+            {/* Using gl prop for performance - antialias off saved GPU work */}
+            <Canvas
+                camera={{ position: [0, 0, 1] }}
+                gl={{ antialias: false, powerPreference: 'high-performance' }}
+            >
                 <FullScreenQuad />
             </Canvas>
         </div>
