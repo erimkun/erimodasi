@@ -145,7 +145,7 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({ onComplete, isLoad
                                     exit={{ opacity: 0 }}
                                     className="dynamic-text placeholder"
                                 >
-                                    ERİM'İN ODASI
+                                    ERDEN ERİM
                                 </motion.div>
                             )}
                         </AnimatePresence>
