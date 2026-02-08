@@ -10,12 +10,12 @@ interface Item {
 }
 
 const items: Item[] = [
-    { id: 1, text: "BİR", image: "/me01.png" },
-    { id: 2, text: "SORUN", image: "/me02.png" },
-    { id: 3, text: "VARSA", image: "/me03.png" },
-    { id: 4, text: "ERİMİ", image: "/me04.png" },
-    { id: 5, text: "DE", image: "/me05.png" },
-    { id: 6, text: "VAR", image: "/me06.png" },
+    { id: 1, text: "BİR", image: "/me01.webp" },
+    { id: 2, text: "SORUN", image: "/me02.webp" },
+    { id: 3, text: "VARSA", image: "/me03.webp" },
+    { id: 4, text: "ERİMİ", image: "/me04.webp" },
+    { id: 5, text: "DE", image: "/me05.webp" },
+    { id: 6, text: "VAR", image: "/me06.webp" },
 ];
 
 interface LoadingScreenProps {

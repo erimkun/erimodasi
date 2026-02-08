@@ -30,7 +30,7 @@ function LoadingFallback() {
 }
 
 const Skybox = () => {
-    const texture = useTexture('/sky.png');
+    const texture = useTexture('/sky.webp');
     // Ensure correct color space so sky doesn't look washed out
     texture.colorSpace = THREE.SRGBColorSpace;
     return <primitive object={texture} attach="background" />;
