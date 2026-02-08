@@ -145,7 +145,11 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({ onComplete, isLoad
                                     initial={{ opacity: 0 }}
                                     animate={{ opacity: 0.8 }}
                                     exit={{ opacity: 0 }}
-                                    style={{ maxHeight: '60px', width: 'auto' }}
+                                    style={{
+                                        maxHeight: '120px',
+                                        width: 'auto',
+                                        filter: 'drop-shadow(0 0 10px rgba(255, 255, 255, 0.8)) brightness(1.2)'
+                                    }}
                                 />
                             )}
                         </AnimatePresence>
