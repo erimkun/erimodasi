@@ -72,17 +72,27 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({ onComplete, isLoad
                                 YÜKLENİYOR...
                             </motion.div>
                         ) : (
-                            <motion.button
-                                key="ready"
-                                className="ready-btn"
-                                initial={{ opacity: 0, scale: 0.9 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                whileHover={{ scale: 1.05 }}
-                                whileTap={{ scale: 0.95 }}
-                                onClick={handleReadyClick}
-                            >
-                                HAZIR - GİRİŞ YAP
-                            </motion.button>
+                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
+                                <motion.button
+                                    key="ready"
+                                    className="ready-btn"
+                                    initial={{ opacity: 0, scale: 0.9 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                    onClick={handleReadyClick}
+                                >
+                                    HAZIR - GİRİŞ YAP
+                                </motion.button>
+                                <motion.img
+                                    src="/favicon.webp"
+                                    alt="Icon"
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 0.8 }}
+                                    transition={{ delay: 0.2 }}
+                                    style={{ width: '24px', height: '24px', opacity: 0.8 }}
+                                />
+                            </div>
                         )}
                     </AnimatePresence>
                 </div>
@@ -138,19 +148,15 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({ onComplete, isLoad
                                     BİR SORUN VARSA ERİMİ DE VAR
                                 </motion.div>
                             ) : (
-                                <motion.img
+                                <motion.div
                                     key="placeholder"
-                                    src="/erder.png"
-                                    alt="Erden Erim"
                                     initial={{ opacity: 0 }}
-                                    animate={{ opacity: 0.8 }}
+                                    animate={{ opacity: 0.3 }}
                                     exit={{ opacity: 0 }}
-                                    style={{
-                                        maxHeight: '180px',
-                                        width: 'auto',
-                                        filter: 'drop-shadow(0 0 10px rgba(255, 255, 255, 0.8)) brightness(1.2)'
-                                    }}
-                                />
+                                    className="dynamic-text placeholder"
+                                >
+                                    ERDEN ERİM
+                                </motion.div>
                             )}
                         </AnimatePresence>
                     </div>
