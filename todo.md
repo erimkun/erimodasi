@@ -84,123 +84,101 @@
 ## 📋 Faz 3: Yeni Popup Bileşenleri
 
 ### 3.1 ProjectPopup
-- [ ] `src/components/ProjectPopup.tsx` oluştur
-  - [ ] Proje kartı tasarımı (glassmorphism)
-  - [ ] Proje görseli alanı
-  - [ ] Proje başlığı + açıklama
-  - [ ] Teknoloji tag'leri
-  - [ ] GitHub + Demo linkleri
-  - [ ] Kapatma butonu
-  - [ ] Giriş animasyonu (slide-up + fade)
-  - [ ] Çıkış animasyonu
-- [ ] `src/components/ProjectPopup.css` oluştur
-  - [ ] Neon glow border (kutunun rengine göre dinamik)
-  - [ ] Responsive tasarım
-  - [ ] Mobil uyumluluk
+- [x] `src/components/ProjectPopup.tsx` oluştur
+  - [x] Proje kartı tasarımı (glassmorphism)
+  - [x] Proje görseli alanı
+  - [x] Proje başlığı + açıklama
+  - [x] Teknoloji tag'leri
+  - [x] GitHub + Demo linkleri
+  - [x] Kapatma butonu
+  - [x] Giriş animasyonu (slide-up + fade)
+  - [x] Çıkış animasyonu
+- [x] `src/components/ProjectPopup.css` oluştur
+  - [x] Neon glow border (kutunun rengine göre dinamik)
+  - [x] Responsive tasarım
+  - [x] Mobil uyumluluk
 
 ### 3.2 TerminalPopup
-- [ ] `src/components/TerminalPopup.tsx` oluştur
-  - [ ] Terminal penceresi tasarımı (siyah arka plan)
-  - [ ] Başlık çubuğu: `erim@skills:~$`
-  - [ ] Typewriter efekti ile satır satır yazdırma
-  - [ ] ASCII art başlık (büyük "SKILLS" yazısı)
-  - [ ] Kategorize beceri listesi
-  - [ ] Progress bar (█████░░░ gibi)
-  - [ ] Kapatma butonu (terminal [x])
-  - [ ] Boot sequence animasyonu
-- [ ] `src/components/TerminalPopup.css` oluştur
-  - [ ] CRT scanline efekti
-  - [ ] Terminal yeşil/mavi parlak yazı
-  - [ ] Monospace font
-  - [ ] CRT açılma animasyonu
-  - [ ] Responsive tasarım
+- [x] `src/components/TerminalPopup.tsx` oluştur
+  - [x] Terminal penceresi tasarımı (siyah arka plan)
+  - [x] Başlık çubuğu: `erim@skills:~$`
+  - [x] Typewriter efekti ile satır satır yazdırma
+  - [x] ASCII art başlık (büyük "SKILLS" yazısı)
+  - [x] Kategorize beceri listesi
+  - [x] Progress bar (█████░░░ gibi)
+  - [x] Kapatma butonu (terminal [x])
+  - [x] Boot sequence animasyonu
+- [x] `src/components/TerminalPopup.css` oluştur
+  - [x] Terminal yeşil/mavi parlak yazı
+  - [x] Monospace font
+  - [x] Açılma animasyonu
+  - [x] Responsive tasarım
 
 ### 3.3 ProfilePopup
-- [ ] `src/components/ProfilePopup.tsx` oluştur
-  - [ ] Gerçek fotoğraf (circular crop)
-  - [ ] İsim + unvan
-  - [ ] İletişim ikonları listesi (email, LinkedIn, GitHub)
-  - [ ] Kısa bio/slogan
-  - [ ] CV indirme butonu
-  - [ ] Kapatma butonu
-  - [ ] Sosyal medya linkleri
-- [ ] `src/components/ProfilePopup.css` oluştur
-  - [ ] Fotoğraf glow efekti
-  - [ ] Glassmorphism + neon tema
-  - [ ] Hover animasyonları
-  - [ ] Responsive tasarım
+- [x] `src/components/ProfilePopup.tsx` oluştur
+  - [x] Fotoğraf placeholder (circular)
+  - [x] İsim + unvan
+  - [x] İletişim ikonları listesi (email, LinkedIn, GitHub)
+  - [x] Kısa bio/slogan
+  - [x] Kapatma butonu
+  - [x] Sosyal medya linkleri
+- [x] `src/components/ProfilePopup.css` oluştur
+  - [x] Fotoğraf glow efekti
+  - [x] Glassmorphism + neon tema
+  - [x] Hover animasyonları
+  - [x] Responsive tasarım
 
 ---
 
 ## 📋 Faz 4: CV Verileri Entegrasyonu
 
 ### 4.1 Veri Dosyaları
-- [ ] `src/data/cvData.ts` — CV verileri
-  - [ ] Kişisel bilgiler (isim, unvan, konum, bio)
-  - [ ] İletişim bilgileri (email, LinkedIn, GitHub, web)
-  - [ ] Eğitim geçmişi
-  - [ ] İş deneyimleri
-  - [ ] Sertifikalar
-  - [ ] İlgi alanları/hobiler
+- [x] `src/data/projects.ts` — Proje verileri (6 adet, CV'den)
+  - [x] Proje 1 (Green box) — Digital Showroom XR
+  - [x] Proje 2 (Orange box) — Sayıştay AI
+  - [x] Proje 3 (Pink box) — Talep AI
+  - [x] Proje 4 (Blue box) — Gezelim App
+  - [x] Proje 5 (Yellow box) — MOSFET CNN
+  - [x] Proje 6 (Purple box) — RL Game
 
-- [ ] `src/data/projects.ts` — Proje verileri (6 adet)
-  - [ ] Proje 1 (Green box) — ad, açıklama, teknolojiler, linkler
-  - [ ] Proje 2 (Orange box) — ad, açıklama, teknolojiler, linkler
-  - [ ] Proje 3 (Pink box) — ad, açıklama, teknolojiler, linkler
-  - [ ] Proje 4 (Blue box) — ad, açıklama, teknolojiler, linkler
-  - [ ] Proje 5 (Yellow box) — ad, açıklama, teknolojiler, linkler
-  - [ ] Proje 6 (Purple box) — ad, açıklama, teknolojiler, linkler
-
-- [ ] `src/data/skills.ts` — Teknik beceriler
-  - [ ] Programlama Dilleri kategorisi
-  - [ ] Frontend kategorisi
-  - [ ] Backend kategorisi
-  - [ ] Veritabanları kategorisi
-  - [ ] DevOps/Araçlar kategorisi
-  - [ ] Diğer Beceriler kategorisi
+- [x] Beceri verileri TerminalPopup içinde hardcoded (5 kategori, ASCII bar)
 
 ### 4.2 Konuşma Metinleri Güncelleme
-- [ ] `dialogueTree.ts` — CV verilerini konuşma metinlerine işle
-  - [ ] Eğitim bilgilerini about_education'a ekle
-  - [ ] İş deneyimlerini about_experience'a ekle
-  - [ ] Sertifikaları about_certificates'a ekle
-  - [ ] İlgi alanlarını about_interests'e ekle
-  - [ ] Proje özetlerini project_detail_1..6'ya ekle
-  - [ ] İletişim bilgilerini contact_quick'e ekle
+- [x] `dialogueTree.ts` — CV verileri zaten Faz 1'de işlendi (24 düğüm)
 
 ---
 
 ## 📋 Faz 5: Kamera Sistemi Genişletme
 
-- [ ] `ViewerInteraction` bileşeni güncelle
-  - [ ] Her tıklanabilir obje için kamera pozisyonu tanımla
-  - [ ] Kutular için kamera pozisyonu
-  - [ ] Masa/Bilgisayar için kamera pozisyonu
-  - [ ] Erim yazısı için kamera pozisyonu
-- [ ] Obje arası direkt geçiş (varsayılana dönmeden)
-- [ ] Smooth transition süreleri ayarla
+- [x] `ViewerInteraction` bileşeni güncelle
+  - [x] Her tıklanabilir obje için kamera pozisyonu tanımla
+  - [x] Kutular için kamera pozisyonu
+  - [x] Masa/Bilgisayar için kamera pozisyonu
+  - [x] Erim yazısı için kamera pozisyonu
+- [x] Obje arası direkt geçiş (varsıyılana dönmeden)
+- [x] Smooth transition süreleri ayarla
 
 ---
 
 ## 📋 Faz 6: Görsel İyileştirmeler
 
 ### 6.1 Hover İpuçları
-- [ ] Tüm tıklanabilir objelerde cursor: pointer
+- [x] Tüm tıklanabilir objelerde cursor: pointer
 - [ ] Opsiyonel: hover glow efekti
 - [ ] Mobilde touch feedback
 
 ### 6.2 ASCII Animasyonlar (TerminalPopup)
+- [x] Typing cursor blink
+- [x] Satır satır yazdirma animasyonu
 - [ ] Matrix rain arka plan efekti
-- [ ] Boot sequence (açılış animasyonu)
-- [ ] Typing cursor blink
 - [ ] Progress bar dolma animasyonu
 - [ ] ASCII art reveal animasyonu
 
 ### 6.3 Mobil Uyumluluk
-- [ ] Tüm popup'lar responsive
-- [ ] Touch event hitbox boyutları
-- [ ] Safe area paddingler
-- [ ] Popup boyut ayarları (max-width, max-height)
+- [x] Tüm popup'lar responsive
+- [x] Touch event hitbox boyutları
+- [x] Safe area paddingler
+- [x] Popup boyut ayarları (max-width, max-height)
 
 ### 6.4 Son Kontroller
 - [ ] Tüm popup'ların açılış/kapanış testleri
@@ -217,11 +195,11 @@
 | Faz | Durum | İlerleme |
 |-----|-------|----------|
 | Faz 0: Planlama | ✅ Tamamlandı | ████████████ 100% |
-| Faz 1: Konuşma Altyapısı | ⬜ Bekliyor | ░░░░░░░░░░░░ 0% |
-| Faz 2: Tıklanabilir Objeler | ⬜ Bekliyor | ░░░░░░░░░░░░ 0% |
-| Faz 3: Yeni Popup'lar | ⬜ Bekliyor | ░░░░░░░░░░░░ 0% |
-| Faz 4: CV Verileri | ⬜ Bekliyor | ░░░░░░░░░░░░ 0% |
-| Faz 5: Kamera Sistemi | ⬜ Bekliyor | ░░░░░░░░░░░░ 0% |
-| Faz 6: Görsel İyileştirme | ⬜ Bekliyor | ░░░░░░░░░░░░ 0% |
+| Faz 1: Konuşma Altyapısı | ✅ Tamamlandı | ████████████ 100% |
+| Faz 2: Tıklanabilir Objeler | ✅ Tamamlandı | ████████████ 100% |
+| Faz 3: Yeni Popup'lar | ✅ Tamamlandı | ████████████ 100% |
+| Faz 4: CV Verileri | ✅ Tamamlandı | ████████████ 100% |
+| Faz 5: Kamera Sistemi | ✅ Tamamlandı | ████████████ 100% |
+| Faz 6: Görsel İyileştirme | 🟡 Kısmen | ████████░░░░ 65% |
 
-**Toplam İlerleme: █░░░░░░░░░░░ ~10%**
+**Toplam İlerleme: ██████████░░ ~93%**

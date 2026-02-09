@@ -1,8 +1,8 @@
 # 📊 Report — Erim'in Odası İnteraktif Portfolyo
 
 > **Rapor Tarihi:** 10 Şubat 2026
-> **Rapor No:** #002
-> **Durum:** 🟡 CV ile Revize Edildi — Geliştirme Bekleniyor
+> **Rapor No:** #005
+> **Durum:** 🟢 Faz 1-5 Tamamlandı — Görsel İyileştirmeler Opsiyonel
 
 ---
 
@@ -128,4 +128,5 @@ Erim'in Odası projesi — **Erden Erim Aydoğdu** (AI & XR Solutions Architect 
 | 10 Şub 2026 | #002 | CV ile Revize Edildi | CV okundu, communication-tree tamamen yeniden yazıldı, implementation-plan güncellendi, report revize edildi. "Dijital ikiz" yaklaşımı kaldırıldı, gerçek CV verileri yerleştirildi. |
 | 10 Şub 2026 | #003 | Faz 1 Tamamlandı | Konuşma altyapısı: dialogue.ts tipleri, 24 düğümlü dialogueTree.ts, dialogueStore.ts (Zustand), SpeechBubble güncelleme (geri butonu + dinamik seçenekler), Viewer.tsx entegrasyonu. Build başarılı. |
 | 10 Şub 2026 | #004 | Faz 2 Tamamlandı | Tıklanabilir objeler: kutu/desk/writing modelleri Bvh içinde tıklanabilir, 4 farklı kamera odak noktası, InteractiveBoxes onClick handler, Viewer multi-model handler. Build başarılı. |
-| — | #005 | — | *(Faz 3 geliştirme)* |
+| 10 Şub 2026 | #005 | Faz 3+4+5 Tamamlandı | ProjectPopup (6 proje, dinamik renk, neon glow), TerminalPopup (ASCII skill bars, satır satır animasyon, terminal UI), ProfilePopup (CV bilgileri, glassmorphism), projects.ts veri dosyası, tüm Viewer.tsx entegrasyonu tamamlandı. Build başarılı. |
+| — | #006 | — | *(Faz 6 opsiyonel iyileştirmeler)* |

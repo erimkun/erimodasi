@@ -2,13 +2,23 @@ import { useState, useCallback } from 'react';
 import { Scene } from '../components/Scene';
 import { SpeechBubble } from '../components/SpeechBubble';
 import { LoadingScreen } from '../components/LoadingScreen';
+import { ProjectPopup } from '../components/ProjectPopup';
+import { TerminalPopup } from '../components/TerminalPopup';
+import { ProfilePopup } from '../components/ProfilePopup';
 import { useDialogueStore } from '../stores/dialogueStore';
+import { getProjectByBoxId } from '../data/projects';
+import type { ProjectData } from '../components/ProjectPopup';
 import type { DialogueAction } from '../types/dialogue';
 import './Viewer.css';
 
 export function Viewer() {
     const [focusedModelId, setFocusedModelId] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(true);
+
+    // Popup states
+    const [activeProject, setActiveProject] = useState<ProjectData | null>(null);
+    const [showTerminal, setShowTerminal] = useState(false);
+    const [showProfile, setShowProfile] = useState(false);
 
     // Dialogue store
     const {
@@ -29,20 +39,19 @@ export function Viewer() {
         if (!action) return;
         switch (action.type) {
             case 'openTerminal':
-                // Faz 3'te TerminalPopup açılacak
-                console.log('[Viewer] ACTION: openTerminal');
+                setShowTerminal(true);
                 break;
             case 'openProfile':
-                // Faz 3'te ProfilePopup açılacak
-                console.log('[Viewer] ACTION: openProfile');
+                setShowProfile(true);
                 break;
-            case 'openProject':
-                // Faz 3'te ProjectPopup açılacak
-                console.log('[Viewer] ACTION: openProject', action.boxId);
+            case 'openProject': {
+                const project = getProjectByBoxId(action.boxId);
+                if (project) setActiveProject(project);
                 break;
+            }
             case 'highlightBox':
-                // Faz 2'de kutu highlight implementasyonu
-                console.log('[Viewer] ACTION: highlightBox', action.boxId);
+                // Kutu highlight — ışık artışı InteractiveBoxes'ta zaten var
+                console.log('[Viewer] highlightBox', action.boxId);
                 break;
             case 'closeBubble':
                 closeDialogue();
@@ -59,18 +68,18 @@ export function Viewer() {
                 startDialogue();
             }, 600);
         }
-        // desk, writing, kutu tıklama → Faz 3'te popup açılacak
         if (id === 'desk') {
-            console.log('[Viewer] Desk clicked → will open TerminalPopup');
+            setShowTerminal(true);
         }
         if (id === 'writing') {
-            console.log('[Viewer] Writing clicked → will open ProfilePopup');
+            setShowProfile(true);
         }
     }, [startDialogue]);
 
     const handleBoxClick = useCallback((boxId: string) => {
         console.log('[Viewer] Box clicked:', boxId);
-        // Faz 3'te ProjectPopup açılacak
+        const project = getProjectByBoxId(boxId);
+        if (project) setActiveProject(project);
     }, []);
 
     const handleMissed = useCallback(() => {
@@ -143,6 +152,21 @@ export function Viewer() {
             <div className="viewer-footer">
                 <p>Erden Erim Aydoğdu Sunar...</p>
             </div>
+
+            {/* Popup'lar */}
+            <ProjectPopup
+                isVisible={!!activeProject}
+                project={activeProject}
+                onClose={() => setActiveProject(null)}
+            />
+            <TerminalPopup
+                isVisible={showTerminal}
+                onClose={() => setShowTerminal(false)}
+            />
+            <ProfilePopup
+                isVisible={showProfile}
+                onClose={() => setShowProfile(false)}
+            />
         </div>
     );
 }
