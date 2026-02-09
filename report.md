@@ -1,8 +1,8 @@
 # 📊 Report — Erim'in Odası İnteraktif Portfolyo
 
 > **Rapor Tarihi:** 10 Şubat 2026
-> **Rapor No:** #005
-> **Durum:** 🟢 Faz 1-5 Tamamlandı — Görsel İyileştirmeler Opsiyonel
+> **Rapor No:** #006
+> **Durum:** 🟢 Faz 1-6 Tamamlandı — Proje Teslime Hazır
 
 ---
 
@@ -129,4 +129,5 @@ Erim'in Odası projesi — **Erden Erim Aydoğdu** (AI & XR Solutions Architect 
 | 10 Şub 2026 | #003 | Faz 1 Tamamlandı | Konuşma altyapısı: dialogue.ts tipleri, 24 düğümlü dialogueTree.ts, dialogueStore.ts (Zustand), SpeechBubble güncelleme (geri butonu + dinamik seçenekler), Viewer.tsx entegrasyonu. Build başarılı. |
 | 10 Şub 2026 | #004 | Faz 2 Tamamlandı | Tıklanabilir objeler: kutu/desk/writing modelleri Bvh içinde tıklanabilir, 4 farklı kamera odak noktası, InteractiveBoxes onClick handler, Viewer multi-model handler. Build başarılı. |
 | 10 Şub 2026 | #005 | Faz 3+4+5 Tamamlandı | ProjectPopup (6 proje, dinamik renk, neon glow), TerminalPopup (ASCII skill bars, satır satır animasyon, terminal UI), ProfilePopup (CV bilgileri, glassmorphism), projects.ts veri dosyası, tüm Viewer.tsx entegrasyonu tamamlandı. Build başarılı. |
-| — | #006 | — | *(Faz 6 opsiyonel iyileştirmeler)* |
+| 10 Şub 2026 | #006 | Faz 6 Tamamlandı | Matrix rain (TerminalPopup canvas arka plan), CRT scanline overlay, tüm popup'lara kapanış animasyonu, ESC tuşu desteği, HoverableModel (3D hover scale efekti), ProjectPopup tag hover glow, ProfilePopup foto pulse + isim shimmer + dil badge hover, etkileşim ipucu hint, section header renklendirme. Build başarılı. |
+| — | #007 | — | *(Opsiyonel: cross-browser test, progress bar animasyonu)* |

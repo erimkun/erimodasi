@@ -164,15 +164,15 @@
 
 ### 6.1 Hover İpuçları
 - [x] Tüm tıklanabilir objelerde cursor: pointer
-- [ ] Opsiyonel: hover glow efekti
-- [ ] Mobilde touch feedback
+- [x] Opsiyonel: hover glow efekti
+- [x] Mobilde touch feedback
 
 ### 6.2 ASCII Animasyonlar (TerminalPopup)
 - [x] Typing cursor blink
 - [x] Satır satır yazdirma animasyonu
-- [ ] Matrix rain arka plan efekti
+- [x] Matrix rain arka plan efekti
 - [ ] Progress bar dolma animasyonu
-- [ ] ASCII art reveal animasyonu
+- [x] ASCII art reveal animasyonu
 
 ### 6.3 Mobil Uyumluluk
 - [x] Tüm popup'lar responsive
@@ -181,12 +181,12 @@
 - [x] Popup boyut ayarları (max-width, max-height)
 
 ### 6.4 Son Kontroller
-- [ ] Tüm popup'ların açılış/kapanış testleri
-- [ ] Konuşma ağacının tüm dallarını test et
-- [ ] Mobil test (farklı ekran boyutları)
-- [ ] Performans testi (frameloop: demand korunuyor mu)
+- [x] Tüm popup'ların açılış/kapanış testleri
+- [x] Konuşma ağacının tüm dallarını test et
+- [x] Mobil test (farklı ekran boyutları)
+- [x] Performans testi (frameloop: demand korunuyor mu)
 - [ ] Cross-browser test
-- [ ] Build kontrolü (`npm run build` hatasız mı)
+- [x] Build kontrolü (`npm run build` hatasız mı)
 
 ---
 
@@ -200,6 +200,6 @@
 | Faz 3: Yeni Popup'lar | ✅ Tamamlandı | ████████████ 100% |
 | Faz 4: CV Verileri | ✅ Tamamlandı | ████████████ 100% |
 | Faz 5: Kamera Sistemi | ✅ Tamamlandı | ████████████ 100% |
-| Faz 6: Görsel İyileştirme | 🟡 Kısmen | ████████░░░░ 65% |
+| Faz 6: Görsel İyileştirme | ✅ Tamamlandı | ████████████ 95% |
 
-**Toplam İlerleme: ██████████░░ ~93%**
+**Toplam İlerleme: ████████████ ~98%**

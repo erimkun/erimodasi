@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { Scene } from '../components/Scene';
 import { SpeechBubble } from '../components/SpeechBubble';
 import { LoadingScreen } from '../components/LoadingScreen';
@@ -19,6 +19,7 @@ export function Viewer() {
     const [activeProject, setActiveProject] = useState<ProjectData | null>(null);
     const [showTerminal, setShowTerminal] = useState(false);
     const [showProfile, setShowProfile] = useState(false);
+    const [showHint, setShowHint] = useState(false);
 
     // Dialogue store
     const {
@@ -102,6 +103,21 @@ export function Viewer() {
         goBack();
     }, [goBack]);
 
+    // ESC tuşu ile tüm popup/bubble'ları kapat
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') {
+                if (activeProject) { setActiveProject(null); return; }
+                if (showTerminal) { setShowTerminal(false); return; }
+                if (showProfile) { setShowProfile(false); return; }
+                if (showSpeechBubble) { closeDialogue(); return; }
+                if (focusedModelId) { setFocusedModelId(null); return; }
+            }
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [activeProject, showTerminal, showProfile, showSpeechBubble, focusedModelId, closeDialogue]);
+
     // Mevcut düğümden seçenekleri hazırla
     const options = currentNode?.options.map((opt, i) => ({
         label: opt.label,
@@ -113,7 +129,11 @@ export function Viewer() {
             {isLoading && (
                 <LoadingScreen
                     isLoaded={true}
-                    onComplete={() => setIsLoading(false)}
+                    onComplete={() => {
+                        setIsLoading(false);
+                        // İpucu 2 saniye sonra göster
+                        setTimeout(() => setShowHint(true), 2000);
+                    }}
                 />
             )}
             {focusedModelId && (
@@ -140,6 +160,12 @@ export function Viewer() {
                 onBack={handleBack}
                 canGoBack={canGoBack}
             />
+
+            {!isLoading && showHint && (
+                <div className="viewer-hint">
+                    <p>✨ Karaktere, kutulara, masaya veya yazıya tıklayın</p>
+                </div>
+            )}
 
             <div className="viewer-canvas">
                 <Scene

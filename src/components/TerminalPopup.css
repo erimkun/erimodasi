@@ -13,6 +13,7 @@
 }
 
 .terminal-popup {
+    position: relative;
     background: #1a1a2e;
     border: 1px solid rgba(0, 255, 100, 0.3);
     border-radius: 12px;
@@ -116,4 +117,68 @@
     .terminal-content {
         padding: 12px 14px;
     }
+    .matrix-rain {
+        display: none;
+    }
+}
+
+/* Matrix rain canvas */
+.matrix-rain {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0.35;
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* CRT scanline overlay */
+.terminal-scanline {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0, 0, 0, 0.08) 2px,
+        rgba(0, 0, 0, 0.08) 4px
+    );
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* Ensure content layers above effects */
+.terminal-titlebar {
+    position: relative;
+    z-index: 2;
+}
+.terminal-content {
+    position: relative;
+    z-index: 2;
+}
+
+/* Section headers glow */
+.terminal-line-header {
+    color: #00ccff;
+    text-shadow: 0 0 8px rgba(0, 204, 255, 0.5);
+    font-weight: 600;
+}
+
+/* Close animation */
+.terminal-popup.closing {
+    transform: translateY(20px) scale(0.92);
+    opacity: 0;
+    transition: all 0.3s ease-in;
+}
+
+/* Dot hover */
+.dot.red:hover {
+    box-shadow: 0 0 8px rgba(255, 95, 87, 0.8);
+    transform: scale(1.2);
+    transition: all 0.15s ease;
 }

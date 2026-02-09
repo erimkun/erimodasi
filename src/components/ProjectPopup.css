@@ -146,3 +146,32 @@
         font-size: 0.88rem;
     }
 }
+
+/* Close animation */
+.project-popup.closing {
+    transform: translateY(30px) scale(0.9);
+    opacity: 0;
+    transition: all 0.3s ease-in;
+}
+
+/* Tag hover glow */
+.project-tag {
+    transition: all 0.2s ease;
+}
+.project-tag:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: var(--glow-color, rgba(255, 255, 255, 0.4));
+    color: #fff;
+    box-shadow: 0 0 10px color-mix(in srgb, var(--glow-color) 30%, transparent);
+    transform: translateY(-1px);
+}
+
+/* Dot indicator pulse */
+.project-popup-dot {
+    animation: dotPulse 2s ease-in-out infinite;
+}
+
+@keyframes dotPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.3); }
+}

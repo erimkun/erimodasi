@@ -20,25 +20,37 @@ interface ProjectPopupProps {
 
 export function ProjectPopup({ isVisible, project, onClose }: ProjectPopupProps) {
     const [show, setShow] = useState(false);
+    const [closing, setClosing] = useState(false);
 
     useEffect(() => {
         if (isVisible) {
+            setClosing(false);
             requestAnimationFrame(() => setShow(true));
         } else {
             setShow(false);
         }
     }, [isVisible]);
 
-    if (!isVisible || !project) return null;
+    const handleClose = () => {
+        setClosing(true);
+        setTimeout(() => {
+            setClosing(false);
+            setShow(false);
+            onClose();
+        }, 300);
+    };
+
+    if (!isVisible && !closing) return null;
+    if (!project) return null;
 
     return (
-        <div className="project-popup-overlay" onClick={onClose}>
+        <div className="project-popup-overlay" onClick={handleClose}>
             <div
-                className={`project-popup ${show ? 'visible' : ''}`}
+                className={`project-popup ${show && !closing ? 'visible' : ''} ${closing ? 'closing' : ''}`}
                 onClick={(e) => e.stopPropagation()}
                 style={{ '--glow-color': project.color } as React.CSSProperties}
             >
-                <button className="project-popup-close" onClick={onClose}>×</button>
+                <button className="project-popup-close" onClick={handleClose}>×</button>
 
                 <div className="project-popup-header">
                     <div

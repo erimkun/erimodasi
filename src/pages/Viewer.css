@@ -76,6 +76,33 @@
     letter-spacing: 1px;
 }
 
+/* Interaction hint */
+.viewer-hint {
+    position: absolute;
+    bottom: 3.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    pointer-events: none;
+    z-index: 50;
+    animation: hintFadeInOut 6s ease-in-out forwards;
+}
+
+.viewer-hint p {
+    margin: 0;
+    font-size: 0.82rem;
+    color: rgba(255, 255, 255, 0.45);
+    letter-spacing: 0.5px;
+    text-align: center;
+    white-space: nowrap;
+}
+
+@keyframes hintFadeInOut {
+    0% { opacity: 0; transform: translateX(-50%) translateY(10px); }
+    15% { opacity: 1; transform: translateX(-50%) translateY(0); }
+    80% { opacity: 1; }
+    100% { opacity: 0; }
+}
+
 /* Loading state */
 .viewer.loading {
     display: flex;

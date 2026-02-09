@@ -8,24 +8,35 @@ interface ProfilePopupProps {
 
 export function ProfilePopup({ isVisible, onClose }: ProfilePopupProps) {
     const [show, setShow] = useState(false);
+    const [closing, setClosing] = useState(false);
 
     useEffect(() => {
         if (isVisible) {
+            setClosing(false);
             requestAnimationFrame(() => setShow(true));
         } else {
             setShow(false);
         }
     }, [isVisible]);
 
-    if (!isVisible) return null;
+    const handleClose = () => {
+        setClosing(true);
+        setTimeout(() => {
+            setClosing(false);
+            setShow(false);
+            onClose();
+        }, 300);
+    };
+
+    if (!isVisible && !closing) return null;
 
     return (
-        <div className="profile-popup-overlay" onClick={onClose}>
+        <div className="profile-popup-overlay" onClick={handleClose}>
             <div
-                className={`profile-popup ${show ? 'visible' : ''}`}
+                className={`profile-popup ${show && !closing ? 'visible' : ''} ${closing ? 'closing' : ''}`}
                 onClick={(e) => e.stopPropagation()}
             >
-                <button className="profile-popup-close" onClick={onClose}>×</button>
+                <button className="profile-popup-close" onClick={handleClose}>×</button>
 
                 {/* Fotoğraf alanı */}
                 <div className="profile-photo-area">

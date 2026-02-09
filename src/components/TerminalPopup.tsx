@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import './TerminalPopup.css';
 
 interface TerminalPopupProps {
@@ -46,14 +46,74 @@ const TERMINAL_LINES = [
     'erim@skills:~$ _',
 ];
 
+// Matrix rain character set
+const MATRIX_CHARS = 'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン0123456789ABCDEF';
+
+function MatrixRain({ width, height }: { width: number; height: number }) {
+    const canvasRef = useRef<HTMLCanvasElement>(null);
+    const animRef = useRef<number>(0);
+    const columnsRef = useRef<number[]>([]);
+
+    useEffect(() => {
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+
+        canvas.width = width;
+        canvas.height = height;
+
+        const fontSize = 12;
+        const cols = Math.floor(width / fontSize);
+        columnsRef.current = Array(cols).fill(0).map(() => Math.random() * height / fontSize);
+
+        const draw = () => {
+            ctx.fillStyle = 'rgba(10, 10, 20, 0.06)';
+            ctx.fillRect(0, 0, width, height);
+            ctx.fillStyle = 'rgba(0, 255, 80, 0.12)';
+            ctx.font = `${fontSize}px monospace`;
+
+            for (let i = 0; i < cols; i++) {
+                const char = MATRIX_CHARS[Math.floor(Math.random() * MATRIX_CHARS.length)];
+                const x = i * fontSize;
+                const y = columnsRef.current[i] * fontSize;
+                ctx.fillText(char, x, y);
+
+                if (y > height && Math.random() > 0.975) {
+                    columnsRef.current[i] = 0;
+                }
+                columnsRef.current[i] += 0.5;
+            }
+            animRef.current = requestAnimationFrame(draw);
+        };
+
+        animRef.current = requestAnimationFrame(draw);
+        return () => cancelAnimationFrame(animRef.current);
+    }, [width, height]);
+
+    return <canvas ref={canvasRef} className="matrix-rain" />;
+}
+
 export function TerminalPopup({ isVisible, onClose }: TerminalPopupProps) {
     const [show, setShow] = useState(false);
+    const [closing, setClosing] = useState(false);
     const [visibleLines, setVisibleLines] = useState(0);
     const contentRef = useRef<HTMLDivElement>(null);
+    const popupRef = useRef<HTMLDivElement>(null);
+
+    const handleClose = useCallback(() => {
+        setClosing(true);
+        setTimeout(() => {
+            setClosing(false);
+            setShow(false);
+            onClose();
+        }, 300);
+    }, [onClose]);
 
     useEffect(() => {
         if (isVisible) {
             setVisibleLines(0);
+            setClosing(false);
             requestAnimationFrame(() => setShow(true));
             // Satır satır göster
             let line = 0;
@@ -78,18 +138,23 @@ export function TerminalPopup({ isVisible, onClose }: TerminalPopupProps) {
         }
     }, [visibleLines]);
 
-    if (!isVisible) return null;
+    if (!isVisible && !closing) return null;
 
     return (
-        <div className="terminal-popup-overlay" onClick={onClose}>
+        <div className="terminal-popup-overlay" onClick={handleClose}>
             <div
-                className={`terminal-popup ${show ? 'visible' : ''}`}
+                ref={popupRef}
+                className={`terminal-popup ${show && !closing ? 'visible' : ''} ${closing ? 'closing' : ''}`}
                 onClick={(e) => e.stopPropagation()}
             >
+                {/* Matrix rain background */}
+                <MatrixRain width={640} height={500} />
+                <div className="terminal-scanline" />
+
                 {/* Title bar */}
                 <div className="terminal-titlebar">
                     <div className="terminal-dots">
-                        <span className="dot red" onClick={onClose} />
+                        <span className="dot red" onClick={handleClose} />
                         <span className="dot yellow" />
                         <span className="dot green" />
                     </div>
@@ -99,7 +164,7 @@ export function TerminalPopup({ isVisible, onClose }: TerminalPopupProps) {
                 {/* Terminal content */}
                 <div className="terminal-content" ref={contentRef}>
                     {TERMINAL_LINES.slice(0, visibleLines).map((line, i) => (
-                        <div key={i} className="terminal-line">
+                        <div key={i} className={`terminal-line ${line.startsWith('[') ? 'terminal-line-header' : ''}`}>
                             {line || '\u00A0'}
                         </div>
                     ))}

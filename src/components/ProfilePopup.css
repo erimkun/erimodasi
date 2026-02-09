@@ -180,3 +180,52 @@
         font-size: 0.8rem;
     }
 }
+
+/* Close animation */
+.profile-popup.closing {
+    transform: translateY(30px) scale(0.9);
+    opacity: 0;
+    transition: all 0.3s ease-in;
+}
+
+/* Photo pulse glow */
+.profile-photo-placeholder {
+    animation: photoPulse 3s ease-in-out infinite;
+}
+
+@keyframes photoPulse {
+    0%, 100% { box-shadow: 0 0 20px rgba(0, 255, 255, 0.15); }
+    50% { box-shadow: 0 0 35px rgba(0, 255, 255, 0.35), 0 0 60px rgba(196, 77, 255, 0.15); }
+}
+
+/* Detail link hover glow */
+.detail-link:hover {
+    color: #00ffff;
+    text-shadow: 0 0 10px rgba(0, 255, 255, 0.4);
+}
+
+/* Language badge hover */
+.lang-badge {
+    transition: all 0.2s ease;
+    cursor: default;
+}
+.lang-badge:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(0, 255, 255, 0.4);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Name gradient shimmer */
+.profile-name {
+    background: linear-gradient(90deg, #fff 0%, #00ffff 50%, #fff 100%);
+    background-size: 200% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    animation: nameShimmer 4s ease-in-out infinite;
+}
+
+@keyframes nameShimmer {
+    0%, 100% { background-position: 0% 50%; -webkit-text-fill-color: #fff; }
+    50% { background-position: 100% 50%; -webkit-text-fill-color: transparent; }
+}
