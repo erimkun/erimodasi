@@ -38,4 +38,27 @@ function sceneConfigSaver(): Plugin {
 export default defineConfig({
     plugins: [react(), sceneConfigSaver()],
     assetsInclude: ['**/*.glb'],
+    build: {
+        // Asset'leri agresif hash'le — CDN cache'i maximize eder
+        assetsInlineLimit: 0, // Hiçbir dosyayı inline etme, hepsini ayrı cache'le
+        rollupOptions: {
+            output: {
+                // Vendor code splitting — değişmeyen kütüphaneler ayrı bundle
+                manualChunks: {
+                    'three-core': ['three'],
+                    'r3f': ['@react-three/fiber', '@react-three/drei'],
+                    'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+                },
+                // Content-hash'li dosya isimleri (Cloudflare immutable cache)
+                assetFileNames: 'assets/[name]-[hash][extname]',
+                chunkFileNames: 'assets/[name]-[hash].js',
+                entryFileNames: 'assets/[name]-[hash].js',
+            },
+        },
+        // Chunk boyut uyarı limitini yükselt (3D modeller büyük)
+        chunkSizeWarningLimit: 800,
+        // Minification
+        minify: 'esbuild',
+        target: 'es2020',
+    },
 })

@@ -1,7 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence, useMotionValue, useTransform, useSpring } from 'framer-motion';
 import { FluidBackground } from './FluidBackground';
 import './LoadingScreen.css';
+
+function useIsMobile() {
+    const [isMobile, setIsMobile] = useState(() => {
+        if (typeof window === 'undefined') return false;
+        return window.innerWidth <= 768 || 'ontouchstart' in window;
+    });
+    useEffect(() => {
+        const check = () => setIsMobile(window.innerWidth <= 768 || 'ontouchstart' in window);
+        window.addEventListener('resize', check);
+        return () => window.removeEventListener('resize', check);
+    }, []);
+    return isMobile;
+}
 
 interface Item {
     id: number;
@@ -27,6 +40,12 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({ onComplete, isLoad
     const [activeId, setActiveId] = useState<number | null>(null);
     const [isMelting, setIsMelting] = useState(false);
     const [showReady, setShowReady] = useState(false);
+    const isMobile = useIsMobile();
+
+    const handleItemTap = useCallback((id: number) => {
+        if (!isMobile) return;
+        setActiveId(prev => prev === id ? null : id);
+    }, [isMobile]);
 
     const [showFullText, setShowFullText] = useState(false);
 
@@ -139,16 +158,22 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({ onComplete, isLoad
 
                 {/* Center Section: Gallery */}
                 <div className="gallery-section">
-                    <div className="gallery-container">
+                    <div className={`gallery-container ${isMobile ? 'gallery-mobile' : ''}`}>
                         {items.map((item) => (
                             <motion.div
                                 key={item.id}
                                 className={`gallery-item ${activeId === item.id ? 'active' : ''}`}
-                                onHoverStart={() => setActiveId(item.id)}
-                                onHoverEnd={() => setActiveId(null)}
+                                onHoverStart={isMobile ? undefined : () => setActiveId(item.id)}
+                                onHoverEnd={isMobile ? undefined : () => setActiveId(null)}
+                                onClick={isMobile ? () => handleItemTap(item.id) : undefined}
                                 layout
-                                initial={{ flex: 1 }}
-                                animate={{ flex: activeId === item.id ? 3 : 1 }}
+                                initial={isMobile ? {} : { flex: 1 }}
+                                animate={isMobile ? {
+                                    scale: activeId === item.id ? 1.05 : 1,
+                                    zIndex: activeId === item.id ? 10 : 1
+                                } : {
+                                    flex: activeId === item.id ? 3 : 1
+                                }}
                                 transition={{ type: "spring", stiffness: 300, damping: 30 }}
                                 style={{
                                     backgroundImage: `url(${item.image})`,
@@ -156,8 +181,13 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({ onComplete, isLoad
                                     backgroundPosition: 'center'
                                 }}
                             >
-                                {/* Images are set as background for better fit handling in flex */}
                                 <div className="overlay" />
+                                {/* Mobile: show text label on each item */}
+                                {isMobile && (
+                                    <div className="gallery-item-label">
+                                        {item.text}
+                                    </div>
+                                )}
                             </motion.div>
                         ))}
                     </div>

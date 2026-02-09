@@ -1,6 +1,6 @@
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { OrbitControls, Stats, TransformControls, Bvh, useTexture } from '@react-three/drei';
-import { Suspense, useRef, useEffect, useMemo } from 'react';
+import { OrbitControls, Stats, TransformControls, Bvh, useTexture, PerformanceMonitor } from '@react-three/drei';
+import { Suspense, useRef, useEffect, useMemo, useState, useCallback, forwardRef } from 'react';
 import * as THREE from 'three';
 import { Model } from './Model';
 import { InteractiveBoxes } from './InteractiveBoxes';
@@ -9,6 +9,13 @@ import { useSceneStore } from '../stores/sceneStore';
 import { STATIC_SCENE } from '../data/staticScene';
 import { ModelConfig } from '../types/scene';
 import { preloadModels } from './Model';
+
+// Detect mobile/touch device
+const IS_MOBILE = typeof window !== 'undefined' && (
+    window.innerWidth <= 768 ||
+    'ontouchstart' in window ||
+    navigator.maxTouchPoints > 0
+);
 
 // Preload all models immediately so they start downloading in parallel
 preloadModels(STATIC_SCENE.models.map(m => m.path));
@@ -35,6 +42,45 @@ const Skybox = () => {
     texture.colorSpace = THREE.SRGBColorSpace;
     return <primitive object={texture} attach="background" />;
 };
+
+// Single emissive glow plane to replace 4 strip lights
+// Positioned behind the "writing" model on the back wall
+function EmissiveGlowPlane() {
+    // Build a slightly curved plane (cylinder slice) for soft light spread
+    const geometry = useMemo(() => {
+        // A very wide, low-curvature arc segment facing forward
+        const geo = new THREE.CylinderGeometry(
+            1.8,     // radiusTop
+            1.8,     // radiusBottom
+            0.55,    // height (vertical span)
+            32,      // radial segments
+            1,       // height segments
+            true,    // openEnded
+            Math.PI * 0.8,  // thetaStart
+            Math.PI * 0.4   // thetaLength (arc)
+        );
+        return geo;
+    }, []);
+
+    return (
+        <group
+            position={[0.3, 0.99, -0.86]}
+            rotation={[0, Math.PI, 0]}
+        >
+            <mesh geometry={geometry}>
+                <meshBasicMaterial
+                    color="#00ffff"
+                    transparent
+                    opacity={0.06}
+                    side={THREE.DoubleSide}
+                    toneMapped={false}
+                    depthWrite={false}
+                    blending={THREE.AdditiveBlending}
+                />
+            </mesh>
+        </group>
+    );
+}
 
 // Wrapper for OrbitControls
 function AdaptiveControls({ isEditor, ...props }: any) {
@@ -360,7 +406,7 @@ function ClickableModel({ config, isFocused, onClick }: {
         groupRef.current.rotation.y = THREE.MathUtils.lerp(
             groupRef.current.rotation.y,
             targetRotY,
-            0.05 // Faster lerp
+            IS_MOBILE ? 0.12 : 0.08 // Faster on mobile to reduce animation frames
         );
     });
 
@@ -430,7 +476,8 @@ function ViewerInteraction({
         const goalTarget = focusedModelId ? focusTarget : defaultTarget;
 
         // Use faster lerp for smoother, quicker animation
-        const lerpFactor = 0.12;
+        // Faster lerp = fewer frames of expensive animated rendering
+        const lerpFactor = IS_MOBILE ? 0.18 : 0.15;
         camera.position.lerp(goalPos, lerpFactor);
         currentLookAt.current.lerp(goalTarget, lerpFactor);
         camera.lookAt(currentLookAt.current);
@@ -441,7 +488,8 @@ function ViewerInteraction({
         const dz = camera.position.z - goalPos.z;
         const distSq = dx * dx + dy * dy + dz * dz;
 
-        if (distSq < 0.0004) { // 0.02 squared
+        // Larger threshold = snap sooner, fewer heavy frames
+        if (distSq < 0.002) {
             // Snap to final position
             camera.position.copy(goalPos);
             currentLookAt.current.copy(goalTarget);
@@ -489,17 +537,27 @@ export function Scene({ isEditor = false, focusedModelId = null, onModelClick, o
         updateBoxLight(lightId, { position: pos });
     };
 
+    // Adaptive DPR for performance
+    const [dpr, setDpr] = useState(IS_MOBILE ? 0.75 : 1.5);
+
+    const handlePerformanceIncline = useCallback(() => {
+        setDpr(prev => Math.min(prev + 0.25, IS_MOBILE ? 1 : 2));
+    }, []);
+    const handlePerformanceDecline = useCallback(() => {
+        setDpr(prev => Math.max(prev - 0.25, IS_MOBILE ? 0.5 : 0.75));
+    }, []);
+
     return (
         <Canvas
-            shadows
+            shadows={IS_MOBILE ? false : true}
             camera={{ position: config.camera.position, fov: 50 }}
-            dpr={1}
+            dpr={dpr}
             gl={{
-                antialias: true,
+                antialias: !IS_MOBILE,
                 powerPreference: 'high-performance',
                 depth: true,
                 stencil: false,
-                toneMapping: THREE.AgXToneMapping,
+                toneMapping: IS_MOBILE ? THREE.ACESFilmicToneMapping : THREE.AgXToneMapping,
                 toneMappingExposure: 1.0
             }}
             onPointerMissed={() => {
@@ -512,13 +570,23 @@ export function Scene({ isEditor = false, focusedModelId = null, onModelClick, o
                 }
             }}
         >
+            {/* Auto-adjusts DPR based on FPS */}
+            {!isEditor && (
+                <PerformanceMonitor
+                    onIncline={handlePerformanceIncline}
+                    onDecline={handlePerformanceDecline}
+                    flipflops={3}
+                    onFallback={() => setDpr(IS_MOBILE ? 0.5 : 0.75)}
+                />
+            )}
+
             {isEditor && <Stats />}
 
             <Suspense fallback={<LoadingFallback />}>
                 {/* Skybox with texture */}
                 <Skybox />
 
-                <Lighting config={config.lighting} />
+                <Lighting config={config.lighting} isMobile={IS_MOBILE} />
 
                 {/* Models - each in own Suspense for progressive loading */}
                 <Bvh firstHitOnly>
@@ -561,7 +629,7 @@ export function Scene({ isEditor = false, focusedModelId = null, onModelClick, o
                     if (!model.visible || model.id === 'char') return null;
                     return (
                         <Suspense key={model.id} fallback={null}>
-                            <Model config={model} />
+                            <Model config={model} enableShadows={!IS_MOBILE} />
                         </Suspense>
                     );
                 })}
@@ -596,36 +664,22 @@ export function Scene({ isEditor = false, focusedModelId = null, onModelClick, o
                     )
                 ))}
 
-                {/* Strip Lights (Neon) */}
-                {config.lighting.stripLights?.map((light) => (
+                {/* Strip Lights (Neon) — Editor keeps editable, Viewer uses single emissive plane */}
+                {isEditor && config.lighting.stripLights?.map((light) => (
                     light.enabled && (
-                        isEditor ? (
-                            <EditableStripLight
-                                key={light.id}
-                                light={light}
-                                isSelected={selectedLightId === light.id}
-                                onSelect={() => { setSelectedLight(light.id); }}
-                                onTransformChange={handleStripLightTransform(light.id)}
-                                orbitRef={orbitRef}
-                            />
-                        ) : (
-                            <group
-                                key={light.id}
-                                position={light.position}
-                                rotation={light.rotation}
-                                scale={light.scale}
-                            >
-                                {/* Geometry removed so it's invisible, just the light source remains */}
-                                <pointLight
-                                    intensity={light.intensity * 0.5}
-                                    color={light.color}
-                                    distance={5}
-                                    decay={2}
-                                />
-                            </group>
-                        )
+                        <EditableStripLight
+                            key={light.id}
+                            light={light}
+                            isSelected={selectedLightId === light.id}
+                            onSelect={() => { setSelectedLight(light.id); }}
+                            onTransformChange={handleStripLightTransform(light.id)}
+                            orbitRef={orbitRef}
+                        />
                     )
                 ))}
+
+                {/* Viewer: single emissive glow plane replaces all 4 strip point lights */}
+                {!isEditor && <EmissiveGlowPlane />}
 
                 {/* Box Lights (Interactive) */}
                 {config.lighting.boxLights?.map((light) => (

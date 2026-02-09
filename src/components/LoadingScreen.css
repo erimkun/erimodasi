@@ -160,3 +160,115 @@
     /* Tech feel */
     margin-top: 20px;
 }
+
+/* Gallery item text label (mobile) */
+.gallery-item-label {
+    position: absolute;
+    bottom: 8px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: white;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
+    z-index: 2;
+    text-transform: uppercase;
+}
+
+/* ===== MOBILE RESPONSIVE ===== */
+@media (max-width: 768px) {
+    .content-wrapper {
+        padding: 1rem 0.75rem;
+        justify-content: center;
+        gap: 1.2rem;
+    }
+
+    .top-indicator {
+        min-height: auto;
+        margin-bottom: 0;
+    }
+
+    .loading-text {
+        font-size: 0.75rem;
+        letter-spacing: 3px;
+    }
+
+    .ready-btn {
+        padding: 8px 20px;
+        font-size: 0.8rem;
+        letter-spacing: 2px;
+    }
+
+    /* Mobile gallery: 3-column, 2-row grid */
+    .gallery-container.gallery-mobile {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        grid-template-rows: 1fr 1fr;
+        gap: 8px;
+        height: auto;
+        max-height: 55vh;
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .gallery-mobile .gallery-item {
+        height: 0;
+        padding-bottom: 120%; /* aspect ratio ~5:6 portrait */
+        flex: none;
+        border-radius: 10px;
+        position: relative;
+    }
+
+    .gallery-mobile .gallery-item.active {
+        border-color: rgba(255, 255, 255, 0.9);
+        box-shadow: 0 0 15px rgba(255, 255, 255, 0.25);
+    }
+
+    .gallery-section {
+        gap: 15px;
+        flex-grow: 0;
+    }
+
+    .dynamic-text-container {
+        height: auto;
+        min-height: 50px;
+    }
+
+    .dynamic-text {
+        font-size: 1.4rem;
+        letter-spacing: 3px;
+    }
+
+    .dynamic-text.full {
+        font-size: 1rem !important;
+        letter-spacing: 1px !important;
+    }
+
+    .dynamic-text.placeholder {
+        font-size: 0.9rem;
+        letter-spacing: 4px;
+    }
+
+    .footer-text {
+        font-size: 0.65rem;
+        margin-top: 10px;
+    }
+
+    /* Logo smaller on mobile */
+    .top-indicator img {
+        width: 80px !important;
+    }
+}
+
+@media (max-width: 400px) {
+    .gallery-mobile .gallery-item {
+        padding-bottom: 130%;
+    }
+
+    .dynamic-text {
+        font-size: 1.1rem;
+        letter-spacing: 2px;
+    }
+}

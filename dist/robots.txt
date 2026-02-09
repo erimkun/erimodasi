@@ -1,9 +1,0 @@
-# https://www.robotstxt.org/robotstxt.html
-User-agent: *
-Allow: /
-
-# Sitemap
-Sitemap: https://erimkun.github.io/erimodasi/sitemap.xml
-
-# Crawl-delay
-Crawl-delay: 10
