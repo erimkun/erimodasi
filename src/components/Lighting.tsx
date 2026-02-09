@@ -3,18 +3,14 @@ import { memo } from 'react';
 
 interface LightingProps {
     config: LightConfig;
-    isMobile?: boolean;
 }
 
-export const Lighting = memo(function Lighting({ config, isMobile = false }: LightingProps) {
-    // Mobile: smaller shadow map, tighter frustum
-    const shadowMapSize: [number, number] = isMobile ? [256, 256] : [1024, 1024];
-
+export const Lighting = memo(function Lighting({ config }: LightingProps) {
     return (
         <>
             {/* Ambient light for base illumination */}
             <ambientLight
-                intensity={isMobile ? config.ambient.intensity * 1.2 : config.ambient.intensity}
+                intensity={config.ambient.intensity}
                 color={config.ambient.color}
             />
 
@@ -23,14 +19,14 @@ export const Lighting = memo(function Lighting({ config, isMobile = false }: Lig
                 intensity={config.directional.intensity}
                 position={config.directional.position}
                 color={config.directional.color}
-                castShadow={!isMobile}
-                shadow-mapSize={shadowMapSize}
-                shadow-camera-far={15}
-                shadow-camera-near={0.5}
-                shadow-camera-left={-2}
-                shadow-camera-right={2}
-                shadow-camera-top={2.5}
-                shadow-camera-bottom={-1}
+                castShadow
+                shadow-mapSize={[1024, 1024]}
+                shadow-camera-far={30}
+                shadow-camera-near={0.1}
+                shadow-camera-left={-3}
+                shadow-camera-right={3}
+                shadow-camera-top={3}
+                shadow-camera-bottom={-3}
                 shadow-bias={-0.001}
                 shadow-normalBias={0.02}
             />
@@ -52,7 +48,7 @@ export const Lighting = memo(function Lighting({ config, isMobile = false }: Lig
                         color={light.color}
                         intensity={light.intensity}
                         position={light.position}
-                        distance={isMobile ? Math.min(light.distance, 3) : light.distance}
+                        distance={light.distance}
                         decay={2}
                     />
                 )

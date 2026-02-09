@@ -1,5 +1,5 @@
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { OrbitControls, Stats, TransformControls, Bvh, useTexture, PerformanceMonitor } from '@react-three/drei';
+import { OrbitControls, Stats, TransformControls, Bvh, useTexture } from '@react-three/drei';
 import { Suspense, useRef, useEffect, useMemo, useState, useCallback, forwardRef } from 'react';
 import * as THREE from 'three';
 import { Model } from './Model';
@@ -44,41 +44,24 @@ const Skybox = () => {
 };
 
 // Single emissive glow plane to replace 4 strip lights
-// Positioned behind the "writing" model on the back wall
+// Flat plane flush with the back wall behind the writing
 function EmissiveGlowPlane() {
-    // Build a slightly curved plane (cylinder slice) for soft light spread
-    const geometry = useMemo(() => {
-        // A very wide, low-curvature arc segment facing forward
-        const geo = new THREE.CylinderGeometry(
-            1.8,     // radiusTop
-            1.8,     // radiusBottom
-            0.55,    // height (vertical span)
-            32,      // radial segments
-            1,       // height segments
-            true,    // openEnded
-            Math.PI * 0.8,  // thetaStart
-            Math.PI * 0.4   // thetaLength (arc)
-        );
-        return geo;
-    }, []);
-
     return (
-        <group
-            position={[0.3, 0.99, -0.86]}
-            rotation={[0, Math.PI, 0]}
+        <mesh
+            position={[0.3, 0.99, -0.87]}
+            rotation={[0, 0, 0]}
         >
-            <mesh geometry={geometry}>
-                <meshBasicMaterial
-                    color="#00ffff"
-                    transparent
-                    opacity={0.06}
-                    side={THREE.DoubleSide}
-                    toneMapped={false}
-                    depthWrite={false}
-                    blending={THREE.AdditiveBlending}
-                />
-            </mesh>
-        </group>
+            <planeGeometry args={[1.45, 0.55]} />
+            <meshBasicMaterial
+                color="#00ffff"
+                transparent
+                opacity={0.04}
+                side={THREE.FrontSide}
+                toneMapped={false}
+                depthWrite={false}
+                blending={THREE.AdditiveBlending}
+            />
+        </mesh>
     );
 }
 
@@ -94,7 +77,7 @@ function AdaptiveControls({ isEditor, ...props }: any) {
             {...props}
             makeDefault
             enableDamping={true}
-            dampingFactor={0.05}
+            dampingFactor={0.1}
             // Viewer: no zoom, no pan, limited rotation
             enableZoom={isEditor}
             enablePan={isEditor}
@@ -384,7 +367,7 @@ function ClickableModel({ config, isFocused, onClick }: {
         ? config.rotation[1] - (125 * Math.PI / 180)
         : config.rotation[1];
 
-    useFrame(() => {
+    useFrame((state) => {
         if (!groupRef.current) return;
 
         // Detect focus change to start animation
@@ -406,8 +389,10 @@ function ClickableModel({ config, isFocused, onClick }: {
         groupRef.current.rotation.y = THREE.MathUtils.lerp(
             groupRef.current.rotation.y,
             targetRotY,
-            IS_MOBILE ? 0.12 : 0.08 // Faster on mobile to reduce animation frames
+            0.08
         );
+        // Request next frame for smooth animation
+        state.invalidate();
     });
 
     return (
@@ -446,7 +431,7 @@ function ViewerInteraction({
     const prevFocusedId = useRef<string | null>(null);
     const animationComplete = useRef(true);
 
-    useFrame(() => {
+    useFrame((state) => {
         const controls = orbitRef.current;
         if (!controls) return;
 
@@ -476,11 +461,13 @@ function ViewerInteraction({
         const goalTarget = focusedModelId ? focusTarget : defaultTarget;
 
         // Use faster lerp for smoother, quicker animation
-        // Faster lerp = fewer frames of expensive animated rendering
-        const lerpFactor = IS_MOBILE ? 0.18 : 0.15;
+        const lerpFactor = 0.12;
         camera.position.lerp(goalPos, lerpFactor);
         currentLookAt.current.lerp(goalTarget, lerpFactor);
         camera.lookAt(currentLookAt.current);
+
+        // Request next frame
+        state.invalidate();
 
         // Check if animation is complete (use squared distance for performance)
         const dx = camera.position.x - goalPos.x;
@@ -488,8 +475,7 @@ function ViewerInteraction({
         const dz = camera.position.z - goalPos.z;
         const distSq = dx * dx + dy * dy + dz * dz;
 
-        // Larger threshold = snap sooner, fewer heavy frames
-        if (distSq < 0.002) {
+        if (distSq < 0.001) {
             // Snap to final position
             camera.position.copy(goalPos);
             currentLookAt.current.copy(goalTarget);
@@ -538,26 +524,20 @@ export function Scene({ isEditor = false, focusedModelId = null, onModelClick, o
     };
 
     // Adaptive DPR for performance
-    const [dpr, setDpr] = useState(IS_MOBILE ? 0.75 : 1.5);
-
-    const handlePerformanceIncline = useCallback(() => {
-        setDpr(prev => Math.min(prev + 0.25, IS_MOBILE ? 1 : 2));
-    }, []);
-    const handlePerformanceDecline = useCallback(() => {
-        setDpr(prev => Math.max(prev - 0.25, IS_MOBILE ? 0.5 : 0.75));
-    }, []);
+    const [dpr, setDpr] = useState(IS_MOBILE ? 0.75 : 1);
 
     return (
         <Canvas
-            shadows={IS_MOBILE ? false : true}
+            shadows
+            frameloop="demand"
             camera={{ position: config.camera.position, fov: 50 }}
             dpr={dpr}
             gl={{
-                antialias: !IS_MOBILE,
+                antialias: true,
                 powerPreference: 'high-performance',
                 depth: true,
                 stencil: false,
-                toneMapping: IS_MOBILE ? THREE.ACESFilmicToneMapping : THREE.AgXToneMapping,
+                toneMapping: THREE.AgXToneMapping,
                 toneMappingExposure: 1.0
             }}
             onPointerMissed={() => {
@@ -570,23 +550,13 @@ export function Scene({ isEditor = false, focusedModelId = null, onModelClick, o
                 }
             }}
         >
-            {/* Auto-adjusts DPR based on FPS */}
-            {!isEditor && (
-                <PerformanceMonitor
-                    onIncline={handlePerformanceIncline}
-                    onDecline={handlePerformanceDecline}
-                    flipflops={3}
-                    onFallback={() => setDpr(IS_MOBILE ? 0.5 : 0.75)}
-                />
-            )}
-
             {isEditor && <Stats />}
 
             <Suspense fallback={<LoadingFallback />}>
                 {/* Skybox with texture */}
                 <Skybox />
 
-                <Lighting config={config.lighting} isMobile={IS_MOBILE} />
+                <Lighting config={config.lighting} />
 
                 {/* Models - each in own Suspense for progressive loading */}
                 <Bvh firstHitOnly>
@@ -629,7 +599,7 @@ export function Scene({ isEditor = false, focusedModelId = null, onModelClick, o
                     if (!model.visible || model.id === 'char') return null;
                     return (
                         <Suspense key={model.id} fallback={null}>
-                            <Model config={model} enableShadows={!IS_MOBILE} />
+                            <Model config={model} />
                         </Suspense>
                     );
                 })}

@@ -22,9 +22,6 @@ const InteractiveBox = memo(function InteractiveBox({ light, isMobile }: Interac
     const currentIntensity = useRef(isMobile ? light.hoverIntensity * 0.5 : light.baseIntensity);
     const isAnimating = useRef(false);
 
-    // On mobile, use a "breathing" pulse animation to draw attention
-    const pulsePhase = useRef(Math.random() * Math.PI * 2); // random start phase per box
-
     // On mobile: base intensity is higher so lights are always visible
     const mobileBaseIntensity = light.hoverIntensity * 0.5;
     const effectiveBaseIntensity = isMobile ? mobileBaseIntensity : light.baseIntensity;
@@ -32,22 +29,8 @@ const InteractiveBox = memo(function InteractiveBox({ light, isMobile }: Interac
     // Active state: hovered on desktop, tapped on mobile
     const isActive = isMobile ? tapped : hovered;
 
-    // Frame counter for mobile throttling
-    const frameCount = useRef(0);
-
     useFrame((state) => {
         if (!lightRef.current) return;
-
-        // Mobile: update every 3rd frame for pulse animation to save GPU
-        if (isMobile && !isActive) {
-            frameCount.current++;
-            if (frameCount.current % 3 !== 0) return;
-            const time = state.clock.elapsedTime;
-            const pulse = Math.sin(time * 1.5 + pulsePhase.current) * 0.3 + 0.7;
-            const pulseIntensity = effectiveBaseIntensity * pulse;
-            lightRef.current.intensity = pulseIntensity;
-            return;
-        }
 
         const targetIntensity = isActive ? light.hoverIntensity : effectiveBaseIntensity;
         const diff = Math.abs(currentIntensity.current - targetIntensity);
@@ -69,6 +52,8 @@ const InteractiveBox = memo(function InteractiveBox({ light, isMobile }: Interac
             0.12
         );
         lightRef.current.intensity = currentIntensity.current;
+        // Request next frame for smooth transition
+        state.invalidate();
     });
 
     // Auto-dismiss tapped state after 2 seconds on mobile

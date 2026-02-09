@@ -7,6 +7,8 @@ interface SpeechBubbleProps {
     options?: { label: string; value: string }[];
     onOptionSelect?: (value: string) => void;
     onClose?: () => void;
+    onBack?: () => void;
+    canGoBack?: boolean;
 }
 
 export function SpeechBubble({
@@ -14,7 +16,9 @@ export function SpeechBubble({
     message,
     options,
     onOptionSelect,
-    onClose
+    onClose,
+    onBack,
+    canGoBack = false,
 }: SpeechBubbleProps) {
     const [displayedText, setDisplayedText] = useState('');
     const [isAnimating, setIsAnimating] = useState(false);
@@ -50,6 +54,19 @@ export function SpeechBubble({
     return (
         <div className="speech-bubble-container" onClick={onClose}>
             <div className="speech-bubble" onClick={(e) => e.stopPropagation()}>
+                {/* Geri butonu */}
+                {canGoBack && showOptions && (
+                    <button
+                        className="speech-back-btn"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            onBack?.();
+                        }}
+                        aria-label="Geri"
+                    >
+                        ←
+                    </button>
+                )}
                 <div className="speech-bubble-content">
                     <p>{displayedText}<span className={isAnimating ? 'cursor blink' : 'cursor'}>|</span></p>
                 </div>

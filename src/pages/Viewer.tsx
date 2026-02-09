@@ -1,54 +1,97 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { Scene } from '../components/Scene';
 import { SpeechBubble } from '../components/SpeechBubble';
 import { LoadingScreen } from '../components/LoadingScreen';
+import { useDialogueStore } from '../stores/dialogueStore';
+import type { DialogueAction } from '../types/dialogue';
 import './Viewer.css';
 
 export function Viewer() {
     const [focusedModelId, setFocusedModelId] = useState<string | null>(null);
-    const [showSpeechBubble, setShowSpeechBubble] = useState(false);
-    const [currentMessage, setCurrentMessage] = useState("Merhaba, Nasılsın?");
-    const [showOptions, setShowOptions] = useState(true);
     const [isLoading, setIsLoading] = useState(true);
 
-    const handleCharacterClick = (id: string) => {
+    // Dialogue store
+    const {
+        isOpen: showSpeechBubble,
+        startDialogue,
+        selectOption,
+        goBack,
+        close: closeDialogue,
+        getCurrentNode,
+        history,
+    } = useDialogueStore();
+
+    const currentNode = getCurrentNode();
+    const canGoBack = history.length > 0;
+
+    // Aksiyonları işle
+    const handleAction = useCallback((action: DialogueAction | undefined) => {
+        if (!action) return;
+        switch (action.type) {
+            case 'openTerminal':
+                // Faz 3'te TerminalPopup açılacak
+                console.log('[Viewer] ACTION: openTerminal');
+                break;
+            case 'openProfile':
+                // Faz 3'te ProfilePopup açılacak
+                console.log('[Viewer] ACTION: openProfile');
+                break;
+            case 'openProject':
+                // Faz 3'te ProjectPopup açılacak
+                console.log('[Viewer] ACTION: openProject', action.boxId);
+                break;
+            case 'highlightBox':
+                // Faz 2'de kutu highlight implementasyonu
+                console.log('[Viewer] ACTION: highlightBox', action.boxId);
+                break;
+            case 'closeBubble':
+                closeDialogue();
+                break;
+        }
+    }, [closeDialogue]);
+
+    const handleCharacterClick = useCallback((id: string) => {
         console.log('[Viewer] onModelClick fired, id:', id);
         setFocusedModelId(id);
 
-        // Karakter tıklandığında speech bubble göster
         if (id === 'char') {
-            setCurrentMessage("Merhaba, Nasılsın?");
-            setShowOptions(true);
             setTimeout(() => {
-                setShowSpeechBubble(true);
+                startDialogue();
             }, 600);
         }
-    };
+    }, [startDialogue]);
 
-    const handleMissed = () => {
+    const handleMissed = useCallback(() => {
         console.log('[Viewer] onMissed fired, clearing focus');
         setFocusedModelId(null);
-        setShowSpeechBubble(false);
-    };
+        closeDialogue();
+    }, [closeDialogue]);
 
-    const handleCloseBubble = () => {
-        setShowSpeechBubble(false);
-    };
+    const handleCloseBubble = useCallback(() => {
+        closeDialogue();
+    }, [closeDialogue]);
 
-    const handleOptionSelect = (value: string) => {
-        if (value === 'good') {
-            setCurrentMessage("Ne güzel! Ben de iyiyim 😊");
-        } else if (value === 'bad') {
-            setCurrentMessage("Üzüldüm... Umarım düzelir 💙");
-        }
-        setShowOptions(false);
-    };
+    const handleOptionSelect = useCallback((value: string) => {
+        const index = parseInt(value, 10);
+        const action = selectOption(index);
+        handleAction(action);
+    }, [selectOption, handleAction]);
+
+    const handleBack = useCallback(() => {
+        goBack();
+    }, [goBack]);
+
+    // Mevcut düğümden seçenekleri hazırla
+    const options = currentNode?.options.map((opt, i) => ({
+        label: opt.label,
+        value: String(i),
+    }));
 
     return (
         <div className="viewer">
             {isLoading && (
                 <LoadingScreen
-                    isLoaded={true} // In a real app, bind to asset loading state
+                    isLoaded={true}
                     onComplete={() => setIsLoading(false)}
                 />
             )}
@@ -58,7 +101,7 @@ export function Viewer() {
                     onClick={() => {
                         console.log('[Viewer] close button clicked');
                         setFocusedModelId(null);
-                        setShowSpeechBubble(false);
+                        closeDialogue();
                     }}
                     aria-label="Kapat"
                 >
@@ -66,16 +109,15 @@ export function Viewer() {
                 </button>
             )}
 
-            {/* Speech Bubble - karakter tıklandığında görünür */}
+            {/* Speech Bubble — dialogue store'dan beslenir */}
             <SpeechBubble
-                isVisible={showSpeechBubble}
-                message={currentMessage}
-                options={showOptions ? [
-                    { label: "İyiyim 😊", value: "good" },
-                    { label: "Kötüyüm 😔", value: "bad" }
-                ] : undefined}
+                isVisible={showSpeechBubble && !!currentNode}
+                message={currentNode?.message ?? ''}
+                options={options}
                 onOptionSelect={handleOptionSelect}
                 onClose={handleCloseBubble}
+                onBack={handleBack}
+                canGoBack={canGoBack}
             />
 
             <div className="viewer-canvas">

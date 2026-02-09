@@ -9,42 +9,30 @@ interface ModelProps extends Omit<ComponentProps<'group'>, 'position' | 'rotatio
     config: ModelConfig;
     onClick?: () => void;
     isSelected?: boolean;
-    enableShadows?: boolean;
 }
 
-export const Model = memo(function Model({ config, onClick, isSelected, enableShadows = true, ...props }: ModelProps) {
+export const Model = memo(function Model({ config, onClick, isSelected, ...props }: ModelProps) {
     const { scene } = useGLTF(config.path);
 
-    // Clone scene with conditional shadow setup
+    // Clone scene with shadow setup
     const clonedScene = useMemo(() => {
         const cloned = scene.clone();
         cloned.traverse((child) => {
             if ((child as any).isMesh) {
                 const mesh = child as THREE.Mesh;
-                if (enableShadows) {
-                    child.receiveShadow = true;
-                    if (mesh.geometry) {
-                        mesh.geometry.computeBoundingSphere();
-                        const radius = mesh.geometry.boundingSphere?.radius || 0;
-                        child.castShadow = radius > 0.1; // Raised threshold: only large meshes
-                    }
-                } else {
-                    // Mobile: no shadows at all
-                    child.castShadow = false;
-                    child.receiveShadow = false;
-                }
-                // Optimize materials: disable unnecessary features
-                if (mesh.material && (mesh.material as any).isMeshStandardMaterial) {
-                    const mat = mesh.material as THREE.MeshStandardMaterial;
-                    mat.envMapIntensity = enableShadows ? 1 : 0.5;
+                child.receiveShadow = true;
+                if (mesh.geometry) {
+                    mesh.geometry.computeBoundingSphere();
+                    const radius = mesh.geometry.boundingSphere?.radius || 0;
+                    child.castShadow = radius > 0.05;
                 }
             }
         });
-        // Freeze matrix for static models
+        // Freeze matrix for static models (good optimization, keeps quality)
         cloned.matrixAutoUpdate = false;
         cloned.updateMatrix();
         return cloned;
-    }, [scene, enableShadows]);
+    }, [scene]);
 
     if (!config.visible) return null;
 
