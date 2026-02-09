@@ -12,10 +12,11 @@ function isTouchDevice() {
 interface InteractiveBoxProps {
     light: BoxLightConfig;
     isMobile: boolean;
+    onBoxClick?: (boxId: string) => void;
 }
 
 // Memoized individual box component
-const InteractiveBox = memo(function InteractiveBox({ light, isMobile }: InteractiveBoxProps) {
+const InteractiveBox = memo(function InteractiveBox({ light, isMobile, onBoxClick }: InteractiveBoxProps) {
     const [hovered, setHovered] = useState(false);
     const [tapped, setTapped] = useState(false);
     const lightRef = useRef<THREE.PointLight>(null);
@@ -82,7 +83,11 @@ const InteractiveBox = memo(function InteractiveBox({ light, isMobile }: Interac
                 onClick={isMobile ? (e) => {
                     e.stopPropagation();
                     setTapped(prev => !prev);
-                } : undefined}
+                    onBoxClick?.(light.id);
+                } : (e) => {
+                    e.stopPropagation();
+                    onBoxClick?.(light.id);
+                }}
             >
                 <boxGeometry args={hitboxSize} />
                 <meshBasicMaterial transparent opacity={0} />
@@ -115,14 +120,15 @@ const InteractiveBox = memo(function InteractiveBox({ light, isMobile }: Interac
 
 interface InteractiveBoxesProps {
     boxLights: BoxLightConfig[];
+    onBoxClick?: (boxId: string) => void;
 }
 
-export const InteractiveBoxes = memo(function InteractiveBoxes({ boxLights }: InteractiveBoxesProps) {
+export const InteractiveBoxes = memo(function InteractiveBoxes({ boxLights, onBoxClick }: InteractiveBoxesProps) {
     const mobile = isTouchDevice();
     return (
         <>
             {boxLights.filter(l => l.enabled).map((light) => (
-                <InteractiveBox key={light.id} light={light} isMobile={mobile} />
+                <InteractiveBox key={light.id} light={light} isMobile={mobile} onBoxClick={onBoxClick} />
             ))}
         </>
     );

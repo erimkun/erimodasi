@@ -60,24 +60,24 @@
 ## 📋 Faz 2: Tıklanabilir Objeler
 
 ### 2.1 Scene.tsx Güncelleme
-- [ ] `char` dışındaki modellere tıklama özelliği ekle
-  - [ ] `kutu` (Kutular) → ProjectPopup tetikleme
-  - [ ] `desk` (Masa/Bilgisayar) → TerminalPopup tetikleme
-  - [ ] `writing` (Erim yazısı) → ProfilePopup tetikleme
-- [ ] Her model için `ClickableModel` kullanımı genişlet
-- [ ] Her model için farklı kamera odak noktası tanımla
-- [ ] `Bvh` içine tüm tıklanabilir modelleri dahil et
+- [x] `char` dışındaki modellere tıklama özelliği ekle
+  - [x] `kutu` (Kutular) → ProjectPopup tetikleme
+  - [x] `desk` (Masa/Bilgisayar) → TerminalPopup tetikleme
+  - [x] `writing` (Erim yazısı) → ProfilePopup tetikleme
+- [x] Her model için `ClickableModel` kullanımı genişlet
+- [x] Her model için farklı kamera odak noktası tanımla
+- [x] `Bvh` içine tüm tıklanabilir modelleri dahil et
 
 ### 2.2 InteractiveBoxes Güncelleme
-- [ ] `InteractiveBoxes.tsx` — onClick handler ekle
-  - [ ] Her kutuya proje ID'si bağla
-  - [ ] Tıklanınca ilgili ProjectPopup aç callback
-  - [ ] Tıklanan kutunun ışığını vurgula (highlight efekti)
+- [x] `InteractiveBoxes.tsx` — onClick handler ekle
+  - [x] Her kutuya proje ID'si bağla
+  - [x] Tıklanınca ilgili ProjectPopup aç callback
+  - [x] Tıklanan kutunun ışığını vurgula (highlight efekti)
 
 ### 2.3 Viewer.tsx Güncelleme
-- [ ] Tüm model tıklama handler'larını ekle
-- [ ] Popup state yönetimi (hangi popup açık)
-- [ ] Popup'lar arası geçiş mantığı
+- [x] Tüm model tıklama handler'larını ekle
+- [x] Popup state yönetimi (hangi popup açık)
+- [x] Popup'lar arası geçiş mantığı
 
 ---
 

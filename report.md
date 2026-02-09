@@ -127,4 +127,5 @@ Erim'in Odası projesi — **Erden Erim Aydoğdu** (AI & XR Solutions Architect 
 | 10 Şub 2026 | #001 | Planlama Tamamlandı | İlk rapor — 4 belge oluşturuldu |
 | 10 Şub 2026 | #002 | CV ile Revize Edildi | CV okundu, communication-tree tamamen yeniden yazıldı, implementation-plan güncellendi, report revize edildi. "Dijital ikiz" yaklaşımı kaldırıldı, gerçek CV verileri yerleştirildi. |
 | 10 Şub 2026 | #003 | Faz 1 Tamamlandı | Konuşma altyapısı: dialogue.ts tipleri, 24 düğümlü dialogueTree.ts, dialogueStore.ts (Zustand), SpeechBubble güncelleme (geri butonu + dinamik seçenekler), Viewer.tsx entegrasyonu. Build başarılı. |
-| — | #004 | — | *(Faz 2 geliştirme)* |
+| 10 Şub 2026 | #004 | Faz 2 Tamamlandı | Tıklanabilir objeler: kutu/desk/writing modelleri Bvh içinde tıklanabilir, 4 farklı kamera odak noktası, InteractiveBoxes onClick handler, Viewer multi-model handler. Build başarılı. |
+| — | #005 | — | *(Faz 3 geliştirme)* |

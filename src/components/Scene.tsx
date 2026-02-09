@@ -24,6 +24,7 @@ interface SceneProps {
     isEditor?: boolean;
     focusedModelId?: string | null;
     onModelClick?: (modelId: string) => void;
+    onBoxClick?: (boxId: string) => void;
     onMissed?: () => void;
 }
 
@@ -423,8 +424,26 @@ function ViewerInteraction({
     const { camera } = useThree();
     const defaultCamPos = useMemo(() => new THREE.Vector3(...cameraPosition), [cameraPosition]);
     const defaultTarget = useMemo(() => new THREE.Vector3(0, 0, 0), []);
-    const focusCamPos = useMemo(() => new THREE.Vector3(0.6, 1.0, 1.2), []);
-    const focusTarget = useMemo(() => new THREE.Vector3(0.16, 0.65, 0), []);
+
+    // Farklı modeller için kamera pozisyonları ve hedefleri
+    const FOCUS_CONFIGS: Record<string, { camPos: THREE.Vector3; target: THREE.Vector3 }> = useMemo(() => ({
+        char: {
+            camPos: new THREE.Vector3(0.6, 1.0, 1.2),
+            target: new THREE.Vector3(0.16, 0.65, 0),
+        },
+        kutu: {
+            camPos: new THREE.Vector3(1.8, 0.8, 0.8),
+            target: new THREE.Vector3(1.0, 0.4, -0.5),
+        },
+        desk: {
+            camPos: new THREE.Vector3(0.3, 1.2, 1.0),
+            target: new THREE.Vector3(-0.4, 0.5, 0),
+        },
+        writing: {
+            camPos: new THREE.Vector3(0.8, 1.0, 0.3),
+            target: new THREE.Vector3(0.3, 0.8, -0.9),
+        },
+    }), []);
 
     const currentLookAt = useRef(new THREE.Vector3(0, 0, 0));
     const isAnimating = useRef(false);
@@ -457,8 +476,12 @@ function ViewerInteraction({
             return;
         }
 
-        const goalPos = focusedModelId ? focusCamPos : defaultCamPos;
-        const goalTarget = focusedModelId ? focusTarget : defaultTarget;
+        const goalPos = focusedModelId && FOCUS_CONFIGS[focusedModelId]
+            ? FOCUS_CONFIGS[focusedModelId].camPos
+            : defaultCamPos;
+        const goalTarget = focusedModelId && FOCUS_CONFIGS[focusedModelId]
+            ? FOCUS_CONFIGS[focusedModelId].target
+            : defaultTarget;
 
         // Use faster lerp for smoother, quicker animation
         const lerpFactor = 0.12;
@@ -495,7 +518,7 @@ function ViewerInteraction({
     return null;
 }
 
-export function Scene({ isEditor = false, focusedModelId = null, onModelClick, onMissed }: SceneProps) {
+export function Scene({ isEditor = false, focusedModelId = null, onModelClick, onBoxClick, onMissed }: SceneProps) {
     // Editor uses store config, Viewer uses hardcoded static scene
     const storeConfig = useSceneStore((s) => s.config);
     const config = isEditor ? storeConfig : STATIC_SCENE;
@@ -590,13 +613,32 @@ export function Scene({ isEditor = false, focusedModelId = null, onModelClick, o
                                 </Suspense>
                             );
                         }
+                        // kutu, desk, writing de tıklanabilir
+                        if (model.id === 'kutu' || model.id === 'desk' || model.id === 'writing') {
+                            return (
+                                <Suspense key={model.id} fallback={null}>
+                                    <group
+                                        position={model.position}
+                                        rotation={model.rotation}
+                                        scale={model.scale}
+                                        onClick={(e) => { e.stopPropagation(); onModelClick?.(model.id); }}
+                                        onPointerOver={() => { document.body.style.cursor = 'pointer'; }}
+                                        onPointerOut={() => { document.body.style.cursor = 'default'; }}
+                                    >
+                                        <Model config={{ ...model, position: [0, 0, 0], rotation: [0, 0, 0], scale: [1, 1, 1] }} />
+                                    </group>
+                                </Suspense>
+                            );
+                        }
                         return null;
                     })}
                 </Bvh>
 
                 {/* Non-clickable models rendered outside Bvh — no raycast interference */}
                 {!isEditor && config.models.map((model) => {
-                    if (!model.visible || model.id === 'char') return null;
+                    if (!model.visible) return null;
+                    // Tıklanabilir modeller Bvh içinde render ediliyor
+                    if (model.id === 'char' || model.id === 'kutu' || model.id === 'desk' || model.id === 'writing') return null;
                     return (
                         <Suspense key={model.id} fallback={null}>
                             <Model config={model} />
@@ -606,7 +648,7 @@ export function Scene({ isEditor = false, focusedModelId = null, onModelClick, o
 
                 {/* Interactive Box Lights for Viewer mode */}
                 {!isEditor && config.lighting.boxLights && config.lighting.boxLights.length > 0 && (
-                    <InteractiveBoxes boxLights={config.lighting.boxLights} />
+                    <InteractiveBoxes boxLights={config.lighting.boxLights} onBoxClick={onBoxClick} />
                 )}
 
                 {/* Point Lights (With visual helpers) */}

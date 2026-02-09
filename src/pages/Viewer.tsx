@@ -59,7 +59,19 @@ export function Viewer() {
                 startDialogue();
             }, 600);
         }
+        // desk, writing, kutu tıklama → Faz 3'te popup açılacak
+        if (id === 'desk') {
+            console.log('[Viewer] Desk clicked → will open TerminalPopup');
+        }
+        if (id === 'writing') {
+            console.log('[Viewer] Writing clicked → will open ProfilePopup');
+        }
     }, [startDialogue]);
+
+    const handleBoxClick = useCallback((boxId: string) => {
+        console.log('[Viewer] Box clicked:', boxId);
+        // Faz 3'te ProjectPopup açılacak
+    }, []);
 
     const handleMissed = useCallback(() => {
         console.log('[Viewer] onMissed fired, clearing focus');
@@ -124,6 +136,7 @@ export function Viewer() {
                 <Scene
                     focusedModelId={focusedModelId}
                     onModelClick={handleCharacterClick}
+                    onBoxClick={handleBoxClick}
                     onMissed={handleMissed}
                 />
             </div>
