@@ -1,6 +1,6 @@
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, Stats, TransformControls, Bvh, useTexture } from '@react-three/drei';
-import { Suspense, useRef, useEffect, useMemo, useState, useCallback, forwardRef } from 'react';
+import { Suspense, useRef, useEffect, useMemo, useState } from 'react';
 import * as THREE from 'three';
 import { Model } from './Model';
 import { InteractiveBoxes } from './InteractiveBoxes';
@@ -598,7 +598,7 @@ export function Scene({ isEditor = false, focusedModelId = null, onModelClick, o
     };
 
     // Adaptive DPR for performance
-    const [dpr, setDpr] = useState(IS_MOBILE ? 0.75 : 1);
+    const [dpr] = useState(IS_MOBILE ? 0.75 : 1);
 
     return (
         <Canvas
@@ -664,8 +664,8 @@ export function Scene({ isEditor = false, focusedModelId = null, onModelClick, o
                                 </Suspense>
                             );
                         }
-                        // kutu, desk, writing de tıklanabilir
-                        if (model.id === 'kutu' || model.id === 'desk' || model.id === 'writing') {
+                        // desk, writing tıklanabilir
+                        if (model.id === 'desk' || model.id === 'writing') {
                             return (
                                 <Suspense key={model.id} fallback={null}>
                                     <HoverableModel
@@ -683,7 +683,7 @@ export function Scene({ isEditor = false, focusedModelId = null, onModelClick, o
                 {!isEditor && config.models.map((model) => {
                     if (!model.visible) return null;
                     // Tıklanabilir modeller Bvh içinde render ediliyor
-                    if (model.id === 'char' || model.id === 'kutu' || model.id === 'desk' || model.id === 'writing') return null;
+                    if (model.id === 'char' || model.id === 'desk' || model.id === 'writing') return null;
                     return (
                         <Suspense key={model.id} fallback={null}>
                             <Model config={model} />
