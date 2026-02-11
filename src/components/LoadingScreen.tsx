@@ -1,7 +1,11 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, lazy, Suspense } from 'react';
 import { motion, AnimatePresence, useMotionValue, useTransform, useSpring } from 'framer-motion';
-import { FluidBackground } from './FluidBackground';
 import './LoadingScreen.css';
+
+// Lazy-load FluidBackground — its WebGL Canvas blocks the main thread during init
+const FluidBackground = lazy(() =>
+    import('./FluidBackground').then(m => ({ default: m.FluidBackground }))
+);
 
 function useIsMobile() {
     const [isMobile, setIsMobile] = useState(() => {
@@ -9,9 +13,13 @@ function useIsMobile() {
         return window.innerWidth <= 768 || 'ontouchstart' in window;
     });
     useEffect(() => {
-        const check = () => setIsMobile(window.innerWidth <= 768 || 'ontouchstart' in window);
+        let timeout: ReturnType<typeof setTimeout>;
+        const check = () => {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => setIsMobile(window.innerWidth <= 768 || 'ontouchstart' in window), 150);
+        };
         window.addEventListener('resize', check);
-        return () => window.removeEventListener('resize', check);
+        return () => { clearTimeout(timeout); window.removeEventListener('resize', check); };
     }, []);
     return isMobile;
 }
@@ -97,7 +105,9 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({ onComplete, isLoad
 
     return (
         <div className={`loading-screen ${isMelting ? 'melting' : ''}`}>
-            <FluidBackground />
+            <Suspense fallback={<div className="fluid-bg" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 0, background: '#000' }} />}>
+                <FluidBackground />
+            </Suspense>
 
             <div className="content-wrapper">
                 {/* Top Section: Loading/Ready Indicator */}
@@ -139,12 +149,15 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({ onComplete, isLoad
                                     <motion.img
                                         src="/entry-logo.webp"
                                         alt="Entry Icon"
+                                        width={120}
+                                        height={120}
                                         initial={{ opacity: 0, y: 20 }}
                                         animate={{ opacity: 1, y: 0 }}
                                         transition={{ delay: 0.2, duration: 0.8 }}
                                         style={{
                                             width: '120px',
                                             height: 'auto',
+                                            aspectRatio: '1',
                                             opacity: 0.9,
                                             filter: 'drop-shadow(0 10px 20px rgba(0,0,0,0.5))',
                                             borderRadius: '12px'
@@ -166,15 +179,14 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({ onComplete, isLoad
                                 onHoverStart={isMobile ? undefined : () => setActiveId(item.id)}
                                 onHoverEnd={isMobile ? undefined : () => setActiveId(null)}
                                 onClick={isMobile ? () => handleItemTap(item.id) : undefined}
-                                layout
-                                initial={isMobile ? {} : { flex: 1 }}
+                                initial={false}
                                 animate={isMobile ? {
                                     scale: activeId === item.id ? 1.05 : 1,
                                     zIndex: activeId === item.id ? 10 : 1
                                 } : {
                                     flex: activeId === item.id ? 3 : 1
                                 }}
-                                transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                                transition={{ type: "tween", duration: 0.25 }}
                                 style={{
                                     backgroundImage: `url(${item.image})`,
                                     backgroundSize: 'cover',

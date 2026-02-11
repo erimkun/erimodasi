@@ -10,12 +10,21 @@ import { STATIC_SCENE } from '../data/staticScene';
 import { ModelConfig } from '../types/scene';
 import { preloadModels } from './Model';
 
-// Detect mobile/touch device
+// Detect mobile/touch device — cache result to avoid forced reflows
 const IS_MOBILE = typeof window !== 'undefined' && (
     window.innerWidth <= 768 ||
     'ontouchstart' in window ||
     navigator.maxTouchPoints > 0
 );
+
+// Use CSS class instead of document.body.style.cursor to avoid forced reflows
+let _pointerCount = 0;
+function setPointerCursor() {
+    if (++_pointerCount === 1) document.documentElement.classList.add('cursor-pointer');
+}
+function resetPointerCursor() {
+    if (--_pointerCount <= 0) { _pointerCount = 0; document.documentElement.classList.remove('cursor-pointer'); }
+}
 
 // Preload all models immediately so they start downloading in parallel
 preloadModels(STATIC_SCENE.models.map(m => m.path));
@@ -403,8 +412,8 @@ function ClickableModel({ config, isFocused, onClick }: {
             rotation={config.rotation}
             scale={config.scale}
             onClick={(e) => { e.stopPropagation(); onClick?.(); }}
-            onPointerOver={() => { document.body.style.cursor = 'pointer'; }}
-            onPointerOut={() => { document.body.style.cursor = 'default'; }}
+            onPointerOver={setPointerCursor}
+            onPointerOut={resetPointerCursor}
         >
             <Model config={{ ...config, position: [0, 0, 0], rotation: [0, 0, 0], scale: [1, 1, 1] }} />
         </group>
@@ -622,8 +631,8 @@ export function Scene({ isEditor = false, focusedModelId = null, onModelClick, o
                                         rotation={model.rotation}
                                         scale={model.scale}
                                         onClick={(e) => { e.stopPropagation(); onModelClick?.(model.id); }}
-                                        onPointerOver={() => { document.body.style.cursor = 'pointer'; }}
-                                        onPointerOut={() => { document.body.style.cursor = 'default'; }}
+                                        onPointerOver={setPointerCursor}
+                                        onPointerOut={resetPointerCursor}
                                     >
                                         <Model config={{ ...model, position: [0, 0, 0], rotation: [0, 0, 0], scale: [1, 1, 1] }} />
                                     </group>

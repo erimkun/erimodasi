@@ -67,6 +67,7 @@
     padding: 1rem;
     background: linear-gradient(to top, rgba(0, 0, 0, 0.6) 0%, transparent 100%);
     pointer-events: none;
+    contain: layout style;
 }
 
 .viewer-footer p {
@@ -85,6 +86,7 @@
     pointer-events: none;
     z-index: 50;
     animation: hintFadeInOut 6s ease-in-out forwards;
+    contain: layout style;
 }
 
 .viewer-hint p {
@@ -97,8 +99,8 @@
 }
 
 @keyframes hintFadeInOut {
-    0% { opacity: 0; transform: translateX(-50%) translateY(10px); }
-    15% { opacity: 1; transform: translateX(-50%) translateY(0); }
+    0% { opacity: 0; }
+    15% { opacity: 1; }
     80% { opacity: 1; }
     100% { opacity: 0; }
 }

@@ -74,11 +74,11 @@ const InteractiveBox = memo(function InteractiveBox({ light, isMobile, onBoxClic
                 onPointerOver={isMobile ? undefined : (e) => {
                     e.stopPropagation();
                     setHovered(true);
-                    document.body.style.cursor = 'pointer';
+                    document.documentElement.classList.add('cursor-pointer');
                 }}
                 onPointerOut={isMobile ? undefined : () => {
                     setHovered(false);
-                    document.body.style.cursor = 'default';
+                    document.documentElement.classList.remove('cursor-pointer');
                 }}
                 onClick={isMobile ? (e) => {
                     e.stopPropagation();

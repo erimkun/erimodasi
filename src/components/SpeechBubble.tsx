@@ -24,25 +24,31 @@ export function SpeechBubble({
     const [isAnimating, setIsAnimating] = useState(false);
     const [showOptions, setShowOptions] = useState(false);
 
-    // Typewriter effect
+    // Typewriter effect — uses requestAnimationFrame for better INP
     useEffect(() => {
         if (isVisible && message) {
             setDisplayedText('');
             setIsAnimating(true);
             setShowOptions(false);
             let index = 0;
-            const timer = setInterval(() => {
-                if (index < message.length) {
-                    setDisplayedText(message.slice(0, index + 1));
-                    index++;
-                } else {
-                    clearInterval(timer);
-                    setIsAnimating(false);
-                    // Yazı bittikten sonra seçenekleri göster
-                    setTimeout(() => setShowOptions(true), 200);
+            let lastTime = 0;
+            let rafId: number;
+            const step = (time: number) => {
+                if (time - lastTime >= 50) {
+                    lastTime = time;
+                    if (index < message.length) {
+                        setDisplayedText(message.slice(0, index + 1));
+                        index++;
+                    } else {
+                        setIsAnimating(false);
+                        setTimeout(() => setShowOptions(true), 200);
+                        return;
+                    }
                 }
-            }, 50);
-            return () => clearInterval(timer);
+                rafId = requestAnimationFrame(step);
+            };
+            rafId = requestAnimationFrame(step);
+            return () => cancelAnimationFrame(rafId);
         } else {
             setDisplayedText('');
             setShowOptions(false);
