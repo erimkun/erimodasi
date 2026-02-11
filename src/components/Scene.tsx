@@ -411,57 +411,6 @@ function ClickableModel({ config, isFocused, onClick }: {
     );
 }
 
-// Hover glow effect for desk/writing/kutu models
-function HoverableModel({ config, onClick }: { config: any; onClick: () => void }) {
-    const [hovered, setHovered] = useState(false);
-    const groupRef = useRef<THREE.Group>(null);
-    const scaleTarget = useRef(1);
-    const currentScale = useRef(1);
-    const isAnimating = useRef(false);
-
-    useFrame((state) => {
-        if (!groupRef.current) return;
-
-        scaleTarget.current = hovered ? 1.03 : 1;
-        const diff = Math.abs(currentScale.current - scaleTarget.current);
-
-        if (diff < 0.001) {
-            if (isAnimating.current) {
-                currentScale.current = scaleTarget.current;
-                groupRef.current.scale.setScalar(scaleTarget.current);
-                isAnimating.current = false;
-            }
-            return;
-        }
-
-        isAnimating.current = true;
-        currentScale.current = THREE.MathUtils.lerp(currentScale.current, scaleTarget.current, 0.1);
-        groupRef.current.scale.setScalar(currentScale.current);
-        state.invalidate();
-    });
-
-    return (
-        <group
-            ref={groupRef}
-            position={config.position}
-            rotation={config.rotation}
-            scale={config.scale}
-            onClick={(e) => { e.stopPropagation(); onClick(); }}
-            onPointerOver={(e) => {
-                e.stopPropagation();
-                setHovered(true);
-                document.body.style.cursor = 'pointer';
-            }}
-            onPointerOut={() => {
-                setHovered(false);
-                document.body.style.cursor = 'default';
-            }}
-        >
-            <Model config={{ ...config, position: [0, 0, 0], rotation: [0, 0, 0], scale: [1, 1, 1] }} />
-        </group>
-    );
-}
-
 // Camera animation controller for Viewer mode
 function ViewerInteraction({
     focusedModelId,
@@ -668,10 +617,16 @@ export function Scene({ isEditor = false, focusedModelId = null, onModelClick, o
                         if (model.id === 'desk' || model.id === 'writing') {
                             return (
                                 <Suspense key={model.id} fallback={null}>
-                                    <HoverableModel
-                                        config={model}
-                                        onClick={() => onModelClick?.(model.id)}
-                                    />
+                                    <group
+                                        position={model.position}
+                                        rotation={model.rotation}
+                                        scale={model.scale}
+                                        onClick={(e) => { e.stopPropagation(); onModelClick?.(model.id); }}
+                                        onPointerOver={() => { document.body.style.cursor = 'pointer'; }}
+                                        onPointerOut={() => { document.body.style.cursor = 'default'; }}
+                                    >
+                                        <Model config={{ ...model, position: [0, 0, 0], rotation: [0, 0, 0], scale: [1, 1, 1] }} />
+                                    </group>
                                 </Suspense>
                             );
                         }
