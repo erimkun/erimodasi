@@ -76,27 +76,26 @@ export function SpeechBubble({
                 <div className="speech-bubble-content">
                     <p>{displayedText}<span className={isAnimating ? 'cursor blink' : 'cursor'}>|</span></p>
                 </div>
-                <div className="speech-bubble-tail" />
-            </div>
 
-            {/* Seçenek butonları */}
-            {options && showOptions && (
-                <div className="speech-options">
-                    {options.map((option, index) => (
-                        <button
-                            key={option.value}
-                            className="speech-option-btn"
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                onOptionSelect?.(option.value);
-                            }}
-                            style={{ animationDelay: `${index * 0.1}s` }}
-                        >
-                            {option.label}
-                        </button>
-                    ))}
-                </div>
-            )}
+                {/* Seçenek butonları — bubble içinde */}
+                {options && showOptions && (
+                    <div className="speech-options">
+                        {options.map((option, index) => (
+                            <button
+                                key={option.value}
+                                className="speech-option-btn"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onOptionSelect?.(option.value);
+                                }}
+                                style={{ animationDelay: `${index * 0.08}s` }}
+                            >
+                                {option.label}
+                            </button>
+                        ))}
+                    </div>
+                )}
+            </div>
         </div>
     );
 }

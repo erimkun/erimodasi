@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, lazy, Suspense } from 'react';
 import { motion, AnimatePresence, useMotionValue, useTransform, useSpring } from 'framer-motion';
 import './LoadingScreen.css';
 
-// Lazy-load FluidBackground — its WebGL Canvas blocks the main thread during init
+// Lazy-load Three.js fluid — CSS blobs show instantly as fallback
 const FluidBackground = lazy(() =>
     import('./FluidBackground').then(m => ({ default: m.FluidBackground }))
 );
@@ -49,6 +49,8 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({ onComplete, isLoad
     const [isMelting, setIsMelting] = useState(false);
     const [showReady, setShowReady] = useState(false);
     const isMobile = useIsMobile();
+
+    const [fluidReady, setFluidReady] = useState(false);
 
     const handleItemTap = useCallback((id: number) => {
         if (!isMobile) return;
@@ -105,8 +107,18 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({ onComplete, isLoad
 
     return (
         <div className={`loading-screen ${isMelting ? 'melting' : ''}`}>
-            <Suspense fallback={<div className="fluid-bg" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 0, background: '#000' }} />}>
-                <FluidBackground />
+            {/* Layer 0: CSS blobs — instant, visible while WebGL loads */}
+            <div className={`css-fluid-bg ${fluidReady ? 'css-fluid-bg--hidden' : ''}`}>
+                <div className="fluid-blob fluid-blob--1" />
+                <div className="fluid-blob fluid-blob--2" />
+                <div className="fluid-blob fluid-blob--3" />
+                <div className="fluid-blob fluid-blob--4" />
+                <div className="fluid-blob fluid-blob--5" />
+            </div>
+
+            {/* Layer 1: Three.js WebGL fluid — lazy loaded, fades in over CSS */}
+            <Suspense fallback={null}>
+                <FluidBackground onReady={() => setFluidReady(true)} />
             </Suspense>
 
             <div className="content-wrapper">
@@ -154,26 +166,28 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({ onComplete, isLoad
                                     />
                                 </motion.div>
 
-                                {/* Giriş Yap butonu - logonun altında, animasyonlu */}
+                            {/* Giriş Yap butonu — fluid morphing blob */}
                                 <motion.button
                                     key="ready"
-                                    className="ready-btn"
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ delay: 0.5, duration: 0.6, type: 'spring', stiffness: 120 }}
-                                    whileHover={{ scale: 1.06, boxShadow: '0 0 40px rgba(0,217,255,0.5), 0 0 80px rgba(196,77,255,0.3)' }}
-                                    whileTap={{ scale: 0.93 }}
+                                    className="enter-btn"
+                                    initial={{ opacity: 0, scale: 0.8 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    transition={{ delay: 0.5, duration: 0.8, type: 'spring', stiffness: 100, damping: 12 }}
                                     onClick={handleReadyClick}
                                 >
-                                    <span className="ready-btn-bg" />
-                                    <span className="ready-btn-shimmer" />
-                                    <span className="ready-btn-text">
-                                        <svg className="ready-btn-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                            <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                                        </svg>
-                                        GİRİŞ YAP
-                                    </span>
-                                    <span className="ready-btn-glow" />
+                                    <div className="enter-fluid">
+                                        <span className="enter-ambient" />
+                                        <div className="enter-blob enter-blob--outer" />
+                                        <div className="enter-blob enter-blob--mid" />
+                                        <div className="enter-blob enter-blob--inner" />
+                                        <div className="enter-core">
+                                            <svg className="enter-core-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M5 12h14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                                                <path d="M13 5l7 7-7 7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                                            </svg>
+                                        </div>
+                                    </div>
+                                    <span className="enter-label">GİRİŞ</span>
                                 </motion.button>
                             </div>
                         )}

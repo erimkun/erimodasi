@@ -1,49 +1,116 @@
-import { useEffect, useState, useRef, useCallback } from 'react';
+import { useEffect, useState, useRef, useCallback, type KeyboardEvent } from 'react';
 import './TerminalPopup.css';
+
+const ANGRY_RESPONSES = [
+    [
+        '',
+        '  ╭──────────────────────────────────────────╮',
+        '  │  (ノಠ益ಠ)ノ彡┻━┻                         │',
+        '  │                                          │',
+        '  │  İyi deneme...                            │',
+        '  │  Ceza olarak IP adresinden konumuna       │',
+        '  │  birkaç pizza yolluyorum. 🍕🍕🍕          │',
+        '  │                                          │',
+        '  │  > IP tespit edildi: 192.168.x.x          │',
+        '  │  > Konum: Muhtemelen annenin evi          │',
+        '  │  > Sipariş: 3x Ananaslı Pizza             │',
+        '  │  > Durum: YOL-DA ████████░░ 80%           │',
+        '  ╰──────────────────────────────────────────╯',
+        '',
+    ],
+    [
+        '',
+        '  ╭──────────────────────────────────────────╮',
+        '  │  ಠ_ಠ  ...ciddi misin?                    │',
+        '  │                                          │',
+        '  │  Bu terminale yazı yazmaya çalışan        │',
+        '  │  son kişi hâlâ kayıp.                     │',
+        '  │                                          │',
+        '  │  > sudo rm -rf /your-career               │',
+        '  │  > [TAMAM]                                │',
+        '  ╰──────────────────────────────────────────╯',
+        '',
+    ],
+    [
+        '',
+        '  ╭──────────────────────────────────────────╮',
+        '  │  (╯°□°)╯︵ ┻━┻                            │',
+        '  │                                          │',
+        '  │  Hack mi deniyorsun yoksa?                │',
+        '  │  Kardeşim ben zaten hacklenmiş            │',
+        '  │  durumdayım, geç kaldın.                  │',
+        '  │                                          │',
+        '  │  > firewall.exe has stopped working       │',
+        '  │  > brain.exe not found                    │',
+        '  ╰──────────────────────────────────────────╯',
+        '',
+    ],
+    [
+        '',
+        '  ╭──────────────────────────────────────────╮',
+        '  │  ᕦ(ò_óˇ)ᕤ  DUR BAKALIM                  │',
+        '  │                                          │',
+        '  │  Bak güzel kardeşim, bu terminal          │',
+        '  │  sadece benim. Dokunma.                   │',
+        '  │                                          │',
+        '  │  > Parmak izi kaydedildi ✓                │',
+        '  │  > CIA\'ya bildirildi ✓                    │',
+        '  │  > Annen arandı ✓                         │',
+        '  ╰──────────────────────────────────────────╯',
+        '',
+    ],
+];
 
 interface TerminalPopupProps {
     isVisible: boolean;
     onClose: () => void;
 }
 
+const FACE_EXPRESSIONS = ['◕‿◕', '◕‿◕', '◕‿◕', '◕‿◕', '─‿─', '◕‿◕', '◕ᴗ◕', '◕‿◕'];
+const FACE_PLACEHOLDER = '{FACE}';
+
 const TERMINAL_LINES = [
-    'erim@skills:~$ cat /etc/skills.conf',
+    'erim@skills:~$ ./system-info.sh',
     '',
-    '╔══════════════════════════════════════════════════╗',
-    '║              S K I L L S                         ║',
-    '╚══════════════════════════════════════════════════╝',
+    ' [✓] Loading modules...',
+    ' [✓] Initializing skill matrix...',
+    ' [✓] System ready.',
     '',
-    '[AI & Machine Learning]',
-    '  RAG ████████░░ | LLM (MCP, LangChain) ████████░░',
-    '  CNN ███████░░░ | PyTorch ███████░░░',
-    '  Computer Vision ██████░░░░',
-    '  Reinforcement Learning ██████░░░░',
+    '          ╭─────────────────╮',
+    '     ══●══┤  ┌───────────┐  ├══●══',
+    '     ══○══┤  │   ({FACE})   │  ├══○══',
+    '          │  │ ERIM·CPU  │  │',
+    '     ══●══┤  └───────────┘  ├══●══',
+    '     ══○══┤                 ├══○══',
+    '          ╰─────────────────╯',
     '',
-    '[Engineering & Hardware]',
-    '  Gömülü Sistemler (STM32) ████████░░',
-    '  IoT (MQTT, Sensör Ağları) ███████░░░',
-    '  Devre Analizi (LTspice) ██████░░░░',
-    '  PCB Tasarım ████░░░░░░',
+    '  ╭─ SPEC ──────────────────────╮',
+    '  │  OS      ErimOS v26.2       │',
+    '  │  Core    creative-engine    │',
+    '  │  Shell   bash 5.2           │',
+    '  │  Uptime  since ~2002        │',
+    '  ╰─────────────────────────────╯',
     '',
-    '[XR & Spatial Computing]',
-    '  Unreal Engine (C++) █████████░',
-    '  Unity ██████░░░░ | WebXR ████████░░',
-    '  CesiumJS (Digital Twin) ████████░░',
-    '  Three.js █████████░',
-    '  Fotogrametri ██████░░░░',
+    '  ◈ AI & Machine Learning',
+    '    RAG · LLM · MCP · LangChain',
+    '    CNN · PyTorch · Computer Vision · RL',
     '',
-    '[Full-Stack Web]',
-    '  React █████████░ | Next.js ████████░░',
-    '  Node.js ████████░░ | FastAPI ███████░░░',
-    '  PostgreSQL/PostGIS ████████░░',
-    '  Tailwind CSS ████████░░',
+    '  ◈ Engineering & Hardware',
+    '    STM32 · MQTT · IoT',
+    '    LTspice · PCB Tasarım',
     '',
-    '[Systems & DevOps]',
-    '  Docker █████████░ | Kubernetes ███████░░░',
-    '  CI/CD ████████░░ | Linux ████████░░',
-    '  Nginx ███████░░░ | Git █████████░',
+    '  ◈ XR & Spatial Computing',
+    '    Unreal Engine (C++) · Unity · WebXR',
+    '    CesiumJS · Three.js · Fotogrametri',
     '',
-    'erim@skills:~$ _',
+    '  ◈ Full-Stack Web',
+    '    React · Next.js · Node.js · FastAPI',
+    '    PostgreSQL/PostGIS · Tailwind CSS',
+    '',
+    '  ◈ Systems & DevOps',
+    '    Docker · Kubernetes · CI/CD · Linux',
+    '    Nginx · Git',
+    '',
 ];
 
 // Matrix rain character set
@@ -98,8 +165,17 @@ export function TerminalPopup({ isVisible, onClose }: TerminalPopupProps) {
     const [show, setShow] = useState(false);
     const [closing, setClosing] = useState(false);
     const [visibleLines, setVisibleLines] = useState(0);
+    const [faceIndex, setFaceIndex] = useState(0);
+    const [pinFrame, setPinFrame] = useState(0);
+    const [inputValue, setInputValue] = useState('');
+    const [extraLines, setExtraLines] = useState<string[]>([]);
+    const [responseCount, setResponseCount] = useState(0);
+    const [isResponseTyping, setIsResponseTyping] = useState(false);
     const contentRef = useRef<HTMLDivElement>(null);
     const popupRef = useRef<HTMLDivElement>(null);
+    const inputRef = useRef<HTMLInputElement>(null);
+    const typingDone = visibleLines >= TERMINAL_LINES.length;
+    const showInput = typingDone && !isResponseTyping;
 
     const handleClose = useCallback(() => {
         setClosing(true);
@@ -114,6 +190,12 @@ export function TerminalPopup({ isVisible, onClose }: TerminalPopupProps) {
         if (isVisible) {
             setVisibleLines(0);
             setClosing(false);
+            setFaceIndex(0);
+            setPinFrame(0);
+            setInputValue('');
+            setExtraLines([]);
+            setResponseCount(0);
+            setIsResponseTyping(false);
             requestAnimationFrame(() => setShow(true));
             // Satır satır göster
             let line = 0;
@@ -136,7 +218,76 @@ export function TerminalPopup({ isVisible, onClose }: TerminalPopupProps) {
         if (contentRef.current) {
             contentRef.current.scrollTop = contentRef.current.scrollHeight;
         }
-    }, [visibleLines]);
+    }, [visibleLines, extraLines]);
+
+    // Focus input when typing is done
+    useEffect(() => {
+        if (showInput && inputRef.current) {
+            inputRef.current.focus();
+        }
+    }, [showInput, extraLines]);
+
+    const handleInputSubmit = useCallback((e: KeyboardEvent<HTMLInputElement>) => {
+        if (e.key !== 'Enter' || !inputValue.trim()) return;
+        const cmd = inputValue.trim();
+        setInputValue('');
+        setIsResponseTyping(true);
+
+        const response = ANGRY_RESPONSES[responseCount % ANGRY_RESPONSES.length];
+        setResponseCount((c) => c + 1);
+
+        // Add the typed command immediately
+        setExtraLines((prev) => [...prev, `erim@skills:~$ ${cmd}`]);
+
+        // Type response line by line
+        let i = 0;
+        const timer = setInterval(() => {
+            if (i < response.length) {
+                setExtraLines((prev) => [...prev, response[i]]);
+                i++;
+            } else {
+                clearInterval(timer);
+                setExtraLines((prev) => [...prev, '', 'erim@skills:~$ _']);
+                setIsResponseTyping(false);
+            }
+        }, 70);
+    }, [inputValue, responseCount]);
+
+    // Face blink animation
+    useEffect(() => {
+        if (!typingDone) return;
+        const timer = setInterval(() => {
+            setFaceIndex((i) => (i + 1) % FACE_EXPRESSIONS.length);
+        }, 2000);
+        return () => clearInterval(timer);
+    }, [typingDone]);
+
+    // Pin data flow animation
+    useEffect(() => {
+        if (!typingDone) return;
+        const timer = setInterval(() => {
+            setPinFrame((f) => (f + 1) % 2);
+        }, 800);
+        return () => clearInterval(timer);
+    }, [typingDone]);
+
+    const renderLine = (line: string): string => {
+        if (line.includes(FACE_PLACEHOLDER)) {
+            line = line.replace(FACE_PLACEHOLDER, FACE_EXPRESSIONS[faceIndex]);
+        }
+        if (typingDone && pinFrame === 1) {
+            line = line.replace(/●/g, '◆').replace(/○/g, '●').replace(/◆/g, '○');
+        }
+        return line;
+    };
+
+    const getLineClass = (_line: string, index: number): string => {
+        if (index >= 2 && index <= 4) return 'terminal-line-boot';
+        if (index >= 6 && index <= 12) return 'terminal-line-chip';
+        if (index >= 14 && index <= 19) return 'terminal-line-spec';
+        if (_line.trimStart().startsWith('◈')) return 'terminal-line-header';
+        return '';
+    };
 
     if (!isVisible && !closing) return null;
 
@@ -163,12 +314,47 @@ export function TerminalPopup({ isVisible, onClose }: TerminalPopupProps) {
 
                 {/* Terminal content */}
                 <div className="terminal-content" ref={contentRef}>
-                    {TERMINAL_LINES.slice(0, visibleLines).map((line, i) => (
-                        <div key={i} className={`terminal-line ${line.startsWith('[') ? 'terminal-line-header' : ''}`}>
-                            {line || '\u00A0'}
-                        </div>
-                    ))}
+                    {TERMINAL_LINES.slice(0, visibleLines).map((line, i) => {
+                        const rendered = renderLine(line);
+                        const cls = getLineClass(line, i);
+                        return (
+                            <div key={i} className={`terminal-line ${cls}`}>
+                                {rendered || '\u00A0'}
+                            </div>
+                        );
+                    })}
+                    {/* Extra lines from user interaction */}
+                    {extraLines.map((line, i) => {
+                        const l = line ?? '';
+                        return (
+                            <div key={`extra-${i}`} className={`terminal-line ${l.includes('ಠ') || l.includes('╯°□°') || l.includes('ᕦ') ? 'terminal-line-angry' : ''} ${l.includes('pizza') || l.includes('Pizza') || l.includes('🍕') ? 'terminal-line-pizza' : ''}`}>
+                                {l || '\u00A0'}
+                            </div>
+                        );
+                    })}
+
                     {visibleLines < TERMINAL_LINES.length && (
+                        <span className="terminal-cursor">▌</span>
+                    )}
+
+                    {/* Interactive input */}
+                    {showInput && (
+                        <div className="terminal-input-line">
+                            <span className="terminal-prompt">erim@skills:~$&nbsp;</span>
+                            <input
+                                ref={inputRef}
+                                type="text"
+                                className="terminal-input"
+                                value={inputValue}
+                                onChange={(e) => setInputValue(e.target.value)}
+                                onKeyDown={handleInputSubmit}
+                                spellCheck={false}
+                                autoComplete="off"
+                            />
+                        </div>
+                    )}
+
+                    {isResponseTyping && (
                         <span className="terminal-cursor">▌</span>
                     )}
                 </div>

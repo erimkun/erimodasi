@@ -169,6 +169,67 @@
     font-weight: 600;
 }
 
+/* Boot sequence lines */
+.terminal-line-boot {
+    color: #39ff14;
+    text-shadow: 0 0 4px rgba(57, 255, 20, 0.4);
+}
+
+/* Chip ASCII art */
+.terminal-line-chip {
+    color: #ffcc00;
+    text-shadow: 0 0 6px rgba(255, 204, 0, 0.25);
+}
+
+/* Spec box */
+.terminal-line-spec {
+    color: #88ffcc;
+}
+
+/* Interactive input */
+.terminal-input-line {
+    display: flex;
+    align-items: center;
+    font-family: 'SF Mono', 'Cascadia Code', 'Fira Code', 'Courier New', monospace;
+    font-size: 0.82rem;
+    line-height: 1.55;
+}
+
+.terminal-prompt {
+    color: #00ff64;
+    white-space: pre;
+}
+
+.terminal-input {
+    background: transparent;
+    border: none;
+    outline: none;
+    color: #00ff64;
+    font-family: inherit;
+    font-size: inherit;
+    flex: 1;
+    caret-color: #00ff64;
+    padding: 0;
+    line-height: inherit;
+}
+
+.terminal-input::selection {
+    background: rgba(0, 255, 100, 0.3);
+}
+
+/* Angry response face */
+.terminal-line-angry {
+    color: #ff4444 !important;
+    text-shadow: 0 0 10px rgba(255, 68, 68, 0.6);
+    font-weight: 700;
+}
+
+/* Pizza line */
+.terminal-line-pizza {
+    color: #ffaa00 !important;
+    text-shadow: 0 0 8px rgba(255, 170, 0, 0.4);
+}
+
 /* Close animation */
 .terminal-popup.closing {
     transform: translateY(20px) scale(0.92);
