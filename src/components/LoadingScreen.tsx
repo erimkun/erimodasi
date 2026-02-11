@@ -124,19 +124,8 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({ onComplete, isLoad
                                 YÜKLENİYOR...
                             </motion.div>
                         ) : (
-                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '30px', perspective: 1000 }}>
-                                <motion.button
-                                    key="ready"
-                                    className="ready-btn"
-                                    initial={{ opacity: 0, scale: 0.9 }}
-                                    animate={{ opacity: 1, scale: 1 }}
-                                    whileHover={{ scale: 1.05 }}
-                                    whileTap={{ scale: 0.95 }}
-                                    onClick={handleReadyClick}
-                                >
-                                    HAZIR - GİRİŞ YAP
-                                </motion.button>
-
+                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '24px', perspective: 1000 }}>
+                                {/* Logo - üstte */}
                                 <motion.div
                                     style={{
                                         rotateX,
@@ -164,6 +153,28 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({ onComplete, isLoad
                                         }}
                                     />
                                 </motion.div>
+
+                                {/* Giriş Yap butonu - logonun altında, animasyonlu */}
+                                <motion.button
+                                    key="ready"
+                                    className="ready-btn"
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 0.5, duration: 0.6, type: 'spring', stiffness: 120 }}
+                                    whileHover={{ scale: 1.06, boxShadow: '0 0 40px rgba(0,217,255,0.5), 0 0 80px rgba(196,77,255,0.3)' }}
+                                    whileTap={{ scale: 0.93 }}
+                                    onClick={handleReadyClick}
+                                >
+                                    <span className="ready-btn-bg" />
+                                    <span className="ready-btn-shimmer" />
+                                    <span className="ready-btn-text">
+                                        <svg className="ready-btn-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                        </svg>
+                                        GİRİŞ YAP
+                                    </span>
+                                    <span className="ready-btn-glow" />
+                                </motion.button>
                             </div>
                         )}
                     </AnimatePresence>
