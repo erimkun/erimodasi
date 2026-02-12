@@ -1,7 +1,7 @@
 import { useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
 import { ModelConfig } from '../types/scene';
-import { memo, useMemo } from 'react';
+import { memo, useMemo, useEffect } from 'react';
 
 import type { ComponentProps } from 'react';
 
@@ -33,6 +33,30 @@ export const Model = memo(function Model({ config, onClick, isSelected, ...props
         cloned.updateMatrix();
         return cloned;
     }, [scene]);
+
+    // Dispose cloned geometries, materials & textures on unmount
+    useEffect(() => {
+        return () => {
+            clonedScene.traverse((child) => {
+                if ((child as any).isMesh) {
+                    const mesh = child as THREE.Mesh;
+                    mesh.geometry?.dispose();
+                    const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+                    for (const mat of materials) {
+                        if (!mat) continue;
+                        // Dispose all texture maps on the material
+                        for (const key of Object.keys(mat)) {
+                            const value = (mat as any)[key];
+                            if (value && value.isTexture) {
+                                value.dispose();
+                            }
+                        }
+                        mat.dispose();
+                    }
+                }
+            });
+        };
+    }, [clonedScene]);
 
     if (!config.visible) return null;
 

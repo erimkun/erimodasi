@@ -167,14 +167,17 @@ export function Viewer() {
                 </div>
             )}
 
-            <div className="viewer-canvas">
-                <Scene
-                    focusedModelId={focusedModelId}
-                    onModelClick={handleCharacterClick}
-                    onBoxClick={handleBoxClick}
-                    onMissed={handleMissed}
-                />
-            </div>
+            {/* Defer Canvas mount until loading complete — avoids 2 simultaneous WebGL contexts */}
+            {!isLoading && (
+                <div className="viewer-canvas">
+                    <Scene
+                        focusedModelId={focusedModelId}
+                        onModelClick={handleCharacterClick}
+                        onBoxClick={handleBoxClick}
+                        onMissed={handleMissed}
+                    />
+                </div>
+            )}
             <div className="viewer-footer">
                 <p>Erden Erim Aydoğdu Sunar...</p>
             </div>

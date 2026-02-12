@@ -19,40 +19,55 @@ interface InteractiveBoxProps {
 const InteractiveBox = memo(function InteractiveBox({ light, isMobile, onBoxClick }: InteractiveBoxProps) {
     const [hovered, setHovered] = useState(false);
     const [tapped, setTapped] = useState(false);
-    const lightRef = useRef<THREE.PointLight>(null);
-    const currentIntensity = useRef(isMobile ? light.hoverIntensity * 0.5 : light.baseIntensity);
+    const coreRef = useRef<THREE.Mesh>(null);
+    const haloRef = useRef<THREE.Mesh>(null);
+    const currentOpacity = useRef(isMobile ? 0.4 : 0.15);
     const isAnimating = useRef(false);
 
-    // On mobile: base intensity is higher so lights are always visible
-    const mobileBaseIntensity = light.hoverIntensity * 0.5;
-    const effectiveBaseIntensity = isMobile ? mobileBaseIntensity : light.baseIntensity;
+    // Emissive glow opacity targets (replaces expensive PointLights)
+    const baseOpacity = isMobile ? 0.4 : 0.15;
+    const hoverOpacity = 0.85;
+    const haloBaseOpacity = isMobile ? 0.12 : 0.04;
+    const haloHoverOpacity = 0.3;
 
     // Active state: hovered on desktop, tapped on mobile
     const isActive = isMobile ? tapped : hovered;
 
     useFrame((state) => {
-        if (!lightRef.current) return;
+        if (!coreRef.current) return;
 
-        const targetIntensity = isActive ? light.hoverIntensity : effectiveBaseIntensity;
-        const diff = Math.abs(currentIntensity.current - targetIntensity);
+        const targetOpacity = isActive ? hoverOpacity : baseOpacity;
+        const diff = Math.abs(currentOpacity.current - targetOpacity);
 
         // Stop animating when close enough to target
-        if (diff < 0.01) {
+        if (diff < 0.005) {
             if (isAnimating.current) {
-                lightRef.current.intensity = targetIntensity;
-                currentIntensity.current = targetIntensity;
+                (coreRef.current.material as THREE.MeshBasicMaterial).opacity = targetOpacity;
+                if (haloRef.current) {
+                    (haloRef.current.material as THREE.MeshBasicMaterial).opacity =
+                        isActive ? haloHoverOpacity : haloBaseOpacity;
+                }
+                currentOpacity.current = targetOpacity;
                 isAnimating.current = false;
             }
             return;
         }
 
         isAnimating.current = true;
-        currentIntensity.current = THREE.MathUtils.lerp(
-            currentIntensity.current,
-            targetIntensity,
-            0.12
+        currentOpacity.current = THREE.MathUtils.lerp(
+            currentOpacity.current,
+            targetOpacity,
+            0.15
         );
-        lightRef.current.intensity = currentIntensity.current;
+        (coreRef.current.material as THREE.MeshBasicMaterial).opacity = currentOpacity.current;
+
+        // Halo follows core with lower opacity
+        if (haloRef.current) {
+            const haloTarget = isActive ? haloHoverOpacity : haloBaseOpacity;
+            const haloMat = haloRef.current.material as THREE.MeshBasicMaterial;
+            haloMat.opacity = THREE.MathUtils.lerp(haloMat.opacity, haloTarget, 0.15);
+        }
+
         // Request next frame for smooth transition
         state.invalidate();
     });
@@ -93,27 +108,31 @@ const InteractiveBox = memo(function InteractiveBox({ light, isMobile, onBoxClic
                 <meshBasicMaterial transparent opacity={0} />
             </mesh>
 
-            {/* Visible glowing sphere on mobile so users can see the lights */}
-            {isMobile && (
-                <mesh>
-                    <sphereGeometry args={[0.03, 8, 8]} />
-                    <meshBasicMaterial
-                        color={light.color}
-                        transparent
-                        opacity={0.6}
-                        toneMapped={false}
-                    />
-                </mesh>
-            )}
-
-            {/* Point light inside the box */}
-            <pointLight
-                ref={lightRef}
-                color={light.color}
-                intensity={effectiveBaseIntensity}
-                distance={light.distance}
-                decay={2}
-            />
+            {/* Emissive glow — dual layer: inner core + outer halo */}
+            {/* Outer halo — large, soft, simulates light spread */}
+            <mesh ref={haloRef}>
+                <sphereGeometry args={[isMobile ? 0.12 : 0.09, 12, 12]} />
+                <meshBasicMaterial
+                    color={light.color}
+                    transparent
+                    opacity={haloBaseOpacity}
+                    toneMapped={false}
+                    depthWrite={false}
+                    blending={THREE.AdditiveBlending}
+                />
+            </mesh>
+            {/* Inner core — bright, sharp center */}
+            <mesh ref={coreRef}>
+                <sphereGeometry args={[isMobile ? 0.04 : 0.03, 8, 8]} />
+                <meshBasicMaterial
+                    color={light.color}
+                    transparent
+                    opacity={baseOpacity}
+                    toneMapped={false}
+                    depthWrite={false}
+                    blending={THREE.AdditiveBlending}
+                />
+            </mesh>
         </group>
     );
 });
