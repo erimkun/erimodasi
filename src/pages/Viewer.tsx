@@ -12,6 +12,19 @@ import type { ProjectData } from '../components/ProjectPopup';
 import type { DialogueAction } from '../types/dialogue';
 import './Viewer.css';
 
+function deferMainThreadWork(task: () => void, timeout = 180) {
+    const win = window as Window & {
+        requestIdleCallback?: (callback: () => void, options?: { timeout: number }) => number;
+    };
+
+    if (typeof win.requestIdleCallback === 'function') {
+        win.requestIdleCallback(task, { timeout });
+        return;
+    }
+
+    setTimeout(task, 0);
+}
+
 export function Viewer() {
     const [focusedModelId, setFocusedModelId] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(true);
@@ -73,22 +86,30 @@ export function Viewer() {
         setFocusedModelId(id);
 
         if (id === 'char') {
-            setTimeout(() => {
+            deferMainThreadWork(() => {
                 startDialogue();
             }, 600);
         }
         if (id === 'desk') {
-            setShowTerminal(true);
+            deferMainThreadWork(() => {
+                setShowTerminal(true);
+            });
         }
         if (id === 'writing') {
-            setShowProfile(true);
+            deferMainThreadWork(() => {
+                setShowProfile(true);
+            });
         }
     }, [startDialogue]);
 
     const handleBoxClick = useCallback((boxId: string) => {
         console.log('[Viewer] Box clicked:', boxId);
         const project = getProjectByBoxId(boxId);
-        if (project) setActiveProject(project);
+        if (project) {
+            deferMainThreadWork(() => {
+                setActiveProject(project);
+            });
+        }
     }, []);
 
     const handleMissed = useCallback(() => {

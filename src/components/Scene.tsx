@@ -1,6 +1,7 @@
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, Stats, TransformControls, Bvh, useTexture } from '@react-three/drei';
 import { Suspense, useRef, useEffect, useMemo } from 'react';
+import type { ReactNode } from 'react';
 import * as THREE from 'three';
 import { Model } from './Model';
 import { InteractiveBoxes } from './InteractiveBoxes';
@@ -39,6 +40,11 @@ interface SceneProps {
     onModelClick?: (modelId: string) => void;
     onBoxClick?: (boxId: string) => void;
     onMissed?: () => void;
+}
+
+function MaybeBvh({ enabled, children }: { enabled: boolean; children: ReactNode }) {
+    if (!enabled) return <>{children}</>;
+    return <Bvh firstHitOnly>{children}</Bvh>;
 }
 
 function LoadingFallback() {
@@ -547,6 +553,37 @@ function ShadowFreeze() {
     return null;
 }
 
+function SceneWarmup({ enabled }: { enabled: boolean }) {
+    const { gl, scene, camera, invalidate } = useThree();
+
+    useEffect(() => {
+        if (!enabled) return;
+
+        let rafId = 0;
+        let frames = 0;
+
+        const warm = () => {
+            if (frames === 0) {
+                gl.compile(scene, camera);
+            }
+            invalidate();
+            frames += 1;
+
+            if (frames < 4) {
+                rafId = requestAnimationFrame(warm);
+            }
+        };
+
+        rafId = requestAnimationFrame(warm);
+
+        return () => {
+            if (rafId) cancelAnimationFrame(rafId);
+        };
+    }, [enabled, gl, scene, camera, invalidate]);
+
+    return null;
+}
+
 export function Scene({ isEditor = false, focusedModelId = null, onModelClick, onBoxClick, onMissed }: SceneProps) {
     // Editor uses store config, Viewer uses hardcoded static scene
     const storeConfig = useSceneStore((s) => s.config);
@@ -587,6 +624,7 @@ export function Scene({ isEditor = false, focusedModelId = null, onModelClick, o
     }, [isEditor]);
 
     const enableShadows = isEditor || !IS_LOW_END_DEVICE;
+    const enableBvh = !isEditor && !IS_LOW_END_DEVICE;
 
     return (
         <Canvas
@@ -615,6 +653,8 @@ export function Scene({ isEditor = false, focusedModelId = null, onModelClick, o
             {isEditor && <Stats />}
             {/* Freeze shadow map after first frame — static scene optimization */}
             {!isEditor && <ShadowFreeze />}
+            {/* Warmup scene/program compilation before first user interaction */}
+            {!isEditor && <SceneWarmup enabled={true} />}
 
             <Suspense fallback={<LoadingFallback />}>
                 {/* Skybox with texture */}
@@ -623,7 +663,7 @@ export function Scene({ isEditor = false, focusedModelId = null, onModelClick, o
                 <Lighting config={config.lighting} enableShadows={enableShadows} />
 
                 {/* Models - each in own Suspense for progressive loading */}
-                <Bvh firstHitOnly>
+                <MaybeBvh enabled={enableBvh}>
                     {config.models.map((model) => {
                         if (!model.visible) return null;
                         if (isEditor) {
@@ -673,7 +713,7 @@ export function Scene({ isEditor = false, focusedModelId = null, onModelClick, o
                         }
                         return null;
                     })}
-                </Bvh>
+                </MaybeBvh>
 
                 {/* Non-clickable models rendered outside Bvh — no raycast interference */}
                 {!isEditor && config.models.map((model) => {
