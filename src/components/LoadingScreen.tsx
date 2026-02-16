@@ -116,10 +116,12 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({ onComplete, isLoad
                 <div className="fluid-blob fluid-blob--5" />
             </div>
 
-            {/* Layer 1: Three.js WebGL fluid — lazy loaded, fades in over CSS */}
-            <Suspense fallback={null}>
-                <FluidBackground onReady={() => setFluidReady(true)} />
-            </Suspense>
+            {/* Layer 1: Three.js WebGL fluid — desktop only for smoother mobile startup */}
+            {!isMobile && (
+                <Suspense fallback={null}>
+                    <FluidBackground onReady={() => setFluidReady(true)} />
+                </Suspense>
+            )}
 
             <div className="content-wrapper">
                 {/* Top Section: Loading/Ready Indicator */}

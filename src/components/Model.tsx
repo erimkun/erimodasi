@@ -1,7 +1,8 @@
 import { useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
+import { clone } from 'three/examples/jsm/utils/SkeletonUtils.js';
 import { ModelConfig } from '../types/scene';
-import { memo, useMemo, useEffect } from 'react';
+import { memo, useMemo } from 'react';
 
 import type { ComponentProps } from 'react';
 
@@ -25,13 +26,15 @@ export const Model = memo(function Model({ config, onClick, isSelected, ...props
 
     // Clone scene with shadow setup
     const clonedScene = useMemo(() => {
-        const cloned = scene.clone();
+        const cloned = clone(scene) as THREE.Object3D;
         cloned.traverse((child) => {
             if ((child as any).isMesh) {
                 const mesh = child as THREE.Mesh;
                 child.receiveShadow = true;
                 if (mesh.geometry) {
-                    mesh.geometry.computeBoundingSphere();
+                    if (!mesh.geometry.boundingSphere) {
+                        mesh.geometry.computeBoundingSphere();
+                    }
                     const radius = mesh.geometry.boundingSphere?.radius || 0;
                     child.castShadow = radius > 0.05;
                 }
@@ -42,30 +45,6 @@ export const Model = memo(function Model({ config, onClick, isSelected, ...props
         cloned.updateMatrix();
         return cloned;
     }, [scene]);
-
-    // Dispose cloned geometries, materials & textures on unmount
-    useEffect(() => {
-        return () => {
-            clonedScene.traverse((child) => {
-                if ((child as any).isMesh) {
-                    const mesh = child as THREE.Mesh;
-                    mesh.geometry?.dispose();
-                    const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
-                    for (const mat of materials) {
-                        if (!mat) continue;
-                        // Dispose all texture maps on the material
-                        for (const key of Object.keys(mat)) {
-                            const value = (mat as any)[key];
-                            if (value && value.isTexture) {
-                                value.dispose();
-                            }
-                        }
-                        mat.dispose();
-                    }
-                }
-            });
-        };
-    }, [clonedScene]);
 
     if (!config.visible) return null;
 

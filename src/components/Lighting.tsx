@@ -12,9 +12,10 @@ const SHADOW_MAP_SIZE: [number, number] = IS_MOBILE ? [512, 512] : [1024, 1024];
 
 interface LightingProps {
     config: LightConfig;
+    enableShadows?: boolean;
 }
 
-export const Lighting = memo(function Lighting({ config }: LightingProps) {
+export const Lighting = memo(function Lighting({ config, enableShadows = true }: LightingProps) {
     return (
         <>
             {/* Ambient light for base illumination */}
@@ -28,7 +29,7 @@ export const Lighting = memo(function Lighting({ config }: LightingProps) {
                 intensity={config.directional.intensity}
                 position={config.directional.position}
                 color={config.directional.color}
-                castShadow
+                castShadow={enableShadows}
                 shadow-mapSize={SHADOW_MAP_SIZE}
                 shadow-camera-far={30}
                 shadow-camera-near={0.1}

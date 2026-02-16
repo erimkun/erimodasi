@@ -2,6 +2,12 @@ import { useRef, useMemo, useState, useCallback } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 
+const IS_MOBILE = typeof window !== 'undefined' && (
+    window.innerWidth <= 768 ||
+    'ontouchstart' in window ||
+    navigator.maxTouchPoints > 0
+);
+
 /* ─── Optimized Fluid Shader ─── */
 const FluidShader = {
     uniforms: {
@@ -156,7 +162,7 @@ export const FluidBackground: React.FC<FluidBackgroundProps> = ({ onReady }) => 
         >
             <Canvas
                 camera={{ position: [0, 0, 1] }}
-                dpr={Math.min(window.devicePixelRatio, 1.5)}
+                dpr={IS_MOBILE ? 1 : Math.min(window.devicePixelRatio, 1.5)}
                 gl={{
                     antialias: false,
                     powerPreference: 'high-performance',

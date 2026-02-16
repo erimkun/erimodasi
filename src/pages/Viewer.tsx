@@ -176,8 +176,8 @@ export function Viewer() {
                 </div>
             )}
 
-            {/* Scene always mounted so models preload — hidden during loading */}
-            <div className="viewer-canvas" style={isLoading ? { position: 'fixed', top: 0, left: 0, width: '1px', height: '1px', opacity: 0, pointerEvents: 'none' } : undefined}>
+            {/* Scene always mounted so models preload — keep full size to avoid costly resize recompile */}
+            <div className="viewer-canvas" style={isLoading ? { opacity: 0, pointerEvents: 'none' } : undefined}>
                 <Scene
                     focusedModelId={focusedModelId}
                     onModelClick={handleCharacterClick}

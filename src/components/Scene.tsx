@@ -1,6 +1,6 @@
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, Stats, TransformControls, Bvh, useTexture } from '@react-three/drei';
-import { Suspense, useRef, useEffect, useMemo, useState } from 'react';
+import { Suspense, useRef, useEffect, useMemo } from 'react';
 import * as THREE from 'three';
 import { Model } from './Model';
 import { InteractiveBoxes } from './InteractiveBoxes';
@@ -16,6 +16,10 @@ const IS_MOBILE = typeof window !== 'undefined' && (
     'ontouchstart' in window ||
     navigator.maxTouchPoints > 0
 );
+
+const DEVICE_MEMORY = typeof navigator !== 'undefined' ? (navigator as any).deviceMemory ?? 8 : 8;
+const CPU_CORES = typeof navigator !== 'undefined' ? navigator.hardwareConcurrency ?? 8 : 8;
+const IS_LOW_END_DEVICE = IS_MOBILE && (DEVICE_MEMORY <= 4 || CPU_CORES <= 6);
 
 // Use CSS class instead of document.body.style.cursor to avoid forced reflows
 let _pointerCount = 0;
@@ -575,17 +579,23 @@ export function Scene({ isEditor = false, focusedModelId = null, onModelClick, o
         updateBoxLight(lightId, { position: pos });
     };
 
-    // Adaptive DPR for performance
-    const [dpr] = useState(IS_MOBILE ? 0.75 : 1);
+    const dpr = useMemo(() => {
+        if (isEditor) return 1;
+        if (IS_LOW_END_DEVICE) return 0.7;
+        if (IS_MOBILE) return 0.85;
+        return Math.min(window.devicePixelRatio || 1, 1.25);
+    }, [isEditor]);
+
+    const enableShadows = isEditor || !IS_LOW_END_DEVICE;
 
     return (
         <Canvas
-            shadows
+            shadows={enableShadows}
             frameloop="demand"
             camera={{ position: config.camera.position, fov: 50 }}
             dpr={dpr}
             gl={{
-                antialias: !IS_MOBILE,
+                antialias: !IS_MOBILE && !IS_LOW_END_DEVICE,
                 powerPreference: 'high-performance',
                 depth: true,
                 stencil: false,
@@ -610,7 +620,7 @@ export function Scene({ isEditor = false, focusedModelId = null, onModelClick, o
                 {/* Skybox with texture */}
                 <Skybox />
 
-                <Lighting config={config.lighting} />
+                <Lighting config={config.lighting} enableShadows={enableShadows} />
 
                 {/* Models - each in own Suspense for progressive loading */}
                 <Bvh firstHitOnly>
@@ -682,7 +692,7 @@ export function Scene({ isEditor = false, focusedModelId = null, onModelClick, o
                     <InteractiveBoxes boxLights={config.lighting.boxLights} onBoxClick={onBoxClick} />
                 )}
 
-                {/* Point Lights (With visual helpers) */}
+                {/* Point Lights (With visual helpers in editor) */}
                 {config.lighting.pointLights?.map((light) => (
                     light.enabled && (
                         isEditor ? (
@@ -694,16 +704,7 @@ export function Scene({ isEditor = false, focusedModelId = null, onModelClick, o
                                 onTransformChange={handlePointLightTransform(light.id)}
                                 orbitRef={orbitRef}
                             />
-                        ) : (
-                            <pointLight
-                                key={light.id}
-                                position={light.position}
-                                intensity={light.intensity}
-                                color={light.color}
-                                distance={light.distance}
-                                decay={2}
-                            />
-                        )
+                        ) : null
                     )
                 ))}
 
