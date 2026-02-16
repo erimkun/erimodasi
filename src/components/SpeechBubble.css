@@ -234,6 +234,9 @@
         padding: 14px 16px;
         border-radius: 16px;
         box-sizing: border-box;
+        /* Reduce blur on mobile for GPU performance */
+        backdrop-filter: blur(6px);
+        -webkit-backdrop-filter: blur(6px);
     }
 
     .speech-bubble-content p {

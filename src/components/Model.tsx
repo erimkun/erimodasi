@@ -5,6 +5,15 @@ import { memo, useMemo, useEffect } from 'react';
 
 import type { ComponentProps } from 'react';
 
+/**
+ * P3 — WebWorker-based Draco decoding
+ * drei's useGLTF internally creates a DRACOLoader which spawns WebWorkers
+ * for parallel mesh decompression. setDecoderPath tells it where to fetch
+ * the WASM decoder — this runs in workers, NOT on the main thread.
+ * Calling this at module level ensures workers are ready before models load.
+ */
+useGLTF.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.7/');
+
 interface ModelProps extends Omit<ComponentProps<'group'>, 'position' | 'rotation' | 'scale'> {
     config: ModelConfig;
     onClick?: () => void;

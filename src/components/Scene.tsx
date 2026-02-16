@@ -54,26 +54,26 @@ const Skybox = () => {
 };
 
 // Single emissive glow plane to replace 4 strip lights
-// Flat plane flush with the back wall behind the writing
-function EmissiveGlowPlane() {
-    return (
-        <mesh
-            position={[0.3, 0.99, -0.87]}
-            rotation={[0, 0, 0]}
-        >
-            <planeGeometry args={[1.45, 0.55]} />
-            <meshBasicMaterial
-                color="#00ffff"
-                transparent
-                opacity={0.04}
-                side={THREE.FrontSide}
-                toneMapped={false}
-                depthWrite={false}
-                blending={THREE.AdditiveBlending}
-            />
-        </mesh>
-    );
-}
+// DISABLED: commented out per design decision — will be replaced with better solution
+// function EmissiveGlowPlane() {
+//     return (
+//         <mesh
+//             position={[0.3, 0.99, -0.87]}
+//             rotation={[0, 0, 0]}
+//         >
+//             <planeGeometry args={[1.45, 0.55]} />
+//             <meshBasicMaterial
+//                 color="#00ffff"
+//                 transparent
+//                 opacity={0.04}
+//                 side={THREE.FrontSide}
+//                 toneMapped={false}
+//                 depthWrite={false}
+//                 blending={THREE.AdditiveBlending}
+//             />
+//         </mesh>
+//     );
+// }
 
 // Wrapper for OrbitControls
 function AdaptiveControls({ isEditor, ...props }: any) {
@@ -527,15 +527,35 @@ function ViewerInteraction({
     return null;
 }
 
+// Disable shadow auto-update for static scenes — massive perf win on mobile
+// Computes shadow map once, then freezes it
+function ShadowFreeze() {
+    const { gl } = useThree();
+    const done = useRef(false);
+    useFrame(() => {
+        if (!done.current) {
+            // Let first frame compute shadow map, then freeze
+            gl.shadowMap.autoUpdate = false;
+            gl.shadowMap.needsUpdate = true;
+            done.current = true;
+        }
+    });
+    return null;
+}
+
 export function Scene({ isEditor = false, focusedModelId = null, onModelClick, onBoxClick, onMissed }: SceneProps) {
     // Editor uses store config, Viewer uses hardcoded static scene
     const storeConfig = useSceneStore((s) => s.config);
     const config = isEditor ? storeConfig : STATIC_SCENE;
-    const {
-        selectedModelId, selectedLightId,
-        setSelectedModel, setSelectedLight,
-        updateModel, updatePointLight, updateStripLight, updateBoxLight
-    } = useSceneStore();
+    // Use individual selectors to prevent unnecessary re-renders (R3F best practice)
+    const selectedModelId = useSceneStore((s) => s.selectedModelId);
+    const selectedLightId = useSceneStore((s) => s.selectedLightId);
+    const setSelectedModel = useSceneStore((s) => s.setSelectedModel);
+    const setSelectedLight = useSceneStore((s) => s.setSelectedLight);
+    const updateModel = useSceneStore((s) => s.updateModel);
+    const updatePointLight = useSceneStore((s) => s.updatePointLight);
+    const updateStripLight = useSceneStore((s) => s.updateStripLight);
+    const updateBoxLight = useSceneStore((s) => s.updateBoxLight);
 
     const orbitRef = useRef<any>(null);
 
@@ -565,7 +585,7 @@ export function Scene({ isEditor = false, focusedModelId = null, onModelClick, o
             camera={{ position: config.camera.position, fov: 50 }}
             dpr={dpr}
             gl={{
-                antialias: true,
+                antialias: !IS_MOBILE,
                 powerPreference: 'high-performance',
                 depth: true,
                 stencil: false,
@@ -583,6 +603,8 @@ export function Scene({ isEditor = false, focusedModelId = null, onModelClick, o
             }}
         >
             {isEditor && <Stats />}
+            {/* Freeze shadow map after first frame — static scene optimization */}
+            {!isEditor && <ShadowFreeze />}
 
             <Suspense fallback={<LoadingFallback />}>
                 {/* Skybox with texture */}
@@ -699,8 +721,8 @@ export function Scene({ isEditor = false, focusedModelId = null, onModelClick, o
                     )
                 ))}
 
-                {/* Viewer: single emissive glow plane replaces all 4 strip point lights */}
-                {!isEditor && <EmissiveGlowPlane />}
+                {/* Viewer: emissive glow plane DISABLED */}
+                {/* {!isEditor && <EmissiveGlowPlane />} */}
 
                 {/* Box Lights (Interactive) */}
                 {config.lighting.boxLights?.map((light) => (

@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
+import { useProgress } from '@react-three/drei';
 import { Scene } from '../components/Scene';
 import { SpeechBubble } from '../components/SpeechBubble';
 import { LoadingScreen } from '../components/LoadingScreen';
@@ -14,6 +15,15 @@ import './Viewer.css';
 export function Viewer() {
     const [focusedModelId, setFocusedModelId] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [sceneReady, setSceneReady] = useState(false);
+
+    // Track real model loading progress via drei useProgress
+    const { progress, active } = useProgress();
+    useEffect(() => {
+        if (progress >= 100 && !active) {
+            setSceneReady(true);
+        }
+    }, [progress, active]);
 
     // Popup states
     const [activeProject, setActiveProject] = useState<ProjectData | null>(null);
@@ -21,16 +31,14 @@ export function Viewer() {
     const [showProfile, setShowProfile] = useState(false);
     const [showHint, setShowHint] = useState(false);
 
-    // Dialogue store
-    const {
-        isOpen: showSpeechBubble,
-        startDialogue,
-        selectOption,
-        goBack,
-        close: closeDialogue,
-        getCurrentNode,
-        history,
-    } = useDialogueStore();
+    // Dialogue store — use individual selectors to avoid unnecessary re-renders
+    const showSpeechBubble = useDialogueStore(s => s.isOpen);
+    const startDialogue = useDialogueStore(s => s.startDialogue);
+    const selectOption = useDialogueStore(s => s.selectOption);
+    const goBack = useDialogueStore(s => s.goBack);
+    const closeDialogue = useDialogueStore(s => s.close);
+    const getCurrentNode = useDialogueStore(s => s.getCurrentNode);
+    const history = useDialogueStore(s => s.history);
 
     const currentNode = getCurrentNode();
     const canGoBack = history.length > 0;
@@ -91,6 +99,7 @@ export function Viewer() {
 
     const handleCloseBubble = useCallback(() => {
         closeDialogue();
+        setFocusedModelId(null);
     }, [closeDialogue]);
 
     const handleOptionSelect = useCallback((value: string) => {
@@ -103,14 +112,14 @@ export function Viewer() {
         goBack();
     }, [goBack]);
 
-    // ESC tuşu ile tüm popup/bubble'ları kapat
+    // ESC tuşu ile tüm popup/bubble'ları kapat + zoom reset
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
             if (e.key === 'Escape') {
-                if (activeProject) { setActiveProject(null); return; }
-                if (showTerminal) { setShowTerminal(false); return; }
-                if (showProfile) { setShowProfile(false); return; }
-                if (showSpeechBubble) { closeDialogue(); return; }
+                if (activeProject) { setActiveProject(null); setFocusedModelId(null); return; }
+                if (showTerminal) { setShowTerminal(false); setFocusedModelId(null); return; }
+                if (showProfile) { setShowProfile(false); setFocusedModelId(null); return; }
+                if (showSpeechBubble) { closeDialogue(); setFocusedModelId(null); return; }
                 if (focusedModelId) { setFocusedModelId(null); return; }
             }
         };
@@ -128,7 +137,7 @@ export function Viewer() {
         <div className="viewer">
             {isLoading && (
                 <LoadingScreen
-                    isLoaded={true}
+                    isLoaded={sceneReady}
                     onComplete={() => {
                         setIsLoading(false);
                         // İpucu 2 saniye sonra göster
@@ -167,17 +176,15 @@ export function Viewer() {
                 </div>
             )}
 
-            {/* Defer Canvas mount until loading complete — avoids 2 simultaneous WebGL contexts */}
-            {!isLoading && (
-                <div className="viewer-canvas">
-                    <Scene
-                        focusedModelId={focusedModelId}
-                        onModelClick={handleCharacterClick}
-                        onBoxClick={handleBoxClick}
-                        onMissed={handleMissed}
-                    />
-                </div>
-            )}
+            {/* Scene always mounted so models preload — hidden during loading */}
+            <div className="viewer-canvas" style={isLoading ? { position: 'fixed', top: 0, left: 0, width: '1px', height: '1px', opacity: 0, pointerEvents: 'none' } : undefined}>
+                <Scene
+                    focusedModelId={focusedModelId}
+                    onModelClick={handleCharacterClick}
+                    onBoxClick={handleBoxClick}
+                    onMissed={handleMissed}
+                />
+            </div>
             <div className="viewer-footer">
                 <p>Erden Erim Aydoğdu Sunar...</p>
             </div>
@@ -186,15 +193,15 @@ export function Viewer() {
             <ProjectPopup
                 isVisible={!!activeProject}
                 project={activeProject}
-                onClose={() => setActiveProject(null)}
+                onClose={() => { setActiveProject(null); setFocusedModelId(null); }}
             />
             <TerminalPopup
                 isVisible={showTerminal}
-                onClose={() => setShowTerminal(false)}
+                onClose={() => { setShowTerminal(false); setFocusedModelId(null); }}
             />
             <ProfilePopup
                 isVisible={showProfile}
-                onClose={() => setShowProfile(false)}
+                onClose={() => { setShowProfile(false); setFocusedModelId(null); }}
             />
         </div>
     );

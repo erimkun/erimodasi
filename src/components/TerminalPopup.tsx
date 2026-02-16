@@ -220,9 +220,10 @@ export function TerminalPopup({ isVisible, onClose }: TerminalPopupProps) {
         }
     }, [visibleLines, extraLines]);
 
-    // Focus input when typing is done
+    // Focus input when typing is done (skip on mobile to prevent keyboard popup)
     useEffect(() => {
-        if (showInput && inputRef.current) {
+        const isMobile = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+        if (showInput && inputRef.current && !isMobile) {
             inputRef.current.focus();
         }
     }, [showInput, extraLines]);

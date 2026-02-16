@@ -1,6 +1,15 @@
 import { LightConfig } from '../types/scene';
 import { memo } from 'react';
 
+// Cache mobile check to avoid forced reflows
+const IS_MOBILE = typeof window !== 'undefined' && (
+    window.innerWidth <= 768 ||
+    'ontouchstart' in window ||
+    navigator.maxTouchPoints > 0
+);
+
+const SHADOW_MAP_SIZE: [number, number] = IS_MOBILE ? [512, 512] : [1024, 1024];
+
 interface LightingProps {
     config: LightConfig;
 }
@@ -20,7 +29,7 @@ export const Lighting = memo(function Lighting({ config }: LightingProps) {
                 position={config.directional.position}
                 color={config.directional.color}
                 castShadow
-                shadow-mapSize={[1024, 1024]}
+                shadow-mapSize={SHADOW_MAP_SIZE}
                 shadow-camera-far={30}
                 shadow-camera-near={0.1}
                 shadow-camera-left={-3}
