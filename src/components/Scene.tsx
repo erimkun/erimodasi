@@ -1,6 +1,6 @@
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, Stats, TransformControls, Bvh, useTexture } from '@react-three/drei';
-import { Suspense, useRef, useEffect, useMemo, useState } from 'react';
+import { Suspense, useRef, useEffect, useMemo } from 'react';
 import * as THREE from 'three';
 import { Model } from './Model';
 import { InteractiveBoxes } from './InteractiveBoxes';
@@ -562,34 +562,6 @@ export function Scene({ isEditor = false, focusedModelId = null, onModelClick, o
     const updateBoxLight = useSceneStore((s) => s.updateBoxLight);
 
     const orbitRef = useRef<any>(null);
-    const [isInteracting, setIsInteracting] = useState(false);
-    const interactionTimeoutRef = useRef<number | null>(null);
-
-    const beginInteraction = () => {
-        if (interactionTimeoutRef.current !== null) {
-            window.clearTimeout(interactionTimeoutRef.current);
-            interactionTimeoutRef.current = null;
-        }
-        setIsInteracting(true);
-    };
-
-    const endInteraction = () => {
-        if (interactionTimeoutRef.current !== null) {
-            window.clearTimeout(interactionTimeoutRef.current);
-        }
-        interactionTimeoutRef.current = window.setTimeout(() => {
-            setIsInteracting(false);
-            interactionTimeoutRef.current = null;
-        }, 120);
-    };
-
-    useEffect(() => {
-        return () => {
-            if (interactionTimeoutRef.current !== null) {
-                window.clearTimeout(interactionTimeoutRef.current);
-            }
-        };
-    }, []);
 
     const handleModelTransform = (modelId: string) => (pos: [number, number, number], rot: [number, number, number], scl: [number, number, number]) => {
         updateModel(modelId, { position: pos, rotation: rot, scale: scl });
@@ -608,21 +580,13 @@ export function Scene({ isEditor = false, focusedModelId = null, onModelClick, o
     };
 
     const dpr = useMemo(() => {
-        const reducedQuality = !isEditor && (isInteracting || !!focusedModelId);
-
-        if (reducedQuality) {
-            if (IS_LOW_END_DEVICE) return 0.5;
-            if (IS_MOBILE) return 0.62;
-            return 0.72;
-        }
-
         if (isEditor) return 1;
         if (IS_LOW_END_DEVICE) return 0.7;
         if (IS_MOBILE) return 0.85;
         return Math.min(window.devicePixelRatio || 1, 1.25);
-    }, [isEditor, isInteracting, focusedModelId]);
+    }, [isEditor]);
 
-    const enableShadows = (isEditor || !IS_LOW_END_DEVICE) && !isInteracting;
+    const enableShadows = isEditor || !IS_LOW_END_DEVICE;
     const enableBvh = false;
 
     return (
@@ -830,12 +794,7 @@ export function Scene({ isEditor = false, focusedModelId = null, onModelClick, o
                     )
                 ))}
 
-                <AdaptiveControls
-                    ref={orbitRef}
-                    isEditor={isEditor}
-                    onStart={beginInteraction}
-                    onEnd={endInteraction}
-                />
+                <AdaptiveControls ref={orbitRef} isEditor={isEditor} />
 
                 {!isEditor && (
                     <ViewerInteraction
