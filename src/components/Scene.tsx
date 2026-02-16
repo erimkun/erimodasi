@@ -1,7 +1,6 @@
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, Stats, TransformControls, Bvh, useTexture } from '@react-three/drei';
 import { Suspense, useRef, useEffect, useMemo } from 'react';
-import type { ReactNode } from 'react';
 import * as THREE from 'three';
 import { Model } from './Model';
 import { InteractiveBoxes } from './InteractiveBoxes';
@@ -40,11 +39,6 @@ interface SceneProps {
     onModelClick?: (modelId: string) => void;
     onBoxClick?: (boxId: string) => void;
     onMissed?: () => void;
-}
-
-function MaybeBvh({ enabled, children }: { enabled: boolean; children: ReactNode }) {
-    if (!enabled) return <>{children}</>;
-    return <Bvh firstHitOnly>{children}</Bvh>;
 }
 
 function LoadingFallback() {
@@ -553,37 +547,6 @@ function ShadowFreeze() {
     return null;
 }
 
-function SceneWarmup({ enabled }: { enabled: boolean }) {
-    const { gl, scene, camera, invalidate } = useThree();
-
-    useEffect(() => {
-        if (!enabled) return;
-
-        let rafId = 0;
-        let frames = 0;
-
-        const warm = () => {
-            if (frames === 0) {
-                gl.compile(scene, camera);
-            }
-            invalidate();
-            frames += 1;
-
-            if (frames < 4) {
-                rafId = requestAnimationFrame(warm);
-            }
-        };
-
-        rafId = requestAnimationFrame(warm);
-
-        return () => {
-            if (rafId) cancelAnimationFrame(rafId);
-        };
-    }, [enabled, gl, scene, camera, invalidate]);
-
-    return null;
-}
-
 export function Scene({ isEditor = false, focusedModelId = null, onModelClick, onBoxClick, onMissed }: SceneProps) {
     // Editor uses store config, Viewer uses hardcoded static scene
     const storeConfig = useSceneStore((s) => s.config);
@@ -624,7 +587,7 @@ export function Scene({ isEditor = false, focusedModelId = null, onModelClick, o
     }, [isEditor]);
 
     const enableShadows = isEditor || !IS_LOW_END_DEVICE;
-    const enableBvh = !isEditor && !IS_LOW_END_DEVICE;
+    const enableBvh = false;
 
     return (
         <Canvas
@@ -653,8 +616,6 @@ export function Scene({ isEditor = false, focusedModelId = null, onModelClick, o
             {isEditor && <Stats />}
             {/* Freeze shadow map after first frame — static scene optimization */}
             {!isEditor && <ShadowFreeze />}
-            {/* Warmup scene/program compilation before first user interaction */}
-            {!isEditor && <SceneWarmup enabled={true} />}
 
             <Suspense fallback={<LoadingFallback />}>
                 {/* Skybox with texture */}
@@ -663,57 +624,109 @@ export function Scene({ isEditor = false, focusedModelId = null, onModelClick, o
                 <Lighting config={config.lighting} enableShadows={enableShadows} />
 
                 {/* Models - each in own Suspense for progressive loading */}
-                <MaybeBvh enabled={enableBvh}>
-                    {config.models.map((model) => {
-                        if (!model.visible) return null;
-                        if (isEditor) {
-                            return (
-                                <Suspense key={model.id} fallback={null}>
-                                    <EditableObject
-                                        position={model.position}
-                                        rotation={model.rotation}
-                                        scale={model.scale}
-                                        isSelected={selectedModelId === model.id}
-                                        onSelect={() => { setSelectedModel(model.id); }}
-                                        onTransformChange={handleModelTransform(model.id)}
-                                        orbitRef={orbitRef}
-                                    >
-                                        <Model config={{ ...model, position: [0, 0, 0], rotation: [0, 0, 0], scale: [1, 1, 1] }} />
-                                    </EditableObject>
-                                </Suspense>
-                            );
-                        }
-                        if (model.id === 'char') {
-                            return (
-                                <Suspense key={model.id} fallback={null}>
-                                    <ClickableModel
-                                        config={model}
-                                        isFocused={focusedModelId === model.id}
-                                        onClick={() => onModelClick?.(model.id)}
-                                    />
-                                </Suspense>
-                            );
-                        }
-                        // desk, writing tıklanabilir
-                        if (model.id === 'desk' || model.id === 'writing') {
-                            return (
-                                <Suspense key={model.id} fallback={null}>
-                                    <group
-                                        position={model.position}
-                                        rotation={model.rotation}
-                                        scale={model.scale}
-                                        onClick={(e) => { e.stopPropagation(); onModelClick?.(model.id); }}
-                                        onPointerOver={setPointerCursor}
-                                        onPointerOut={resetPointerCursor}
-                                    >
-                                        <Model config={{ ...model, position: [0, 0, 0], rotation: [0, 0, 0], scale: [1, 1, 1] }} />
-                                    </group>
-                                </Suspense>
-                            );
-                        }
-                        return null;
-                    })}
-                </MaybeBvh>
+                {enableBvh ? (
+                    <Bvh firstHitOnly>
+                        {config.models.map((model) => {
+                            if (!model.visible) return null;
+                            if (isEditor) {
+                                return (
+                                    <Suspense key={model.id} fallback={null}>
+                                        <EditableObject
+                                            position={model.position}
+                                            rotation={model.rotation}
+                                            scale={model.scale}
+                                            isSelected={selectedModelId === model.id}
+                                            onSelect={() => { setSelectedModel(model.id); }}
+                                            onTransformChange={handleModelTransform(model.id)}
+                                            orbitRef={orbitRef}
+                                        >
+                                            <Model config={{ ...model, position: [0, 0, 0], rotation: [0, 0, 0], scale: [1, 1, 1] }} />
+                                        </EditableObject>
+                                    </Suspense>
+                                );
+                            }
+                            if (model.id === 'char') {
+                                return (
+                                    <Suspense key={model.id} fallback={null}>
+                                        <ClickableModel
+                                            config={model}
+                                            isFocused={focusedModelId === model.id}
+                                            onClick={() => onModelClick?.(model.id)}
+                                        />
+                                    </Suspense>
+                                );
+                            }
+                            if (model.id === 'desk' || model.id === 'writing') {
+                                return (
+                                    <Suspense key={model.id} fallback={null}>
+                                        <group
+                                            position={model.position}
+                                            rotation={model.rotation}
+                                            scale={model.scale}
+                                            onClick={(e) => { e.stopPropagation(); onModelClick?.(model.id); }}
+                                            onPointerOver={setPointerCursor}
+                                            onPointerOut={resetPointerCursor}
+                                        >
+                                            <Model config={{ ...model, position: [0, 0, 0], rotation: [0, 0, 0], scale: [1, 1, 1] }} />
+                                        </group>
+                                    </Suspense>
+                                );
+                            }
+                            return null;
+                        })}
+                    </Bvh>
+                ) : (
+                    <>
+                        {config.models.map((model) => {
+                            if (!model.visible) return null;
+                            if (isEditor) {
+                                return (
+                                    <Suspense key={model.id} fallback={null}>
+                                        <EditableObject
+                                            position={model.position}
+                                            rotation={model.rotation}
+                                            scale={model.scale}
+                                            isSelected={selectedModelId === model.id}
+                                            onSelect={() => { setSelectedModel(model.id); }}
+                                            onTransformChange={handleModelTransform(model.id)}
+                                            orbitRef={orbitRef}
+                                        >
+                                            <Model config={{ ...model, position: [0, 0, 0], rotation: [0, 0, 0], scale: [1, 1, 1] }} />
+                                        </EditableObject>
+                                    </Suspense>
+                                );
+                            }
+                            if (model.id === 'char') {
+                                return (
+                                    <Suspense key={model.id} fallback={null}>
+                                        <ClickableModel
+                                            config={model}
+                                            isFocused={focusedModelId === model.id}
+                                            onClick={() => onModelClick?.(model.id)}
+                                        />
+                                    </Suspense>
+                                );
+                            }
+                            if (model.id === 'desk' || model.id === 'writing') {
+                                return (
+                                    <Suspense key={model.id} fallback={null}>
+                                        <group
+                                            position={model.position}
+                                            rotation={model.rotation}
+                                            scale={model.scale}
+                                            onClick={(e) => { e.stopPropagation(); onModelClick?.(model.id); }}
+                                            onPointerOver={setPointerCursor}
+                                            onPointerOut={resetPointerCursor}
+                                        >
+                                            <Model config={{ ...model, position: [0, 0, 0], rotation: [0, 0, 0], scale: [1, 1, 1] }} />
+                                        </group>
+                                    </Suspense>
+                                );
+                            }
+                            return null;
+                        })}
+                    </>
+                )}
 
                 {/* Non-clickable models rendered outside Bvh — no raycast interference */}
                 {!isEditor && config.models.map((model) => {
