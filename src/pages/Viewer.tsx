@@ -30,13 +30,16 @@ export function Viewer() {
     const [isLoading, setIsLoading] = useState(true);
     const [sceneReady, setSceneReady] = useState(false);
 
-    // Track real model loading progress via drei useProgress
-    const { progress, active } = useProgress();
-    useEffect(() => {
-        if (progress >= 100 && !active) {
-            setSceneReady(true);
-        }
-    }, [progress, active]);
+    // Track real model loading progress via drei useProgress isolated component
+    const ProgressTracker = useCallback(() => {
+        const { progress, active } = useProgress();
+        useEffect(() => {
+            if (progress >= 100 && !active) {
+                setSceneReady(true);
+            }
+        }, [progress, active]);
+        return null;
+    }, []);
 
     // Popup states
     const [activeProject, setActiveProject] = useState<ProjectData | null>(null);
@@ -46,15 +49,16 @@ export function Viewer() {
 
     // Dialogue store — use individual selectors to avoid unnecessary re-renders
     const showSpeechBubble = useDialogueStore(s => s.isOpen);
+    const currentNodeId = useDialogueStore(s => s.currentNodeId);
+    const historyFlags = useDialogueStore(s => s.history.length);
     const startDialogue = useDialogueStore(s => s.startDialogue);
     const selectOption = useDialogueStore(s => s.selectOption);
     const goBack = useDialogueStore(s => s.goBack);
     const closeDialogue = useDialogueStore(s => s.close);
     const getCurrentNode = useDialogueStore(s => s.getCurrentNode);
-    const history = useDialogueStore(s => s.history);
 
-    const currentNode = getCurrentNode();
-    const canGoBack = history.length > 0;
+    const currentNode = currentNodeId ? getCurrentNode() : null;
+    const canGoBack = historyFlags > 0;
 
     // Aksiyonları işle
     const handleAction = useCallback((action: DialogueAction | undefined) => {
@@ -156,6 +160,7 @@ export function Viewer() {
 
     return (
         <div className="viewer">
+            <ProgressTracker />
             {isLoading && (
                 <LoadingScreen
                     isLoaded={sceneReady}
@@ -198,7 +203,7 @@ export function Viewer() {
             )}
 
             {/* Scene always mounted so models preload — keep full size to avoid costly resize recompile */}
-            <div className="viewer-canvas" style={isLoading ? { opacity: 0, pointerEvents: 'none' } : undefined}>
+            <div className="viewer-canvas" style={!sceneReady ? { opacity: 0, pointerEvents: 'none' } : undefined}>
                 <Scene
                     focusedModelId={focusedModelId}
                     onModelClick={handleCharacterClick}

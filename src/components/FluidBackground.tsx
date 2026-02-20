@@ -1,6 +1,7 @@
 import { useRef, useMemo, useState, useCallback } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
+import { useLoadingStore } from '../stores/loadingStore';
 
 const IS_MOBILE = typeof window !== 'undefined' && (
     window.innerWidth <= 768 ||
@@ -90,6 +91,8 @@ function FullScreenQuad({ onWarmedUp }: { onWarmedUp: () => void }) {
     const { viewport } = useThree();
     const frameCount = useRef(0);
     const signaled = useRef(false);
+    const lastTime = useRef(0);
+    const isFluidPaused = useLoadingStore((s) => s.isFluidPaused);
 
     const uniforms = useMemo(
         () => ({
@@ -100,9 +103,14 @@ function FullScreenQuad({ onWarmedUp }: { onWarmedUp: () => void }) {
     );
 
     useFrame((state) => {
-        if (mesh.current) {
-            (mesh.current.material as THREE.ShaderMaterial).uniforms.uTime.value =
-                state.clock.getElapsedTime();
+        if (mesh.current && !isFluidPaused) {
+            const elapsed = state.clock.getElapsedTime();
+
+            // Throttle to ~30fps to reduce GPU contention with main Scene canvas
+            if (elapsed - lastTime.current < 0.033) return;
+            lastTime.current = elapsed;
+
+            (mesh.current.material as THREE.ShaderMaterial).uniforms.uTime.value = elapsed;
 
             // Let the GPU compile the shader & render 15 stable frames
             // before we signal readiness — eliminates the stutter on fade-in

@@ -1,7 +1,10 @@
 import { useRef, useEffect, memo } from 'react';
 // import { useFrame } from '@react-three/fiber';  // DISABLED: no emissive animation
-// import * as THREE from 'three';  // DISABLED: no emissive blending materials
+import * as THREE from 'three';
 import { BoxLightConfig } from '../types/scene';
+
+// Shared invisible hitbox material — single instance across all 6 boxes, reduces draw calls
+const HITBOX_MATERIAL = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0 });
 
 // Detect touch device
 function isTouchDevice() {
@@ -62,7 +65,7 @@ const InteractiveBox = memo(function InteractiveBox({ light, isMobile, onBoxClic
                 }}
             >
                 <boxGeometry args={hitboxSize} />
-                <meshBasicMaterial transparent opacity={0} />
+                <primitive object={HITBOX_MATERIAL} attach="material" />
             </mesh>
 
             {/* Emissive glow — DISABLED: commented out per design decision */}

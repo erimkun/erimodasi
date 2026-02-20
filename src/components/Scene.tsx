@@ -1,11 +1,12 @@
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, Stats, TransformControls, Bvh, useTexture } from '@react-three/drei';
-import { Suspense, useRef, useEffect, useMemo } from 'react';
+import { Suspense, useRef, useEffect, useMemo, useCallback, memo } from 'react';
 import * as THREE from 'three';
 import { Model } from './Model';
 import { InteractiveBoxes } from './InteractiveBoxes';
 import { Lighting } from './Lighting';
 import { useSceneStore } from '../stores/sceneStore';
+import { useLoadingStore } from '../stores/loadingStore';
 import { STATIC_SCENE } from '../data/staticScene';
 import { ModelConfig } from '../types/scene';
 import { preloadModels } from './Model';
@@ -368,10 +369,10 @@ function EditableBoxLight({ light, isSelected, onSelect, onTransformChange, orbi
 }
 
 // Clickable model wrapper for Viewer mode - animates rotation on focus
-function ClickableModel({ config, isFocused, onClick }: {
+const ClickableModel = memo(function ClickableModel({ config, isFocused, onModelClick }: {
     config: ModelConfig;
     isFocused: boolean;
-    onClick?: () => void;
+    onModelClick?: (id: string) => void;
 }) {
     const groupRef = useRef<THREE.Group>(null);
     const isAnimating = useRef(false);
@@ -397,6 +398,7 @@ function ClickableModel({ config, isFocused, onClick }: {
         if (diff < 0.01) {
             groupRef.current.rotation.y = targetRotY;
             isAnimating.current = false;
+            state.invalidate(); // Once for final paint
             return;
         }
 
@@ -409,20 +411,53 @@ function ClickableModel({ config, isFocused, onClick }: {
         state.invalidate();
     });
 
+    const zeroConfig = useMemo(() => ({
+        ...config,
+        position: [0, 0, 0] as [number, number, number],
+        rotation: [0, 0, 0] as [number, number, number],
+        scale: [1, 1, 1] as [number, number, number]
+    }), [config]);
+
     return (
         <group
             ref={groupRef}
             position={config.position}
             rotation={config.rotation}
             scale={config.scale}
-            onClick={(e) => { e.stopPropagation(); onClick?.(); }}
+            onClick={(e) => { e.stopPropagation(); onModelClick?.(config.id); }}
             onPointerOver={setPointerCursor}
             onPointerOut={resetPointerCursor}
         >
-            <Model config={{ ...config, position: [0, 0, 0], rotation: [0, 0, 0], scale: [1, 1, 1] }} />
+            <Model config={zeroConfig} />
         </group>
     );
-}
+});
+
+// Static Hoverable Model wrapper for Viewer mode (Desk, Writing)
+const StaticHoverModel = memo(function StaticHoverModel({ config, onModelClick }: {
+    config: ModelConfig;
+    onModelClick?: (id: string) => void;
+}) {
+    const zeroConfig = useMemo(() => ({
+        ...config,
+        position: [0, 0, 0] as [number, number, number],
+        rotation: [0, 0, 0] as [number, number, number],
+        scale: [1, 1, 1] as [number, number, number]
+    }), [config]);
+
+    return (
+        <group
+            position={config.position}
+            rotation={config.rotation}
+            scale={config.scale}
+            onClick={(e) => { e.stopPropagation(); onModelClick?.(config.id); }}
+            onPointerOver={setPointerCursor}
+            onPointerOut={resetPointerCursor}
+        >
+            <Model config={zeroConfig} />
+        </group>
+    );
+});
 
 // Camera animation controller for Viewer mode
 function ViewerInteraction({
@@ -502,7 +537,7 @@ function ViewerInteraction({
         currentLookAt.current.lerp(goalTarget, lerpFactor);
         camera.lookAt(currentLookAt.current);
 
-        // Request next frame
+        // Always invalidate while animating
         state.invalidate();
 
         // Check if animation is complete (use squared distance for performance)
@@ -523,31 +558,51 @@ function ViewerInteraction({
                 controls.target.copy(goalTarget);
                 controls.enabled = true;
                 controls.update();
-                animationComplete.current = true;
+            }
+            animationComplete.current = true;
+            state.invalidate(); // Final paint
+        }
+    });
+
+    return null;
+}
+
+// Sequential Baker: Waits for signal -> Compiles -> Computes Shadows -> Freezes -> Done
+function ShadowBaker() {
+    const { gl, scene, camera, invalidate } = useThree();
+    const bakingStatus = useLoadingStore((s) => s.bakingStatus);
+    const setBakingStatus = useLoadingStore((s) => s.setBakingStatus);
+    const setFluidPaused = useLoadingStore((s) => s.setFluidPaused);
+    const frameCount = useRef(0);
+
+    useFrame(() => {
+        if (bakingStatus === 'baking') {
+            frameCount.current++;
+
+            // Frame 1: Compile shaders
+            if (frameCount.current === 1) {
+                gl.compile(scene, camera);
+                invalidate();
+            }
+
+            // Frame 2: Compute shadow map & Freeze
+            if (frameCount.current === 2) {
+                gl.shadowMap.autoUpdate = false;
+                gl.shadowMap.needsUpdate = true;
+                invalidate();
+            }
+
+            // Frame 3: Signal done & Resume Fluid
+            if (frameCount.current >= 3) {
+                setBakingStatus('done');
+                setFluidPaused(false);
             }
         }
     });
-
     return null;
 }
 
-// Disable shadow auto-update for static scenes — massive perf win on mobile
-// Computes shadow map once, then freezes it
-function ShadowFreeze() {
-    const { gl } = useThree();
-    const done = useRef(false);
-    useFrame(() => {
-        if (!done.current) {
-            // Let first frame compute shadow map, then freeze
-            gl.shadowMap.autoUpdate = false;
-            gl.shadowMap.needsUpdate = true;
-            done.current = true;
-        }
-    });
-    return null;
-}
-
-export function Scene({ isEditor = false, focusedModelId = null, onModelClick, onBoxClick, onMissed }: SceneProps) {
+export const Scene = memo(function Scene({ isEditor = false, focusedModelId = null, onModelClick, onBoxClick, onMissed }: SceneProps) {
     // Editor uses store config, Viewer uses hardcoded static scene
     const storeConfig = useSceneStore((s) => s.config);
     const config = isEditor ? storeConfig : STATIC_SCENE;
@@ -563,27 +618,27 @@ export function Scene({ isEditor = false, focusedModelId = null, onModelClick, o
 
     const orbitRef = useRef<any>(null);
 
-    const handleModelTransform = (modelId: string) => (pos: [number, number, number], rot: [number, number, number], scl: [number, number, number]) => {
+    const handleModelTransform = useCallback((modelId: string) => (pos: [number, number, number], rot: [number, number, number], scl: [number, number, number]) => {
         updateModel(modelId, { position: pos, rotation: rot, scale: scl });
-    };
+    }, [updateModel]);
 
-    const handlePointLightTransform = (lightId: string) => (pos: [number, number, number]) => {
+    const handlePointLightTransform = useCallback((lightId: string) => (pos: [number, number, number]) => {
         updatePointLight(lightId, { position: pos });
-    };
+    }, [updatePointLight]);
 
-    const handleStripLightTransform = (lightId: string) => (pos: [number, number, number], rot: [number, number, number], scl: [number, number, number]) => {
+    const handleStripLightTransform = useCallback((lightId: string) => (pos: [number, number, number], rot: [number, number, number], scl: [number, number, number]) => {
         updateStripLight(lightId, { position: pos, rotation: rot, scale: scl });
-    };
+    }, [updateStripLight]);
 
-    const handleBoxLightTransform = (lightId: string) => (pos: [number, number, number]) => {
+    const handleBoxLightTransform = useCallback((lightId: string) => (pos: [number, number, number]) => {
         updateBoxLight(lightId, { position: pos });
-    };
+    }, [updateBoxLight]);
 
     const dpr = useMemo(() => {
         if (isEditor) return 1;
         if (IS_LOW_END_DEVICE) return 0.7;
-        if (IS_MOBILE) return 0.85;
-        return Math.min(window.devicePixelRatio || 1, 1.25);
+        if (IS_MOBILE) return 0.85; // Hard limits mobile pixel push
+        return Math.min(window.devicePixelRatio || 1, 1.2); // Limit desktop to 1.2x instead of 1.5x to prevent rotational pan lag
     }, [isEditor]);
 
     const enableShadows = isEditor || !IS_LOW_END_DEVICE;
@@ -591,7 +646,7 @@ export function Scene({ isEditor = false, focusedModelId = null, onModelClick, o
 
     return (
         <Canvas
-            shadows={enableShadows}
+            shadows={enableShadows ? "soft" : false} // Force PCFSoftShadowMap
             frameloop="demand"
             camera={{ position: config.camera.position, fov: 50 }}
             dpr={dpr}
@@ -601,7 +656,7 @@ export function Scene({ isEditor = false, focusedModelId = null, onModelClick, o
                 depth: true,
                 stencil: false,
                 toneMapping: THREE.AgXToneMapping,
-                toneMappingExposure: 1.0
+                toneMappingExposure: 1.05
             }}
             onPointerMissed={() => {
                 if (isEditor) {
@@ -614,8 +669,6 @@ export function Scene({ isEditor = false, focusedModelId = null, onModelClick, o
             }}
         >
             {isEditor && <Stats />}
-            {/* Freeze shadow map after first frame — static scene optimization */}
-            {!isEditor && <ShadowFreeze />}
 
             <Suspense fallback={<LoadingFallback />}>
                 {/* Skybox with texture */}
@@ -651,7 +704,7 @@ export function Scene({ isEditor = false, focusedModelId = null, onModelClick, o
                                         <ClickableModel
                                             config={model}
                                             isFocused={focusedModelId === model.id}
-                                            onClick={() => onModelClick?.(model.id)}
+                                            onModelClick={onModelClick}
                                         />
                                     </Suspense>
                                 );
@@ -659,16 +712,7 @@ export function Scene({ isEditor = false, focusedModelId = null, onModelClick, o
                             if (model.id === 'desk' || model.id === 'writing') {
                                 return (
                                     <Suspense key={model.id} fallback={null}>
-                                        <group
-                                            position={model.position}
-                                            rotation={model.rotation}
-                                            scale={model.scale}
-                                            onClick={(e) => { e.stopPropagation(); onModelClick?.(model.id); }}
-                                            onPointerOver={setPointerCursor}
-                                            onPointerOut={resetPointerCursor}
-                                        >
-                                            <Model config={{ ...model, position: [0, 0, 0], rotation: [0, 0, 0], scale: [1, 1, 1] }} />
-                                        </group>
+                                        <StaticHoverModel config={model} onModelClick={onModelClick} />
                                     </Suspense>
                                 );
                             }
@@ -702,7 +746,7 @@ export function Scene({ isEditor = false, focusedModelId = null, onModelClick, o
                                         <ClickableModel
                                             config={model}
                                             isFocused={focusedModelId === model.id}
-                                            onClick={() => onModelClick?.(model.id)}
+                                            onModelClick={onModelClick}
                                         />
                                     </Suspense>
                                 );
@@ -710,16 +754,7 @@ export function Scene({ isEditor = false, focusedModelId = null, onModelClick, o
                             if (model.id === 'desk' || model.id === 'writing') {
                                 return (
                                     <Suspense key={model.id} fallback={null}>
-                                        <group
-                                            position={model.position}
-                                            rotation={model.rotation}
-                                            scale={model.scale}
-                                            onClick={(e) => { e.stopPropagation(); onModelClick?.(model.id); }}
-                                            onPointerOver={setPointerCursor}
-                                            onPointerOut={resetPointerCursor}
-                                        >
-                                            <Model config={{ ...model, position: [0, 0, 0], rotation: [0, 0, 0], scale: [1, 1, 1] }} />
-                                        </group>
+                                        <StaticHoverModel config={model} onModelClick={onModelClick} />
                                     </Suspense>
                                 );
                             }
@@ -803,7 +838,9 @@ export function Scene({ isEditor = false, focusedModelId = null, onModelClick, o
                         cameraPosition={config.camera.position}
                     />
                 )}
+                {/* Sequential Baker replaces WarmUp/Freeze */}
+                {!isEditor && <ShadowBaker />}
             </Suspense>
         </Canvas>
     );
-}
+});

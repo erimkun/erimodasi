@@ -32,11 +32,9 @@ export const Model = memo(function Model({ config, onClick, isSelected, ...props
                 const mesh = child as THREE.Mesh;
                 child.receiveShadow = true;
                 if (mesh.geometry) {
-                    if (!mesh.geometry.boundingSphere) {
-                        mesh.geometry.computeBoundingSphere();
-                    }
-                    const radius = mesh.geometry.boundingSphere?.radius || 0;
-                    child.castShadow = radius > 0.05;
+                    // Only specific models cast shadows per user request
+                    const CAST_SHADOW_IDS = ['char', 'kutu', 'desk'];
+                    child.castShadow = CAST_SHADOW_IDS.includes(config.id);
                 }
             }
         });

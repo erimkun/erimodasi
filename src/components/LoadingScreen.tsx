@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, lazy, Suspense } from 'react';
 import { motion, AnimatePresence, useMotionValue, useTransform, useSpring } from 'framer-motion';
+import { useLoadingStore } from '../stores/loadingStore';
 import './LoadingScreen.css';
 
 // Lazy-load Three.js fluid — CSS blobs show instantly as fallback
@@ -48,6 +49,7 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({ onComplete, isLoad
     const [activeId, setActiveId] = useState<number | null>(null);
     const [isMelting, setIsMelting] = useState(false);
     const [showReady, setShowReady] = useState(false);
+    const [hideFluid, setHideFluid] = useState(false);
     const isMobile = useIsMobile();
 
     const [fluidReady, setFluidReady] = useState(false);
@@ -59,11 +61,23 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({ onComplete, isLoad
 
     const [showFullText, setShowFullText] = useState(false);
 
+    const setBakingStatus = useLoadingStore((s) => s.setBakingStatus);
+    const setFluidPaused = useLoadingStore((s) => s.setFluidPaused);
+    const bakingStatus = useLoadingStore((s) => s.bakingStatus);
+
     useEffect(() => {
         if (isLoaded) {
+            // Models loaded -> Start Baking Sequence
+            setFluidPaused(true);
+            setBakingStatus('baking');
+        }
+    }, [isLoaded, setFluidPaused, setBakingStatus]);
+
+    useEffect(() => {
+        if (bakingStatus === 'done') {
             setShowReady(true);
         }
-    }, [isLoaded]);
+    }, [bakingStatus]);
 
     // Mouse movement for logo rotation
     const x = useMotionValue(0);
@@ -98,6 +112,7 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({ onComplete, isLoad
 
     const handleReadyClick = () => {
         setIsMelting(true);
+        setHideFluid(true); // Kill fluid shader BEFORE melt to avoid dual-Canvas GPU contention
         setTimeout(() => {
             onComplete();
         }, 1500);
@@ -117,7 +132,7 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({ onComplete, isLoad
             </div>
 
             {/* Layer 1: Three.js WebGL fluid — desktop only for smoother mobile startup */}
-            {!isMobile && (
+            {!isMobile && !hideFluid && (
                 <Suspense fallback={null}>
                     <FluidBackground onReady={() => setFluidReady(true)} />
                 </Suspense>
@@ -168,7 +183,7 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({ onComplete, isLoad
                                     />
                                 </motion.div>
 
-                            {/* Giriş Yap butonu — fluid morphing blob */}
+                                {/* Giriş Yap butonu — fluid morphing blob */}
                                 <motion.button
                                     key="ready"
                                     className="enter-btn"
@@ -184,8 +199,8 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({ onComplete, isLoad
                                         <div className="enter-blob enter-blob--inner" />
                                         <div className="enter-core">
                                             <svg className="enter-core-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                <path d="M5 12h14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-                                                <path d="M13 5l7 7-7 7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                                                <path d="M5 12h14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                                                <path d="M13 5l7 7-7 7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                                             </svg>
                                         </div>
                                     </div>

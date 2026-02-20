@@ -8,7 +8,7 @@ const IS_MOBILE = typeof window !== 'undefined' && (
     navigator.maxTouchPoints > 0
 );
 
-const SHADOW_MAP_SIZE: [number, number] = IS_MOBILE ? [512, 512] : [1024, 1024];
+const SHADOW_MAP_SIZE: [number, number] = IS_MOBILE ? [1024, 1024] : [2048, 2048];
 
 interface LightingProps {
     config: LightConfig;
@@ -31,14 +31,14 @@ export const Lighting = memo(function Lighting({ config, enableShadows = true }:
                 color={config.directional.color}
                 castShadow={enableShadows}
                 shadow-mapSize={SHADOW_MAP_SIZE}
-                shadow-camera-far={30}
+                shadow-camera-far={30} // Restored far plane to encompass the origin from y=20
                 shadow-camera-near={0.1}
-                shadow-camera-left={-3}
-                shadow-camera-right={3}
-                shadow-camera-top={3}
-                shadow-camera-bottom={-3}
-                shadow-bias={-0.001}
-                shadow-normalBias={0.02}
+                shadow-camera-left={-2.5}
+                shadow-camera-right={2.5}
+                shadow-camera-top={2.5}
+                shadow-camera-bottom={-1.8}
+                shadow-bias={-0.0005} // Tweak bias slightly to fit higher resolution map
+                shadow-normalBias={0.03}
             />
 
             {/* Hemisphere light for realistic sky/ground color blending */}
