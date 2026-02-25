@@ -213,8 +213,8 @@
 @media (max-width: 768px) {
     .speech-bubble-container {
         /* Mobilde ekranın merkezinde, safe area içinde, karakterin üstünde */
-        top: auto;
-        bottom: 38%;
+        top: 12%;
+        bottom: auto;
         left: 50%;
         transform: translateX(-50%);
         width: 90vw;
@@ -260,7 +260,8 @@
 @media (max-width: 400px) {
     .speech-bubble-container {
         width: 94vw;
-        bottom: 35%;
+        top: 10%;
+        bottom: auto;
     }
 
     .speech-bubble-content p {
