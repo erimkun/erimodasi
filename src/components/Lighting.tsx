@@ -8,7 +8,7 @@ const IS_MOBILE = typeof window !== 'undefined' && (
     navigator.maxTouchPoints > 0
 );
 
-const SHADOW_MAP_SIZE: [number, number] = IS_MOBILE ? [1024, 1024] : [2048, 2048];
+const SHADOW_MAP_SIZE: [number, number] = IS_MOBILE ? [512, 512] : [2048, 2048];
 
 interface LightingProps {
     config: LightConfig;

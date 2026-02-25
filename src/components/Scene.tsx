@@ -637,8 +637,8 @@ export const Scene = memo(function Scene({ isEditor = false, focusedModelId = nu
     const dpr = useMemo(() => {
         if (isEditor) return 1;
         if (IS_LOW_END_DEVICE) return 0.7;
-        if (IS_MOBILE) return 0.85; // Hard limits mobile pixel push
-        return Math.min(window.devicePixelRatio || 1, 1.2); // Limit desktop to 1.2x instead of 1.5x to prevent rotational pan lag
+        if (IS_MOBILE) return 0.8; // Hard limits mobile pixel push to reduce VRAM pressure
+        return Math.min(window.devicePixelRatio || 1, 1.2); // Limit desktop to 1.2x
     }, [isEditor]);
 
     const enableShadows = isEditor || !IS_LOW_END_DEVICE;
@@ -652,7 +652,8 @@ export const Scene = memo(function Scene({ isEditor = false, focusedModelId = nu
             dpr={dpr}
             gl={{
                 antialias: !IS_MOBILE && !IS_LOW_END_DEVICE,
-                powerPreference: 'high-performance',
+                powerPreference: 'default',
+                precision: IS_MOBILE ? 'mediump' : 'highp',
                 depth: true,
                 stencil: false,
                 toneMapping: THREE.AgXToneMapping,
