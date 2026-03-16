@@ -1,5 +1,5 @@
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { OrbitControls, Stats, TransformControls, Bvh, useTexture, useGLTF } from '@react-three/drei';
+import { OrbitControls, Stats, TransformControls, Bvh, useTexture } from '@react-three/drei';
 import { Suspense, useRef, useEffect, useMemo, useCallback, memo, useState } from 'react';
 import * as THREE from 'three';
 import { Model } from './Model';
@@ -538,7 +538,6 @@ const ClickableModel = memo(function ClickableModel({ config, isFocused, onModel
     const groupRef = useRef<THREE.Group>(null);
     const isAnimating = useRef(false);
     const prevFocused = useRef(isFocused);
-    const { scene } = useGLTF(config.path);
 
     const targetRotY = isFocused
         ? config.rotation[1] - (125 * Math.PI / 180)
@@ -580,34 +579,16 @@ const ClickableModel = memo(function ClickableModel({ config, isFocused, onModel
         scale: [1, 1, 1] as [number, number, number]
     }), [config]);
 
-    const { boxSize, boxCenter } = useMemo(() => {
-        const box = new THREE.Box3().setFromObject(scene);
-        const s = new THREE.Vector3();
-        box.getSize(s);
-        const c = new THREE.Vector3();
-        box.getCenter(c);
-        // Expand hitbox slightly so edges are easy to click
-        s.multiplyScalar(1.05);
-        return { boxSize: [s.x, s.y, s.z], boxCenter: [c.x, c.y, c.z] };
-    }, [scene]);
-
     return (
         <group
             ref={groupRef}
             position={config.position}
             rotation={config.rotation}
             scale={config.scale}
+            onClick={(e) => { e.stopPropagation(); onModelClick?.(config.id); }}
+            onPointerOver={setPointerCursor}
+            onPointerOut={resetPointerCursor}
         >
-            <mesh
-                position={boxCenter as [number, number, number]}
-                visible={false}
-                onClick={(e) => { e.stopPropagation(); onModelClick?.(config.id); }}
-                onPointerOver={(e) => { e.stopPropagation(); setPointerCursor(); }}
-                onPointerOut={(e) => { e.stopPropagation(); resetPointerCursor(); }}
-            >
-                <boxGeometry args={boxSize as [number, number, number]} />
-                <meshBasicMaterial opacity={0} transparent />
-            </mesh>
             <Model config={zeroConfig} />
         </group>
     );
@@ -618,8 +599,6 @@ const StaticHoverModel = memo(function StaticHoverModel({ config, onModelClick }
     config: ModelConfig;
     onModelClick?: (id: string) => void;
 }) {
-    const { scene } = useGLTF(config.path);
-
     const zeroConfig = useMemo(() => ({
         ...config,
         position: [0, 0, 0] as [number, number, number],
@@ -627,33 +606,15 @@ const StaticHoverModel = memo(function StaticHoverModel({ config, onModelClick }
         scale: [1, 1, 1] as [number, number, number]
     }), [config]);
 
-    const { boxSize, boxCenter } = useMemo(() => {
-        const box = new THREE.Box3().setFromObject(scene);
-        const s = new THREE.Vector3();
-        box.getSize(s);
-        const c = new THREE.Vector3();
-        box.getCenter(c);
-        // Add slightly higher thickness vertically for desk planes
-        if (s.y < 0.1) s.y = 0.2;
-        return { boxSize: [s.x, s.y, s.z], boxCenter: [c.x, c.y, c.z] };
-    }, [scene]);
-
     return (
         <group
             position={config.position}
             rotation={config.rotation}
             scale={config.scale}
+            onClick={(e) => { e.stopPropagation(); onModelClick?.(config.id); }}
+            onPointerOver={setPointerCursor}
+            onPointerOut={resetPointerCursor}
         >
-            <mesh
-                position={boxCenter as [number, number, number]}
-                visible={false}
-                onClick={(e) => { e.stopPropagation(); onModelClick?.(config.id); }}
-                onPointerOver={(e) => { e.stopPropagation(); setPointerCursor(); }}
-                onPointerOut={(e) => { e.stopPropagation(); resetPointerCursor(); }}
-            >
-                <boxGeometry args={boxSize as [number, number, number]} />
-                <meshBasicMaterial opacity={0} transparent />
-            </mesh>
             <Model config={zeroConfig} />
         </group>
     );
@@ -891,7 +852,7 @@ export const Scene = memo(function Scene({ isEditor = false, focusedModelId = nu
     return (
         <Canvas
             shadows={enableShadows}
-            frameloop="always"
+            frameloop="demand"
             camera={{ position: config.camera.position, fov: 50 }}
             dpr={dpr}
             onCreated={({ gl }) => {

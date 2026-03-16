@@ -2,6 +2,20 @@ import { useEffect, useRef, useState } from 'react';
 
 declare global {
     interface Window {
+        __R3F_METRICS__?: {
+            updatedAt: number;
+            render: {
+                calls: number;
+                triangles: number;
+                points: number;
+                lines: number;
+            };
+            memory: {
+                geometries: number;
+                textures: number;
+            };
+            maxCallsInLastSecond: number;
+        };
         __FPS_TOOL__?: {
             active: boolean;
             startedAt: string;
@@ -11,6 +25,9 @@ declare global {
                 max: number;
                 p1Low: number;
                 freezeCount: number;
+                longTaskCount: number;
+                avgRenderCalls: number;
+                peakRenderCalls: number;
                 sampleCount: number;
             };
             timeline: Array<{
@@ -18,9 +35,11 @@ declare global {
                 avg: number;
                 min: number;
                 max: number;
+                calls: number;
             }>;
             samples: number[];
             freezes: Array<{ t: number; dtMs: number }>;
+            longTasks: Array<{ t: number; durationMs: number }>;
         };
     }
 }
@@ -42,10 +61,14 @@ export function FpsLogger() {
     const startEpochRef = useRef<number>(0);
     const samplesRef = useRef<number[]>([]);
     const freezesRef = useRef<Array<{ t: number; dtMs: number }>>([]);
-    const timelineRef = useRef<Array<{ t: number; avg: number; min: number; max: number }>>([]);
+    const timelineRef = useRef<Array<{ t: number; avg: number; min: number; max: number; calls: number }>>([]);
     const bucketRef = useRef<number[]>([]);
     const bucketStartedAtRef = useRef<number>(0);
     const lastHudAtRef = useRef<number>(0);
+    const longTasksRef = useRef<Array<{ t: number; durationMs: number }>>([]);
+    const bucketCallsRef = useRef<number[]>([]);
+    const runningSumRef = useRef(0);
+    const runningMinRef = useRef(Number.POSITIVE_INFINITY);
 
     const getSnapshot = () => {
         const samples = samplesRef.current;
@@ -55,6 +78,12 @@ export function FpsLogger() {
         const max = Math.max(...samples);
         const avg = samples.reduce((sum, value) => sum + value, 0) / samples.length;
         const p1Low = percentile(samples, 0.01);
+        const avgRenderCalls = timelineRef.current.length > 0
+            ? timelineRef.current.reduce((sum, item) => sum + item.calls, 0) / timelineRef.current.length
+            : 0;
+        const peakRenderCalls = timelineRef.current.length > 0
+            ? Math.max(...timelineRef.current.map((item) => item.calls))
+            : 0;
 
         return {
             active,
@@ -65,11 +94,15 @@ export function FpsLogger() {
                 max: Number(max.toFixed(2)),
                 p1Low: Number(p1Low.toFixed(2)),
                 freezeCount: freezesRef.current.length,
+                longTaskCount: longTasksRef.current.length,
+                avgRenderCalls: Number(avgRenderCalls.toFixed(2)),
+                peakRenderCalls: Number(peakRenderCalls.toFixed(2)),
                 sampleCount: samples.length,
             },
             timeline: timelineRef.current,
             samples,
             freezes: freezesRef.current,
+            longTasks: longTasksRef.current,
         };
     };
 
@@ -117,6 +150,35 @@ export function FpsLogger() {
     }, []);
 
     useEffect(() => {
+        if (typeof PerformanceObserver === 'undefined') return;
+
+        let observer: PerformanceObserver | null = null;
+
+        try {
+            observer = new PerformanceObserver((list) => {
+                if (!active) return;
+                const now = performance.now();
+                const sinceStartSec = Number(((now - startRef.current) / 1000).toFixed(2));
+
+                list.getEntries().forEach((entry) => {
+                    longTasksRef.current.push({
+                        t: sinceStartSec,
+                        durationMs: Number(entry.duration.toFixed(2)),
+                    });
+                });
+            });
+
+            observer.observe({ entryTypes: ['longtask'] });
+        } catch {
+            observer = null;
+        }
+
+        return () => {
+            if (observer) observer.disconnect();
+        };
+    }, [active]);
+
+    useEffect(() => {
         if (!active) {
             if (rafRef.current !== null) {
                 cancelAnimationFrame(rafRef.current);
@@ -152,6 +214,10 @@ export function FpsLogger() {
         bucketRef.current = [];
         bucketStartedAtRef.current = 0;
         lastHudAtRef.current = 0;
+        longTasksRef.current = [];
+        bucketCallsRef.current = [];
+        runningSumRef.current = 0;
+        runningMinRef.current = Number.POSITIVE_INFINITY;
         setHud({ fps: 0, avg: 0, min: 0, p1Low: 0, freezes: 0 });
 
         const loop = (now: number) => {
@@ -171,7 +237,10 @@ export function FpsLogger() {
 
             const fps = Math.min(240, 1000 / dt);
             samplesRef.current.push(fps);
+            runningSumRef.current += fps;
+            if (fps < runningMinRef.current) runningMinRef.current = fps;
             bucketRef.current.push(fps);
+            bucketCallsRef.current.push(window.__R3F_METRICS__?.render.calls ?? 0);
 
             if (dt > 100) {
                 freezesRef.current.push({
@@ -182,24 +251,33 @@ export function FpsLogger() {
 
             if (now - bucketStartedAtRef.current >= 1000 && bucketRef.current.length > 0) {
                 const bucket = bucketRef.current;
+                const bucketCalls = bucketCallsRef.current;
                 const bMin = Math.min(...bucket);
                 const bMax = Math.max(...bucket);
                 const bAvg = bucket.reduce((sum, value) => sum + value, 0) / bucket.length;
+                const bCalls = bucketCalls.length > 0
+                    ? bucketCalls.reduce((sum, value) => sum + value, 0) / bucketCalls.length
+                    : 0;
                 timelineRef.current.push({
                     t: Number(((now - startRef.current) / 1000).toFixed(1)),
                     avg: Number(bAvg.toFixed(2)),
                     min: Number(bMin.toFixed(2)),
                     max: Number(bMax.toFixed(2)),
+                    calls: Number(bCalls.toFixed(2)),
                 });
                 bucketRef.current = [];
+                bucketCallsRef.current = [];
                 bucketStartedAtRef.current = now;
             }
 
-            if (now - lastHudAtRef.current >= 250 && samplesRef.current.length > 5) {
-                const values = samplesRef.current;
-                const avg = values.reduce((sum, value) => sum + value, 0) / values.length;
-                const min = Math.min(...values);
-                const p1Low = percentile(values, 0.01);
+            if (now - lastHudAtRef.current >= 500 && samplesRef.current.length > 5) {
+                const count = samplesRef.current.length;
+                const avg = runningSumRef.current / count;
+                const min = runningMinRef.current;
+
+                // Estimate p1 low from a rolling tail window to avoid sorting the full session repeatedly.
+                const tailWindow = samplesRef.current.slice(Math.max(0, count - 240));
+                const p1Low = percentile(tailWindow, 0.01);
                 setHud({
                     fps: Number(fps.toFixed(1)),
                     avg: Number(avg.toFixed(1)),
@@ -248,6 +326,7 @@ export function FpsLogger() {
             <div>MIN: {hud.min}</div>
             <div>1% LOW: {hud.p1Low}</div>
             <div>FREEZE: {hud.freezes}</div>
+            <div>CALLS: {window.__R3F_METRICS__?.render.calls ?? 0}</div>
             <div style={{ opacity: 0.7 }}>F: start/stop, L: JSON indir</div>
         </div>
     );

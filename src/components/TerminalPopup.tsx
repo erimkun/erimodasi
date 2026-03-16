@@ -120,6 +120,7 @@ function MatrixRain({ width, height }: { width: number; height: number }) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const animRef = useRef<number>(0);
     const columnsRef = useRef<number[]>([]);
+    const lastDrawTimeRef = useRef(0);
 
     useEffect(() => {
         const canvas = canvasRef.current;
@@ -134,7 +135,13 @@ function MatrixRain({ width, height }: { width: number; height: number }) {
         const cols = Math.floor(width / fontSize);
         columnsRef.current = Array(cols).fill(0).map(() => Math.random() * height / fontSize);
 
-        const draw = () => {
+        const draw = (time: number) => {
+            if (time - lastDrawTimeRef.current < 33) {
+                animRef.current = requestAnimationFrame(draw);
+                return;
+            }
+            lastDrawTimeRef.current = time;
+
             ctx.fillStyle = 'rgba(10, 10, 20, 0.06)';
             ctx.fillRect(0, 0, width, height);
             ctx.fillStyle = 'rgba(0, 255, 80, 0.12)';

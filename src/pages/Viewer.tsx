@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useTransition } from 'react';
 import { useProgress } from '@react-three/drei';
 import { Scene } from '../components/Scene';
 import { SpeechBubble } from '../components/SpeechBubble';
@@ -7,6 +7,7 @@ import { ProjectPopup } from '../components/ProjectPopup';
 import { TerminalPopup } from '../components/TerminalPopup';
 import { ProfilePopup } from '../components/ProfilePopup';
 import { useDialogueStore } from '../stores/dialogueStore';
+import { useLoadingStore } from '../stores/loadingStore';
 import { getProjectByBoxId } from '../data/projects';
 import type { ProjectData } from '../components/ProjectPopup';
 import type { DialogueAction } from '../types/dialogue';
@@ -26,9 +27,12 @@ function deferMainThreadWork(task: () => void, timeout = 180) {
 }
 
 export function Viewer() {
+    const [, startTransition] = useTransition();
     const [focusedModelId, setFocusedModelId] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [sceneReady, setSceneReady] = useState(false);
+    const bakingStatus = useLoadingStore((s) => s.bakingStatus);
+    const runtimeReady = sceneReady && bakingStatus === 'done';
 
     // Track real model loading progress via drei useProgress isolated component
     const ProgressTracker = useCallback(() => {
@@ -65,14 +69,22 @@ export function Viewer() {
         if (!action) return;
         switch (action.type) {
             case 'openTerminal':
-                setShowTerminal(true);
+                startTransition(() => {
+                    setShowTerminal(true);
+                });
                 break;
             case 'openProfile':
-                setShowProfile(true);
+                startTransition(() => {
+                    setShowProfile(true);
+                });
                 break;
             case 'openProject': {
                 const project = getProjectByBoxId(action.boxId);
-                if (project) setActiveProject(project);
+                if (project) {
+                    startTransition(() => {
+                        setActiveProject(project);
+                    });
+                }
                 break;
             }
             case 'highlightBox':
@@ -91,17 +103,23 @@ export function Viewer() {
 
         if (id === 'char') {
             deferMainThreadWork(() => {
-                startDialogue();
+                startTransition(() => {
+                    startDialogue();
+                });
             }, 600);
         }
         if (id === 'desk') {
             deferMainThreadWork(() => {
-                setShowTerminal(true);
+                startTransition(() => {
+                    setShowTerminal(true);
+                });
             });
         }
         if (id === 'writing') {
             deferMainThreadWork(() => {
-                setShowProfile(true);
+                startTransition(() => {
+                    setShowProfile(true);
+                });
             });
         }
     }, [startDialogue]);
@@ -111,10 +129,12 @@ export function Viewer() {
         const project = getProjectByBoxId(boxId);
         if (project) {
             deferMainThreadWork(() => {
-                setActiveProject(project);
+                startTransition(() => {
+                    setActiveProject(project);
+                });
             });
         }
-    }, []);
+    }, [startTransition]);
 
     const handleMissed = useCallback(() => {
         console.log('[Viewer] onMissed fired, clearing focus');
@@ -203,7 +223,7 @@ export function Viewer() {
             )}
 
             {/* Scene always mounted so models preload — keep full size to avoid costly resize recompile */}
-            <div className="viewer-canvas" style={!sceneReady ? { opacity: 0, pointerEvents: 'none' } : undefined}>
+            <div className="viewer-canvas" style={!runtimeReady ? { opacity: 0, pointerEvents: 'none' } : undefined}>
                 <Scene
                     focusedModelId={focusedModelId}
                     onModelClick={handleCharacterClick}

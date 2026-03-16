@@ -185,6 +185,20 @@
     transform: translateY(100%);
 }
 
+.loading-screen.loading-lite .fluid-blob {
+    animation-play-state: paused;
+    opacity: 0.55;
+    filter: blur(45px);
+}
+
+.loading-screen.loading-lite .css-fluid-bg::before {
+    opacity: 0.015;
+}
+
+.loading-screen.loading-lite .enter-blob {
+    animation-duration: 16s, 18s;
+}
+
 .content-wrapper {
     position: relative;
     z-index: 10;

@@ -64,6 +64,7 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({ onComplete, isLoad
     const setBakingStatus = useLoadingStore((s) => s.setBakingStatus);
     const setFluidPaused = useLoadingStore((s) => s.setFluidPaused);
     const bakingStatus = useLoadingStore((s) => s.bakingStatus);
+    const reduceUiMotion = bakingStatus === 'baking' || showReady;
 
     useEffect(() => {
         if (isLoaded) {
@@ -82,6 +83,7 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({ onComplete, isLoad
     // Mouse movement for logo rotation
     const x = useMotionValue(0);
     const y = useMotionValue(0);
+    const lastMoveUpdateRef = React.useRef(0);
 
     const mouseX = useSpring(x, { stiffness: 150, damping: 15 });
     const mouseY = useSpring(y, { stiffness: 150, damping: 15 });
@@ -91,6 +93,10 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({ onComplete, isLoad
 
     useEffect(() => {
         const handleMouseMove = (e: MouseEvent) => {
+            const now = performance.now();
+            if (now - lastMoveUpdateRef.current < 33) return; // ~30fps throttle
+            lastMoveUpdateRef.current = now;
+
             const { innerWidth, innerHeight } = window;
             const xPct = (e.clientX / innerWidth) - 0.5;
             const yPct = (e.clientY / innerHeight) - 0.5;
@@ -121,7 +127,7 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({ onComplete, isLoad
     const activeItem = items.find(i => i.id === activeId);
 
     return (
-        <div className={`loading-screen ${isMelting ? 'melting' : ''}`}>
+        <div className={`loading-screen ${isMelting ? 'melting' : ''} ${reduceUiMotion ? 'loading-lite' : ''}`}>
             {/* Layer 0: CSS blobs — instant, visible while WebGL loads */}
             <div className={`css-fluid-bg ${fluidReady ? 'css-fluid-bg--hidden' : ''}`}>
                 <div className="fluid-blob fluid-blob--1" />
@@ -161,7 +167,7 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({ onComplete, isLoad
                                         rotateY,
                                         cursor: 'pointer'
                                     }}
-                                    whileHover={{ scale: 1.1 }}
+                                    whileHover={reduceUiMotion ? undefined : { scale: 1.1 }}
                                     transition={{ type: "spring", stiffness: 400, damping: 10 }}
                                 >
                                     <motion.img
@@ -226,7 +232,7 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({ onComplete, isLoad
                                     scale: activeId === item.id ? 1.05 : 1,
                                     zIndex: activeId === item.id ? 10 : 1
                                 } : {
-                                    flex: activeId === item.id ? 3 : 1
+                                    flex: reduceUiMotion ? 1 : (activeId === item.id ? 3 : 1)
                                 }}
                                 transition={{ type: "tween", duration: 0.25 }}
                                 style={{
