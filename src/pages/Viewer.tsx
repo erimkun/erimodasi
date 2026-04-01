@@ -97,6 +97,7 @@ export function Viewer() {
     const [showTerminal, setShowTerminal] = useState(false);
     const [showProfile, setShowProfile] = useState(false);
     const [showHint, setShowHint] = useState(false);
+    const [showStoryPanel, setShowStoryPanel] = useState(true);
 
     // Dialogue store — use individual selectors to avoid unnecessary re-renders
     const showSpeechBubble = useDialogueStore(s => s.isOpen);
@@ -236,8 +237,15 @@ export function Viewer() {
                 />
             )}
 
-            {!isLoading && (
+            {!isLoading && showStoryPanel && (
                 <div className="story-panel">
+                    <button
+                        className="story-panel-close"
+                        onClick={() => setShowStoryPanel(false)}
+                        aria-label="Dijital anlatıyı kapat"
+                    >
+                        ×
+                    </button>
                     <p className="story-panel-kicker">Dijital Anlatı</p>
                     <h2>{storyMeta.title}</h2>
                     <p className="story-panel-subtitle">{storyMeta.subtitle}</p>
@@ -272,7 +280,7 @@ export function Viewer() {
                 </div>
             )}
 
-            {focusedModelId && (
+            {focusedModelId && !activeProject && !showTerminal && !showProfile && (
                 <button
                     className="close-btn"
                     onClick={() => {

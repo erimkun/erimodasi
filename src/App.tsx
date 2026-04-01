@@ -7,7 +7,7 @@ import './App.css';
 function App() {
     return (
         <BrowserRouter>
-            {import.meta.env.DEV && <FpsLogger />}
+            <FpsLogger />
             <Routes>
                 <Route path="/" element={<Viewer />} />
                 <Route path="/editor" element={<Editor />} />

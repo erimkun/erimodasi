@@ -54,6 +54,7 @@
     align-items: center;
     justify-content: center;
     transition: all 0.2s ease;
+    z-index: 2;
 }
 
 .project-popup-close:hover {
@@ -133,9 +134,18 @@
 
 @media (max-width: 768px) {
     .project-popup {
-        padding: 24px;
+        padding: 28px 20px 22px;
         max-width: 95vw;
         border-radius: 20px;
+    }
+
+    .project-popup-close {
+        top: 10px;
+        right: 10px;
+    }
+
+    .project-popup-header {
+        padding-right: 36px;
     }
 
     .project-popup-header h2 {

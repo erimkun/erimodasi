@@ -48,22 +48,22 @@ function getQualitySettings(tier: QualityTier, isEditor: boolean) {
         shadowMapSize: [number, number];
     }> = {
         high: {
-            dpr: [0.78, 0.95],
+            dpr: [0.84, 1.05],
+            antialias: true,
+            enableShadows: true,
+            shadowMapSize: [1024, 1024],
+        },
+        medium: {
+            dpr: [0.74, 0.9],
             antialias: false,
             enableShadows: true,
             shadowMapSize: [768, 768],
         },
-        medium: {
-            dpr: [0.68, 0.82],
+        low: {
+            dpr: [0.6, 0.76],
             antialias: false,
             enableShadows: true,
             shadowMapSize: [512, 512],
-        },
-        low: {
-            dpr: [0.55, 0.7],
-            antialias: false,
-            enableShadows: true,
-            shadowMapSize: [256, 256],
         },
     };
 
@@ -74,22 +74,22 @@ function getQualitySettings(tier: QualityTier, isEditor: boolean) {
         shadowMapSize: [number, number];
     }> = {
         high: {
-            dpr: [0.95, 1.2],
+            dpr: [1.0, 1.3],
             antialias: true,
             enableShadows: true,
-            shadowMapSize: [1024, 1024],
+            shadowMapSize: [1536, 1536],
         },
         medium: {
-            dpr: [0.85, 1.0],
+            dpr: [0.9, 1.1],
             antialias: true,
             enableShadows: true,
-            shadowMapSize: [1024, 1024],
+            shadowMapSize: [1280, 1280],
         },
         low: {
-            dpr: [0.72, 0.9],
-            antialias: false,
+            dpr: [0.78, 0.96],
+            antialias: true,
             enableShadows: true,
-            shadowMapSize: [512, 512],
+            shadowMapSize: [768, 768],
         },
     };
 
@@ -897,7 +897,7 @@ export const Scene = memo(function Scene({ isEditor = false, focusedModelId = nu
             onCreated={({ gl }) => {
                 if (enableShadows) {
                     gl.shadowMap.enabled = true;
-                    gl.shadowMap.type = THREE.PCFShadowMap;
+                    gl.shadowMap.type = THREE.PCFSoftShadowMap;
                 }
             }}
             gl={{
@@ -907,7 +907,7 @@ export const Scene = memo(function Scene({ isEditor = false, focusedModelId = nu
                 depth: true,
                 stencil: false,
                 toneMapping: THREE.AgXToneMapping,
-                toneMappingExposure: 1.05
+                toneMappingExposure: 1.08
             }}
             onPointerMissed={() => {
                 if (isEditor) {

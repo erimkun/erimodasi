@@ -118,6 +118,12 @@ export function FpsLogger() {
     };
 
     useEffect(() => {
+        if (typeof navigator !== 'undefined' && navigator.webdriver) {
+            setActive(true);
+        }
+    }, []);
+
+    useEffect(() => {
         const onKeyDown = (event: KeyboardEvent) => {
             if (event.repeat) return;
             const key = event.key.toLowerCase();

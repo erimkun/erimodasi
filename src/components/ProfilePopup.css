@@ -56,6 +56,7 @@
     align-items: center;
     justify-content: center;
     transition: all 0.2s ease;
+    z-index: 2;
 }
 
 .profile-popup-close:hover {
@@ -167,8 +168,19 @@
 
 @media (max-width: 768px) {
     .profile-popup {
-        padding: 28px 24px;
+        padding: 30px 20px 24px;
         max-width: 94vw;
+    }
+
+    .profile-popup-close {
+        top: 10px;
+        right: 10px;
+    }
+
+    .profile-name,
+    .profile-title,
+    .profile-subtitle {
+        padding-right: 34px;
     }
     .profile-name {
         font-size: 1.2rem;
