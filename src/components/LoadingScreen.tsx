@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, lazy, Suspense } from 'react';
 import { motion, AnimatePresence, useMotionValue, useTransform, useSpring } from 'framer-motion';
 import { useLoadingStore } from '../stores/loadingStore';
+import { withBase } from '../utils/assetPath';
 import './LoadingScreen.css';
 
 // Lazy-load Three.js fluid — CSS blobs show instantly as fallback
@@ -32,12 +33,12 @@ interface Item {
 }
 
 const items: Item[] = [
-    { id: 1, text: "BİR", image: "/me01.webp" },
-    { id: 2, text: "SORUN", image: "/me02.webp" },
-    { id: 3, text: "VARSA", image: "/me03.webp" },
-    { id: 4, text: "ERİMİ", image: "/me04.webp" },
-    { id: 5, text: "DE", image: "/me05.webp" },
-    { id: 6, text: "VAR", image: "/me06.webp" },
+    { id: 1, text: "BİR", image: withBase('me01.webp') },
+    { id: 2, text: "SORUN", image: withBase('me02.webp') },
+    { id: 3, text: "VARSA", image: withBase('me03.webp') },
+    { id: 4, text: "ERİMİ", image: withBase('me04.webp') },
+    { id: 5, text: "DE", image: withBase('me05.webp') },
+    { id: 6, text: "VAR", image: withBase('me06.webp') },
 ];
 
 interface LoadingScreenProps {
@@ -171,7 +172,7 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({ onComplete, isLoad
                                     transition={{ type: "spring", stiffness: 400, damping: 10 }}
                                 >
                                     <motion.img
-                                        src="/entry-logo.webp"
+                                        src={withBase('entry-logo.webp')}
                                         alt="Entry Icon"
                                         width={120}
                                         height={120}

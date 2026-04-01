@@ -35,7 +35,8 @@ function sceneConfigSaver(): Plugin {
     }
 }
 
-export default defineConfig({
+export default defineConfig(({ command }) => ({
+    base: command === 'build' ? '/erimodasi/' : '/',
     plugins: [react(), sceneConfigSaver()],
     assetsInclude: ['**/*.glb'],
     build: {
@@ -61,4 +62,4 @@ export default defineConfig({
         minify: 'esbuild',
         target: 'es2020',
     },
-})
+}))

@@ -1,11 +1,12 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { SceneConfig, ModelConfig, PointLightConfig, StripLightConfig, BoxLightConfig, DEFAULT_SCENE_CONFIG } from '../types/scene';
+import { withBase } from '../utils/assetPath';
 
 // Helper function to save config to public folder via API
 async function saveConfigToFile(config: SceneConfig) {
     try {
-        const res = await fetch('/api/save-config', {
+        const res = await fetch(withBase('api/save-config'), {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(config, null, 2),

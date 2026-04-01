@@ -1,4 +1,5 @@
 import { SceneConfig } from '../types/scene';
+import { withBase } from '../utils/assetPath';
 
 /**
  * Tüm sahne ayarları burada hardcoded.
@@ -10,7 +11,7 @@ export const STATIC_SCENE: SceneConfig = {
         {
             id: "room",
             name: "Room",
-            path: "/room_opt.glb",
+            path: withBase('room_opt.glb'),
             visible: true,
             position: [0.2, 0.6, 0],
             rotation: [0, 0, 0],
@@ -19,7 +20,7 @@ export const STATIC_SCENE: SceneConfig = {
         {
             id: "desk",
             name: "Desk",
-            path: "/desk_opt.glb",
+            path: withBase('desk_opt.glb'),
             visible: true,
             position: [-0.4262338391111051, 0.004, 0],
             rotation: [0, -1.5707963267948966, 0],
@@ -28,7 +29,7 @@ export const STATIC_SCENE: SceneConfig = {
         {
             id: "cabinet",
             name: "Cabinet",
-            path: "/cabinet_opt.glb",
+            path: withBase('cabinet_opt.glb'),
             visible: true,
             position: [-0.5472904242306201, 0, 0.6674180899125743],
             rotation: [0, 0, 0],
@@ -37,7 +38,7 @@ export const STATIC_SCENE: SceneConfig = {
         {
             id: "char",
             name: "Character",
-            path: "/char_opt.glb",
+            path: withBase('char_opt.glb'),
             visible: true,
             position: [0.16479696103908625, 0.403, 0],
             rotation: [-3.141592653589793, 0, -3.141592653589793],
@@ -46,7 +47,7 @@ export const STATIC_SCENE: SceneConfig = {
         {
             id: "kutu",
             name: "Kutu (Box)",
-            path: "/kutu_opt.glb",
+            path: withBase('kutu_opt.glb'),
             visible: true,
             position: [1.01, 0.36, -0.5],
             rotation: [0, 0, 0],
@@ -55,7 +56,7 @@ export const STATIC_SCENE: SceneConfig = {
         {
             id: "writing",
             name: "Writing",
-            path: "/writing_opt.glb",
+            path: withBase('writing_opt.glb'),
             visible: true,
             position: [0.3, 0.7, -0.9],
             rotation: [0, -1.5707963267948966, 0],

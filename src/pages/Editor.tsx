@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Scene } from '../components/Scene';
 import { useSceneStore } from '../stores/sceneStore';
 import './Editor.css';
@@ -181,9 +182,9 @@ export function Editor() {
                     <button className="btn btn-secondary" onClick={handleReset} title="Reset">
                         🔄
                     </button>
-                    <a href="/" className="view-btn">
+                    <Link to="/" className="view-btn">
                         👁️ View
-                    </a>
+                    </Link>
                 </div>
             </div>
 

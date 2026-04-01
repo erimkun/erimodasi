@@ -1,4 +1,5 @@
 // Scene configuration types
+import { withBase } from '../utils/assetPath';
 
 export interface ModelConfig {
     id: string;
@@ -74,22 +75,22 @@ export interface SceneConfig {
 
 // Default available models
 export const AVAILABLE_MODELS: Omit<ModelConfig, 'visible' | 'position' | 'rotation' | 'scale'>[] = [
-    { id: 'room', name: 'Room', path: '/room_opt.glb' },
-    { id: 'desk', name: 'Desk', path: '/desk_opt.glb' },
-    { id: 'cabinet', name: 'Cabinet', path: '/cabinet_opt.glb' },
-    { id: 'char', name: 'Character', path: '/char_opt.glb' },
-    { id: 'kutu', name: 'Kutu (Box)', path: '/kutu_opt.glb' },
-    { id: 'writing', name: 'Writing', path: '/writing_opt.glb' },
+    { id: 'room', name: 'Room', path: withBase('room_opt.glb') },
+    { id: 'desk', name: 'Desk', path: withBase('desk_opt.glb') },
+    { id: 'cabinet', name: 'Cabinet', path: withBase('cabinet_opt.glb') },
+    { id: 'char', name: 'Character', path: withBase('char_opt.glb') },
+    { id: 'kutu', name: 'Kutu (Box)', path: withBase('kutu_opt.glb') },
+    { id: 'writing', name: 'Writing', path: withBase('writing_opt.glb') },
 ];
 
 export const DEFAULT_SCENE_CONFIG: SceneConfig = {
     models: [
-        { id: 'room', name: 'Oda', path: '/room_opt.glb', visible: true, position: [0, 0, 0], rotation: [0, 0, 0], scale: [1, 1, 1] },
-        { id: 'desk', name: 'Masa', path: '/desk_opt.glb', visible: true, position: [0, 0, 0], rotation: [0, 0, 0], scale: [1, 1, 1] },
-        { id: 'chair', name: 'Sandalye', path: '/char_opt.glb', visible: true, position: [0, 0, 0], rotation: [0, 0, 0], scale: [1, 1, 1] },
-        { id: 'cabinet', name: 'Dolap', path: '/cabinet_opt.glb', visible: true, position: [0, 0, 0], rotation: [0, 0, 0], scale: [1, 1, 1] },
-        { id: 'kutu', name: 'Kutu', path: '/kutu_opt.glb', visible: true, position: [0, 0, 0], rotation: [0, 0, 0], scale: [1, 1, 1] },
-        { id: 'writing', name: 'Yazı', path: '/writing_opt.glb', visible: true, position: [0, 0, 0], rotation: [0, 0, 0], scale: [1, 1, 1] },
+        { id: 'room', name: 'Oda', path: withBase('room_opt.glb'), visible: true, position: [0, 0, 0], rotation: [0, 0, 0], scale: [1, 1, 1] },
+        { id: 'desk', name: 'Masa', path: withBase('desk_opt.glb'), visible: true, position: [0, 0, 0], rotation: [0, 0, 0], scale: [1, 1, 1] },
+        { id: 'chair', name: 'Sandalye', path: withBase('char_opt.glb'), visible: true, position: [0, 0, 0], rotation: [0, 0, 0], scale: [1, 1, 1] },
+        { id: 'cabinet', name: 'Dolap', path: withBase('cabinet_opt.glb'), visible: true, position: [0, 0, 0], rotation: [0, 0, 0], scale: [1, 1, 1] },
+        { id: 'kutu', name: 'Kutu', path: withBase('kutu_opt.glb'), visible: true, position: [0, 0, 0], rotation: [0, 0, 0], scale: [1, 1, 1] },
+        { id: 'writing', name: 'Yazı', path: withBase('writing_opt.glb'), visible: true, position: [0, 0, 0], rotation: [0, 0, 0], scale: [1, 1, 1] },
     ],
     lighting: {
         ambient: {
