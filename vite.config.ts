@@ -36,7 +36,11 @@ function sceneConfigSaver(): Plugin {
 }
 
 export default defineConfig(({ command }) => ({
-    base: command === 'build' ? '/erimodasi/' : '/',
+    base: (() => {
+        const isVercel = process.env.VERCEL === '1' || process.env.VERCEL === 'true';
+        if (isVercel) return '/';
+        return command === 'build' ? '/erimodasi/' : '/';
+    })(),
     plugins: [react(), sceneConfigSaver()],
     assetsInclude: ['**/*.glb'],
     build: {
