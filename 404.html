@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Google Analytics — deferred to not block LCP/FCP -->
+  <script>
+    // Load GA after page becomes interactive (reduces main thread blocking by ~68ms+)
+    function loadGA() {
+      var s = document.createElement('script');
+      s.src = 'https://www.googletagmanager.com/gtag/js?id=G-BNEL6G78C9';
+      s.async = true;
+      document.head.appendChild(s);
+      window.dataLayer = window.dataLayer || [];
+      function gtag() { dataLayer.push(arguments); }
+      window.gtag = gtag;
+      gtag('js', new Date());
+      gtag('config', 'G-BNEL6G78C9');
+    }
+    if ('requestIdleCallback' in window) {
+      requestIdleCallback(loadGA, { timeout: 3000 });
+    } else {
+      setTimeout(loadGA, 2000);
+    }
+  </script>
+
+  <!-- Primary Meta Tags -->
+  <title>Erden Erim - İnteraktif 3D Oda Deneyimi</title>
+  <meta name="title" content="Erden Erim - İnteraktif 3D Oda Deneyimi" />
+  <meta name="description"
+    content="Erden Erim Aydoğdu'nun interaktif 3D odasını keşfedin. Three.js ile oluşturulmuş benzersiz bir dijital deneyim. Karakterlerle etkileşime geçin ve odayı gezin." />
+  <meta name="keywords"
+    content="Erden Erim Aydoğdu, Erden Erim, Erden Aydoğdu, Erim Aydoğdu, Erden, Erim, Aydoğdu, 3D oda, interaktif, Three.js, WebGL, dijital deneyim, sanal oda, 3D görselleştirme, portfolio" />
+  <meta name="author" content="Erden Erim Aydoğdu" />
+  <meta name="robots" content="index, follow" />
+  <meta name="language" content="Turkish" />
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/webp" href="/erimodasi/favicon.webp" />
+  <link rel="apple-touch-icon" href="/erimodasi/favicon.webp" />
+
+  <!-- Theme Color -->
+  <meta name="theme-color" content="#1a1a2e" />
+  <meta name="msapplication-TileColor" content="#1a1a2e" />
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://erimkun.github.io/erimodasi/" />
+  <meta property="og:title" content="Erden Erim - İnteraktif 3D Oda Deneyimi" />
+  <meta property="og:description"
+    content="Erden Erim Aydoğdu'nun interaktif 3D odasını keşfedin. Three.js ile oluşturulmuş benzersiz bir dijital deneyim." />
+  <meta property="og:image" content="https://erimkun.github.io/erimodasi/me01.webp" />
+  <meta property="og:locale" content="tr_TR" />
+  <meta property="og:site_name" content="Erden Erim" />
+
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary_large_image" />
+  <meta property="twitter:url" content="https://erimkun.github.io/erimodasi/" />
+  <meta property="twitter:title" content="Erden Erim - İnteraktif 3D Oda Deneyimi" />
+  <meta property="twitter:description"
+    content="Erden Erim Aydoğdu'nun interaktif 3D odasını keşfedin. Three.js ile oluşturulmuş benzersiz bir dijital deneyim." />
+  <meta property="twitter:image" content="https://erimkun.github.io/erimodasi/me01.webp" />
+
+  <!-- Canonical URL -->
+  <link rel="canonical" href="https://erimkun.github.io/erimodasi/" />
+
+  <!-- Preconnect for Performance -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="preconnect" href="https://www.googletagmanager.com" />
+
+  <!-- Preload ALL loading screen images to eliminate render delay -->
+  <link rel="preload" as="image" type="image/webp" href="/erimodasi/me01.webp" fetchpriority="high" />
+  <link rel="preload" as="image" type="image/webp" href="/erimodasi/me02.webp" fetchpriority="high" />
+  <link rel="preload" as="image" type="image/webp" href="/erimodasi/me03.webp" fetchpriority="high" />
+  <link rel="preload" as="image" type="image/webp" href="/erimodasi/me04.webp" fetchpriority="high" />
+  <link rel="preload" as="image" type="image/webp" href="/erimodasi/me05.webp" fetchpriority="high" />
+  <link rel="preload" as="image" type="image/webp" href="/erimodasi/me06.webp" fetchpriority="high" />
+  <link rel="preload" as="image" type="image/webp" href="/erimodasi/entry-logo.webp" />
+  <script type="module" crossorigin src="/erimodasi/assets/index-CQXlqAha.js"></script>
+  <link rel="modulepreload" crossorigin href="/erimodasi/assets/react-vendor-DEx2oJvF.js">
+  <link rel="modulepreload" crossorigin href="/erimodasi/assets/three-core-86AQBBY2.js">
+  <link rel="modulepreload" crossorigin href="/erimodasi/assets/r3f-DS1RzV8M.js">
+  <link rel="stylesheet" crossorigin href="/erimodasi/assets/index-7Z88j3Vw.css">
+</head>
+
+<body>
+  <div id="root"></div>
+</body>
+
+</html>

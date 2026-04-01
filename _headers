@@ -1,0 +1,27 @@
+# Cloudflare Pages custom headers
+
+# Hash'li asset'ler — 1 yıl immutable cache
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# GLB 3D model dosyaları — 1 yıl cache (içerik değiştiğinde dosya adı değişir)
+/*.glb
+  Cache-Control: public, max-age=31536000, immutable
+  Content-Type: model/gltf-binary
+
+# WebP resimler — 30 gün cache
+/*.webp
+  Cache-Control: public, max-age=2592000
+
+# HTML — her zaman en güncel
+/
+  Cache-Control: public, max-age=0, must-revalidate
+
+/index.html
+  Cache-Control: public, max-age=0, must-revalidate
+
+# Security headers
+/*
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Referrer-Policy: strict-origin-when-cross-origin

@@ -1,0 +1,3 @@
+# Cloudflare Pages redirect rules
+# SPA: tüm route'ları index.html'e yönlendir
+/*  /index.html  200
