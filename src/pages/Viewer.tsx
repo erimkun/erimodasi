@@ -13,6 +13,60 @@ import type { ProjectData } from '../components/ProjectPopup';
 import type { DialogueAction } from '../types/dialogue';
 import './Viewer.css';
 
+function StoryProgressTracker({ onSceneReady }: { onSceneReady: () => void }) {
+    const { progress, active } = useProgress();
+
+    useEffect(() => {
+        if (progress >= 100 && !active) {
+            onSceneReady();
+        }
+    }, [progress, active, onSceneReady]);
+
+    return null;
+}
+
+function getStoryMeta(currentNodeId: string | null, isOpen: boolean) {
+    if (!currentNodeId || !isOpen) {
+        return {
+            title: 'Odada Keşif Modu',
+            subtitle: 'Karaktere, masaya, yazıya veya kutulara dokunarak kendi akışını kur.',
+        };
+    }
+
+    if (currentNodeId.startsWith('intro_') || currentNodeId.startsWith('about_')) {
+        return {
+            title: 'Biyografi Akışı',
+            subtitle: 'Mühendislik, AI ve XR yolculuğunu adım adım dinliyorsun.',
+        };
+    }
+
+    if (currentNodeId.startsWith('tour_')) {
+        return {
+            title: 'Oda Turu',
+            subtitle: 'Her obje bir hikaye taşıyor; etkileşimle kapıları açıyorsun.',
+        };
+    }
+
+    if (currentNodeId.startsWith('project_') || currentNodeId.startsWith('projects_')) {
+        return {
+            title: 'Proje Vitrini',
+            subtitle: 'Kutular üzerinden teknik derinliği katman katman açıyorsun.',
+        };
+    }
+
+    if (currentNodeId.startsWith('contact_')) {
+        return {
+            title: 'Bağlantı Noktası',
+            subtitle: 'Profil panelinden iletişim ve sosyal kanallara doğrudan geç.',
+        };
+    }
+
+    return {
+        title: 'Canlı Diyalog',
+        subtitle: 'Seçimlerin anlatıyı şekillendiriyor; farklı patikaları deneyebilirsin.',
+    };
+}
+
 function deferMainThreadWork(task: () => void, timeout = 180) {
     const win = window as Window & {
         requestIdleCallback?: (callback: () => void, options?: { timeout: number }) => number;
@@ -34,15 +88,8 @@ export function Viewer() {
     const bakingStatus = useLoadingStore((s) => s.bakingStatus);
     const runtimeReady = sceneReady && bakingStatus === 'done';
 
-    // Track real model loading progress via drei useProgress isolated component
-    const ProgressTracker = useCallback(() => {
-        const { progress, active } = useProgress();
-        useEffect(() => {
-            if (progress >= 100 && !active) {
-                setSceneReady(true);
-            }
-        }, [progress, active]);
-        return null;
+    const markSceneReady = useCallback(() => {
+        setSceneReady(true);
     }, []);
 
     // Popup states
@@ -89,16 +136,14 @@ export function Viewer() {
             }
             case 'highlightBox':
                 // Kutu highlight — ışık artışı InteractiveBoxes'ta zaten var
-                console.log('[Viewer] highlightBox', action.boxId);
                 break;
             case 'closeBubble':
                 closeDialogue();
                 break;
         }
-    }, [closeDialogue]);
+    }, [closeDialogue, startTransition]);
 
     const handleCharacterClick = useCallback((id: string) => {
-        console.log('[Viewer] onModelClick fired, id:', id);
         setFocusedModelId(id);
 
         if (id === 'char') {
@@ -125,7 +170,6 @@ export function Viewer() {
     }, [startDialogue]);
 
     const handleBoxClick = useCallback((boxId: string) => {
-        console.log('[Viewer] Box clicked:', boxId);
         const project = getProjectByBoxId(boxId);
         if (project) {
             deferMainThreadWork(() => {
@@ -137,7 +181,6 @@ export function Viewer() {
     }, [startTransition]);
 
     const handleMissed = useCallback(() => {
-        console.log('[Viewer] onMissed fired, clearing focus');
         setFocusedModelId(null);
         closeDialogue();
     }, [closeDialogue]);
@@ -177,25 +220,62 @@ export function Viewer() {
         label: opt.label,
         value: String(i),
     }));
+    const storyMeta = getStoryMeta(currentNodeId, showSpeechBubble);
 
     return (
         <div className="viewer">
-            <ProgressTracker />
+            <StoryProgressTracker onSceneReady={markSceneReady} />
             {isLoading && (
                 <LoadingScreen
                     isLoaded={sceneReady}
                     onComplete={() => {
                         setIsLoading(false);
                         // İpucu 2 saniye sonra göster
-                        setTimeout(() => setShowHint(true), 2000);
+                        window.setTimeout(() => setShowHint(true), 2000);
                     }}
                 />
             )}
+
+            {!isLoading && (
+                <div className="story-panel">
+                    <p className="story-panel-kicker">Dijital Anlatı</p>
+                    <h2>{storyMeta.title}</h2>
+                    <p className="story-panel-subtitle">{storyMeta.subtitle}</p>
+                    <div className="story-panel-actions">
+                        <button
+                            className="story-chip"
+                            onClick={() => {
+                                setFocusedModelId('char');
+                                startTransition(() => startDialogue());
+                            }}
+                        >
+                            Karakterle Başla
+                        </button>
+                        <button
+                            className="story-chip"
+                            onClick={() => {
+                                const firstProject = getProjectByBoxId('box_1');
+                                if (firstProject) {
+                                    startTransition(() => setActiveProject(firstProject));
+                                }
+                            }}
+                        >
+                            Projeyi Aç
+                        </button>
+                        <button
+                            className="story-chip"
+                            onClick={() => startTransition(() => setShowProfile(true))}
+                        >
+                            Profili Göster
+                        </button>
+                    </div>
+                </div>
+            )}
+
             {focusedModelId && (
                 <button
                     className="close-btn"
                     onClick={() => {
-                        console.log('[Viewer] close button clicked');
                         setFocusedModelId(null);
                         closeDialogue();
                     }}

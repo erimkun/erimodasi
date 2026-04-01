@@ -5,7 +5,83 @@
     flex-direction: column;
     background: #0a0a1a;
     color: #fff;
-    font-family: 'Segoe UI', system-ui, sans-serif;
+    font-family: 'Bahnschrift', 'Trebuchet MS', system-ui, sans-serif;
+}
+
+.story-panel {
+    position: absolute;
+    top: 1.2rem;
+    left: 1.2rem;
+    z-index: 140;
+    width: min(380px, calc(100vw - 2.4rem));
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 18px;
+    padding: 0.95rem 1rem;
+    background:
+        radial-gradient(circle at 0% 0%, rgba(255, 196, 120, 0.22), transparent 50%),
+        radial-gradient(circle at 100% 100%, rgba(84, 200, 255, 0.18), transparent 45%),
+        linear-gradient(140deg, rgba(16, 20, 36, 0.85), rgba(7, 10, 20, 0.85));
+    backdrop-filter: blur(8px);
+    box-shadow: 0 14px 38px rgba(0, 0, 0, 0.35);
+    animation: storyPanelIn 500ms ease;
+}
+
+.story-panel-kicker {
+    margin: 0;
+    font-size: 0.68rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: rgba(255, 224, 160, 0.9);
+}
+
+.story-panel h2 {
+    margin: 0.25rem 0 0;
+    font-size: 1.1rem;
+    letter-spacing: 0.02em;
+    color: #fff;
+}
+
+.story-panel-subtitle {
+    margin: 0.45rem 0 0;
+    font-size: 0.82rem;
+    line-height: 1.38;
+    color: rgba(224, 239, 255, 0.85);
+}
+
+.story-panel-actions {
+    margin-top: 0.72rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.42rem;
+}
+
+.story-chip {
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.1);
+    color: #f4f8ff;
+    font-size: 0.72rem;
+    padding: 0.35rem 0.72rem;
+    cursor: pointer;
+    transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+}
+
+.story-chip:hover {
+    transform: translateY(-1px);
+    border-color: rgba(255, 240, 200, 0.7);
+    background: rgba(255, 255, 255, 0.18);
+}
+
+@keyframes storyPanelIn {
+    from {
+        opacity: 0;
+        transform: translateY(-8px) scale(0.98);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
 }
 
 .viewer-header {
@@ -140,7 +216,7 @@
 /* Close button — minimal, zarif, yuvarlak */
 .close-btn {
     position: absolute;
-    top: 1.5rem;
+    top: 1.2rem;
     right: 1.5rem;
     z-index: 200;
     width: 40px;
@@ -185,5 +261,24 @@
     to {
         opacity: 1;
         transform: scale(1);
+    }
+}
+
+@media (max-width: 768px) {
+    .story-panel {
+        top: auto;
+        bottom: 5.2rem;
+        width: min(430px, calc(100vw - 1.2rem));
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 0.7rem 0.8rem;
+    }
+
+    .story-panel h2 {
+        font-size: 1rem;
+    }
+
+    .story-panel-subtitle {
+        font-size: 0.76rem;
     }
 }

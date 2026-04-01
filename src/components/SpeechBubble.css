@@ -37,7 +37,7 @@
 
 .speech-bubble-content p {
     margin: 0;
-    font-family: 'Inter', 'Segoe UI', -apple-system, sans-serif;
+    font-family: 'Bahnschrift', 'Trebuchet MS', 'Segoe UI', sans-serif;
     font-size: 15px;
     font-weight: 500;
     color: #ffffff;
@@ -176,7 +176,7 @@
     border: 1.5px solid rgba(255, 255, 255, 0.35);
     border-radius: 20px;
     color: #ffffff;
-    font-family: 'Inter', 'Segoe UI', -apple-system, sans-serif;
+    font-family: 'Bahnschrift', 'Trebuchet MS', 'Segoe UI', sans-serif;
     font-size: 13px;
     font-weight: 500;
     cursor: pointer;
@@ -267,4 +267,8 @@
     .speech-bubble-content p {
         font-size: 15px;
     }
+}
+
+.speech-bubble-content {
+    min-height: 2.1em;
 }

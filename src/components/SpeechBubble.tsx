@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import './SpeechBubble.css';
 
 interface SpeechBubbleProps {
@@ -23,42 +23,72 @@ export function SpeechBubble({
     const [displayedText, setDisplayedText] = useState('');
     const [isAnimating, setIsAnimating] = useState(false);
     const [showOptions, setShowOptions] = useState(false);
+    const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
 
-    // Typewriter effect — uses requestAnimationFrame for better INP
+    const revealImmediately = useCallback(() => {
+        setDisplayedText(message);
+        setIsAnimating(false);
+        setShowOptions(true);
+    }, [message]);
+
+    useEffect(() => {
+        if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return;
+
+        const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+        const update = () => setPrefersReducedMotion(mediaQuery.matches);
+        update();
+
+        mediaQuery.addEventListener('change', update);
+        return () => mediaQuery.removeEventListener('change', update);
+    }, []);
+
+    // Typewriter effect with dynamic pacing and skip support.
     useEffect(() => {
         if (isVisible && message) {
             setDisplayedText('');
             setIsAnimating(true);
             setShowOptions(false);
+
+            if (prefersReducedMotion || message.length > 300) {
+                revealImmediately();
+                return;
+            }
+
             let index = 0;
-            let lastTime = 0;
-            let rafId: number;
-            const step = (time: number) => {
-                if (time - lastTime >= 50) {
-                    lastTime = time;
-                    if (index < message.length) {
-                        setDisplayedText(message.slice(0, index + 1));
-                        index++;
-                    } else {
-                        setIsAnimating(false);
-                        setTimeout(() => setShowOptions(true), 200);
-                        return;
-                    }
+            const frameMs = message.length > 180 ? 28 : 44;
+            const stepSize = message.length > 220 ? 3 : 1;
+            const timer = window.setInterval(() => {
+                if (index < message.length) {
+                    index = Math.min(message.length, index + stepSize);
+                    setDisplayedText(message.slice(0, index));
+                } else {
+                    window.clearInterval(timer);
+                    setIsAnimating(false);
+                    setShowOptions(true);
                 }
-                rafId = requestAnimationFrame(step);
-            };
-            rafId = requestAnimationFrame(step);
-            return () => cancelAnimationFrame(rafId);
+            }, frameMs);
+
+            return () => window.clearInterval(timer);
         } else {
             setDisplayedText('');
             setShowOptions(false);
+            setIsAnimating(false);
         }
-    }, [isVisible, message]);
+    }, [isVisible, message, prefersReducedMotion, revealImmediately]);
 
     if (!isVisible) return null;
 
     return (
-        <div className="speech-bubble-container" onClick={onClose}>
+        <div
+            className="speech-bubble-container"
+            onClick={() => {
+                if (isAnimating) {
+                    revealImmediately();
+                    return;
+                }
+                onClose?.();
+            }}
+        >
             <div className="speech-bubble" onClick={(e) => e.stopPropagation()}>
                 {/* Geri butonu */}
                 {canGoBack && showOptions && (

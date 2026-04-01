@@ -21,6 +21,8 @@ interface ModelProps extends Omit<ComponentProps<'group'>, 'position' | 'rotatio
     isSelected?: boolean;
 }
 
+const CAST_SHADOW_IDS = new Set(['char', 'kutu', 'desk']);
+
 export const Model = memo(function Model({ config, onClick, isSelected, ...props }: ModelProps) {
     const { scene } = useGLTF(config.path);
 
@@ -33,8 +35,7 @@ export const Model = memo(function Model({ config, onClick, isSelected, ...props
                 child.receiveShadow = true;
                 if (mesh.geometry) {
                     // Only specific models cast shadows per user request
-                    const CAST_SHADOW_IDS = ['char', 'kutu', 'desk'];
-                    child.castShadow = CAST_SHADOW_IDS.includes(config.id);
+                    child.castShadow = CAST_SHADOW_IDS.has(config.id);
                 }
             }
         });
@@ -42,7 +43,7 @@ export const Model = memo(function Model({ config, onClick, isSelected, ...props
         cloned.matrixAutoUpdate = false;
         cloned.updateMatrix();
         return cloned;
-    }, [scene]);
+    }, [scene, config.id]);
 
     if (!config.visible) return null;
 
