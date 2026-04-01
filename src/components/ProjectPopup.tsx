@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import './ProjectPopup.css';
+import './PopupCommon.css';
 
 export interface ProjectData {
     id: string;
@@ -50,14 +51,15 @@ export function ProjectPopup({ isVisible, project, onClose }: ProjectPopupProps)
                 onClick={(e) => e.stopPropagation()}
                 style={{ '--glow-color': project.color } as React.CSSProperties}
             >
-                <button className="project-popup-close" onClick={handleClose}>×</button>
-
-                <div className="project-popup-header">
-                    <div
-                        className="project-popup-dot"
-                        style={{ background: project.color, boxShadow: `0 0 12px ${project.color}` }}
-                    />
-                    <h2>{project.title}</h2>
+                <div className="popup-titlebar project-popup-header">
+                    <div className="project-popup-heading">
+                        <div
+                            className="project-popup-dot"
+                            style={{ background: project.color, boxShadow: `0 0 12px ${project.color}` }}
+                        />
+                        <h2>{project.title}</h2>
+                    </div>
+                    <button className="popup-close-btn project-popup-close" onClick={handleClose} aria-label="Projeyi kapat">×</button>
                 </div>
 
                 <p className="project-popup-desc">{project.description}</p>

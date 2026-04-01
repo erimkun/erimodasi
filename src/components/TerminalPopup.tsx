@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef, useCallback, type KeyboardEvent } from 'react';
 import './TerminalPopup.css';
+import './PopupCommon.css';
 
 const ANGRY_RESPONSES = [
     [
@@ -313,7 +314,7 @@ export function TerminalPopup({ isVisible, onClose }: TerminalPopupProps) {
                 {/* Title bar */}
                 <div className="terminal-titlebar">
                     <div className="terminal-dots">
-                        <span className="dot red" onClick={handleClose} />
+                        <button className="popup-close-btn terminal-popup-close" onClick={handleClose} aria-label="Terminali kapat">×</button>
                         <span className="dot yellow" />
                         <span className="dot green" />
                     </div>

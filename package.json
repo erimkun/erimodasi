@@ -6,11 +6,17 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "postbuild": "node scripts/gh-pages-spa.cjs",
     "typecheck": "tsc --noEmit",
     "preview": "vite preview",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist",
     "perf:install": "playwright install chromium",
     "perf:test": "playwright test -c playwright.perf.config.ts",
-    "perf:run": "npm run build && npm run perf:test"
+    "perf:run": "npm run build && npm run perf:test",
+    "perf:test:standard": "set PERF_QUALITY=standard&& playwright test -c playwright.perf.config.ts",
+    "perf:test:boost": "set PERF_QUALITY=boost&& playwright test -c playwright.perf.config.ts",
+    "perf:ab": "npm run build && npm run perf:test:standard && npm run perf:test:boost && node scripts/perf-ab-report.mjs"
   },
   "repository": {
     "type": "git",
@@ -21,7 +27,7 @@
   "bugs": {
     "url": "https://github.com/erimkun/erimodasi/issues"
   },
-  "homepage": "https://github.com/erimkun/erimodasi#readme",
+  "homepage": "https://erimkun.github.io/erimodasi/",
   "devDependencies": {
     "@playwright/test": "^1.58.2",
     "@types/node": "^25.2.1",
@@ -32,7 +38,8 @@
     "playwright": "^1.58.2",
     "sharp": "^0.34.5",
     "typescript": "^5.9.3",
-    "vite": "^7.3.1"
+    "vite": "^7.3.1",
+    "gh-pages": "^6.3.0"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.7",

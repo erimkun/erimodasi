@@ -41,6 +41,7 @@ declare global {
             freezes: Array<{ t: number; dtMs: number }>;
             longTasks: Array<{ t: number; durationMs: number }>;
         };
+        __FPS_LOGGER_AUTO__?: boolean;
     }
 }
 
@@ -119,6 +120,7 @@ export function FpsLogger() {
 
     useEffect(() => {
         if (typeof navigator !== 'undefined' && navigator.webdriver) {
+            window.__FPS_LOGGER_AUTO__ = true;
             setActive(true);
         }
     }, []);
@@ -291,6 +293,15 @@ export function FpsLogger() {
                     p1Low: Number(p1Low.toFixed(1)),
                     freezes: freezesRef.current.length,
                 });
+
+                const liveSnapshot = getSnapshot();
+                if (liveSnapshot) {
+                    window.__FPS_TOOL__ = {
+                        ...liveSnapshot,
+                        active: true,
+                    };
+                }
+
                 lastHudAtRef.current = now;
             }
 

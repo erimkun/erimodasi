@@ -10,6 +10,7 @@ import { useLoadingStore } from '../stores/loadingStore';
 import { STATIC_SCENE } from '../data/staticScene';
 import { ModelConfig } from '../types/scene';
 import { preloadModels } from './Model';
+import { withBase } from '../utils/assetPath';
 
 // Detect mobile/touch device — cache result to avoid forced reflows
 const IS_MOBILE = typeof window !== 'undefined' && (
@@ -23,6 +24,19 @@ const CPU_CORES = typeof navigator !== 'undefined' ? navigator.hardwareConcurren
 const IS_LOW_END_DEVICE = IS_MOBILE && (DEVICE_MEMORY <= 4 || CPU_CORES <= 6);
 
 type QualityTier = 'high' | 'medium' | 'low';
+type QualityProfile = 'standard' | 'boost';
+
+function getQualityProfile(): QualityProfile {
+    if (typeof window === 'undefined') return 'standard';
+
+    const qs = new URLSearchParams(window.location.search).get('quality');
+    if (qs === 'standard' || qs === 'boost') return qs;
+
+    const stored = window.localStorage.getItem('scene-quality-profile');
+    if (stored === 'standard' || stored === 'boost') return stored;
+
+    return 'boost';
+}
 
 function getInitialQualityTier(isEditor: boolean): QualityTier {
     if (isEditor) return 'high';
@@ -31,7 +45,7 @@ function getInitialQualityTier(isEditor: boolean): QualityTier {
     return 'high';
 }
 
-function getQualitySettings(tier: QualityTier, isEditor: boolean) {
+function getQualitySettings(tier: QualityTier, isEditor: boolean, profile: QualityProfile) {
     if (isEditor) {
         return {
             dpr: 1,
@@ -41,7 +55,7 @@ function getQualitySettings(tier: QualityTier, isEditor: boolean) {
         };
     }
 
-    const mobileProfiles: Record<QualityTier, {
+    const mobileProfilesStandard: Record<QualityTier, {
         dpr: [number, number];
         antialias: boolean;
         enableShadows: boolean;
@@ -67,7 +81,33 @@ function getQualitySettings(tier: QualityTier, isEditor: boolean) {
         },
     };
 
-    const desktopProfiles: Record<QualityTier, {
+    const mobileProfilesBoost: Record<QualityTier, {
+        dpr: [number, number];
+        antialias: boolean;
+        enableShadows: boolean;
+        shadowMapSize: [number, number];
+    }> = {
+        high: {
+            dpr: [0.9, 1.12],
+            antialias: true,
+            enableShadows: true,
+            shadowMapSize: [1280, 1280],
+        },
+        medium: {
+            dpr: [0.8, 0.98],
+            antialias: true,
+            enableShadows: true,
+            shadowMapSize: [1024, 1024],
+        },
+        low: {
+            dpr: [0.66, 0.82],
+            antialias: false,
+            enableShadows: true,
+            shadowMapSize: [768, 768],
+        },
+    };
+
+    const desktopProfilesStandard: Record<QualityTier, {
         dpr: [number, number];
         antialias: boolean;
         enableShadows: boolean;
@@ -92,6 +132,35 @@ function getQualitySettings(tier: QualityTier, isEditor: boolean) {
             shadowMapSize: [768, 768],
         },
     };
+
+    const desktopProfilesBoost: Record<QualityTier, {
+        dpr: [number, number];
+        antialias: boolean;
+        enableShadows: boolean;
+        shadowMapSize: [number, number];
+    }> = {
+        high: {
+            dpr: [1.06, 1.35],
+            antialias: true,
+            enableShadows: true,
+            shadowMapSize: [1792, 1792],
+        },
+        medium: {
+            dpr: [0.96, 1.16],
+            antialias: true,
+            enableShadows: true,
+            shadowMapSize: [1536, 1536],
+        },
+        low: {
+            dpr: [0.82, 1.0],
+            antialias: true,
+            enableShadows: true,
+            shadowMapSize: [1024, 1024],
+        },
+    };
+
+    const mobileProfiles = profile === 'boost' ? mobileProfilesBoost : mobileProfilesStandard;
+    const desktopProfiles = profile === 'boost' ? desktopProfilesBoost : desktopProfilesStandard;
 
     return (IS_MOBILE ? mobileProfiles : desktopProfiles)[tier];
 }
@@ -213,7 +282,7 @@ function RuntimeMetricsReporter() {
 }
 
 const Skybox = () => {
-    const texture = useTexture('/sky.webp');
+    const texture = useTexture(withBase('sky.webp'));
     // Ensure correct color space so sky doesn't look washed out
     texture.colorSpace = THREE.SRGBColorSpace;
     return <primitive object={texture} attach="background" />;
@@ -873,8 +942,9 @@ export const Scene = memo(function Scene({ isEditor = false, focusedModelId = nu
     }, [updateBoxLight]);
 
     const [qualityTier, setQualityTier] = useState<QualityTier>(() => getInitialQualityTier(isEditor));
+    const qualityProfile = useMemo(() => getQualityProfile(), []);
 
-    const quality = useMemo(() => getQualitySettings(qualityTier, isEditor), [qualityTier, isEditor]);
+    const quality = useMemo(() => getQualitySettings(qualityTier, isEditor, qualityProfile), [qualityTier, isEditor, qualityProfile]);
 
     const dpr = useMemo(() => {
         if (Array.isArray(quality.dpr)) {

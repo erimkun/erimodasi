@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import './ProfilePopup.css';
+import './PopupCommon.css';
 
 interface ProfilePopupProps {
     isVisible: boolean;
@@ -36,7 +37,10 @@ export function ProfilePopup({ isVisible, onClose }: ProfilePopupProps) {
                 className={`profile-popup ${show && !closing ? 'visible' : ''} ${closing ? 'closing' : ''}`}
                 onClick={(e) => e.stopPropagation()}
             >
-                <button className="profile-popup-close" onClick={handleClose}>×</button>
+                <div className="popup-titlebar profile-popup-header">
+                    <span className="profile-popup-header-title">Profil Kartı</span>
+                    <button className="popup-close-btn profile-popup-close" onClick={handleClose} aria-label="Profili kapat">×</button>
+                </div>
 
                 {/* Fotoğraf alanı */}
                 <div className="profile-photo-area">
