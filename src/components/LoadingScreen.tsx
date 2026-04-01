@@ -64,7 +64,7 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({ onComplete, isLoad
     const setBakingStatus = useLoadingStore((s) => s.setBakingStatus);
     const setFluidPaused = useLoadingStore((s) => s.setFluidPaused);
     const bakingStatus = useLoadingStore((s) => s.bakingStatus);
-    const reduceUiMotion = bakingStatus === 'baking' || showReady;
+    const reduceUiMotion = bakingStatus === 'baking';
 
     useEffect(() => {
         if (isLoaded) {
