@@ -10,6 +10,7 @@
     justify-content: center;
     z-index: 300;
     backdrop-filter: blur(4px);
+    overflow-x: clip;
 }
 
 .terminal-popup {
@@ -118,6 +119,12 @@
     }
     .terminal-line {
         font-size: 0.68rem;
+    }
+    /* Keep input text at 16px to stop mobile browsers from auto-zooming on focus. */
+    .terminal-input-line,
+    .terminal-input,
+    .terminal-prompt {
+        font-size: 16px;
     }
     .terminal-content {
         padding: 12px 14px;
