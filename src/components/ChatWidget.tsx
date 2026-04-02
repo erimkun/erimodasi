@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { ChatMessage } from '../types/chat';
 import { sendChatMessage } from '../utils/chatClient';
+import { withBase } from '../utils/assetPath';
 import './ChatWidget.css';
 
 interface ChatWidgetProps {
@@ -8,7 +9,7 @@ interface ChatWidgetProps {
     onToggle: (next: boolean) => void;
 }
 
-const AVATAR_FRAMES = ['/erimai0.png', '/erimai1.png', '/erimai2.png'];
+const AVATAR_FRAMES = [withBase('erimai0.png'), withBase('erimai1.png'), withBase('erimai2.png')];
 
 const INITIAL_ASSISTANT_MESSAGE =
     'Merhaba, ben ERIM AI. Erden Erim\'in portfolyo asistaniyim; projeleri, deneyimi ve teknik yetkinlikleri hakkinda soru sorabilirsin.';
