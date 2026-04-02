@@ -1,2 +1,11 @@
 node_modules
 dist
+.env
+.env.*
+!.env.example
+.vercel
+
+# Local working notes / drafts (do not commit)
+atılanmail.md
+ozetimsi.md
+github-project-teknik-ozet.md

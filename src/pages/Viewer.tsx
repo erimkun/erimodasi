@@ -6,6 +6,7 @@ import { LoadingScreen } from '../components/LoadingScreen';
 import { ProjectPopup } from '../components/ProjectPopup';
 import { TerminalPopup } from '../components/TerminalPopup';
 import { ProfilePopup } from '../components/ProfilePopup';
+import { ChatWidget } from '../components/ChatWidget';
 import { useDialogueStore } from '../stores/dialogueStore';
 import { useLoadingStore } from '../stores/loadingStore';
 import { getProjectByBoxId } from '../data/projects';
@@ -96,6 +97,7 @@ export function Viewer() {
     const [activeProject, setActiveProject] = useState<ProjectData | null>(null);
     const [showTerminal, setShowTerminal] = useState(false);
     const [showProfile, setShowProfile] = useState(false);
+    const [showChat, setShowChat] = useState(false);
     const [showHint, setShowHint] = useState(false);
     const [showStoryPanel, setShowStoryPanel] = useState(true);
 
@@ -208,13 +210,14 @@ export function Viewer() {
                 if (activeProject) { setActiveProject(null); setFocusedModelId(null); return; }
                 if (showTerminal) { setShowTerminal(false); setFocusedModelId(null); return; }
                 if (showProfile) { setShowProfile(false); setFocusedModelId(null); return; }
+                if (showChat) { setShowChat(false); return; }
                 if (showSpeechBubble) { closeDialogue(); setFocusedModelId(null); return; }
                 if (focusedModelId) { setFocusedModelId(null); return; }
             }
         };
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [activeProject, showTerminal, showProfile, showSpeechBubble, focusedModelId, closeDialogue]);
+    }, [activeProject, showTerminal, showProfile, showChat, showSpeechBubble, focusedModelId, closeDialogue]);
 
     // Mevcut düğümden seçenekleri hazırla
     const options = currentNode?.options.map((opt, i) => ({
@@ -337,6 +340,7 @@ export function Viewer() {
                 isVisible={showProfile}
                 onClose={() => { setShowProfile(false); setFocusedModelId(null); }}
             />
+            <ChatWidget isOpen={showChat} onToggle={setShowChat} />
         </div>
     );
 }
