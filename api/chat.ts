@@ -1,6 +1,13 @@
 const SCOPE_REJECTION = "Dostum, bu soru kapsam dışı kaldı; sadece Erim'in projeleri hakkında bilgi verebilirim.";
 const DEFAULT_MODEL = process.env.GROQ_MODEL || 'llama-3.3-70b-versatile';
 const MAX_HISTORY = 12;
+const DEFAULT_ALLOWED_ORIGIN = 'https://erimkun.github.io';
+const ALLOWED_ORIGINS = new Set([
+    'https://erimkun.github.io',
+    'https://erimodasi.vercel.app',
+    'http://localhost:5173',
+    'http://127.0.0.1:5173',
+]);
 const IN_SCOPE_IDENTITY_FALLBACK =
     'Erim, elektronik eğitimi altyapısına sahip çok yönlü bir çözüm mühendisi; LLM otomasyonları, yapay zeka sistem tasarımı, veri analizi platformları, Digital Showroom, VR/AR deneyimleri ve Unreal tabanlı oyun geliştirme üzerinde çalışır. Görüntü işleme ve modelleme tarafında CNN, GNN, KNN, ANN yaklaşımlarını kullanır; PLC ve EV gibi alanlara da ilgi duyar.';
 const IN_SCOPE_PROFILE_AGE_FALLBACK =
@@ -41,6 +48,28 @@ interface PortfolioProject {
     milestones: string;
     links: string[];
     keywords: string[];
+}
+
+function resolveAllowedOrigin(req: any): string {
+    const origin = typeof req?.headers?.origin === 'string' ? req.headers.origin : '';
+
+    if (!origin) return DEFAULT_ALLOWED_ORIGIN;
+    if (ALLOWED_ORIGINS.has(origin)) return origin;
+
+    // Allow Vercel preview URLs for testing from temporary frontend deployments.
+    if (/^https:\/\/[a-z0-9-]+\.vercel\.app$/i.test(origin)) return origin;
+
+    return DEFAULT_ALLOWED_ORIGIN;
+}
+
+function applyCors(req: any, res: any) {
+    const allowedOrigin = resolveAllowedOrigin(req);
+
+    res.setHeader('Access-Control-Allow-Origin', allowedOrigin);
+    res.setHeader('Vary', 'Origin');
+    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    res.setHeader('Access-Control-Max-Age', '86400');
 }
 
 function simplifyText(text: string): string {
@@ -649,6 +678,12 @@ function buildFallbackReply(
 }
 
 export default async function handler(req: any, res: any) {
+    applyCors(req, res);
+
+    if (req.method === 'OPTIONS') {
+        return res.status(204).end();
+    }
+
     if (req.method !== 'POST') {
         return res.status(405).json({ error: 'Method not allowed.' });
     }
