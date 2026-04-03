@@ -3,6 +3,8 @@ const DEFAULT_MODEL = process.env.GROQ_MODEL || 'llama-3.3-70b-versatile';
 const MAX_HISTORY = 12;
 const IN_SCOPE_IDENTITY_FALLBACK =
     'Erim, elektronik eğitimi altyapısına sahip çok yönlü bir çözüm mühendisi; LLM otomasyonları, yapay zeka sistem tasarımı, veri analizi platformları, Digital Showroom, VR/AR deneyimleri ve Unreal tabanlı oyun geliştirme üzerinde çalışır. Görüntü işleme ve modelleme tarafında CNN, GNN, KNN, ANN yaklaşımlarını kullanır; PLC ve EV gibi alanlara da ilgi duyar.';
+const IN_SCOPE_PROFILE_AGE_FALLBACK =
+    'Mevcut veride Erim\'in doğum tarihi veya net yaşı yer almıyor. Eğitim ve kariyer detaylarını paylaşabilirim.';
 
 type Role = 'system' | 'user' | 'assistant';
 
@@ -192,6 +194,13 @@ const STATIC_SCOPE_SIGNALS = [
     'özgeçmiş',
     'kariyer',
     'deneyim',
+    'egitim',
+    'eğitim',
+    'okul',
+    'universite',
+    'üniversite',
+    'yas',
+    'yaş',
     'llm',
     'rag',
     'three.js',
@@ -257,8 +266,80 @@ function containsAnySignal(text: string, signals: string[]): boolean {
 
 function hasIdentityIntent(message: string): boolean {
     const normalized = simplifyText(message);
-    const identitySignals = ['kimdir', 'kimsin', 'kim', 'hakkinda', 'ozgecmis', 'cv', 'biyografi', 'kariyer'];
+    const identitySignals = [
+        'kimdir',
+        'kimsin',
+        'kim',
+        'hakkinda',
+        'ozgecmis',
+        'cv',
+        'biyografi',
+        'kariyer',
+        'egitim',
+        'okul',
+        'universite',
+        'mezun',
+        'yas',
+        'dogum',
+        'nerede okudu',
+        'hangi okul',
+    ];
     return containsAnySignal(normalized, identitySignals);
+}
+
+function hasProfileIntent(message: string): boolean {
+    const normalized = simplifyText(message);
+    const profileSignals = [
+        'kim',
+        'hakkinda',
+        'ozgecmis',
+        'cv',
+        'biyografi',
+        'kariyer',
+        'egitim',
+        'okul',
+        'universite',
+        'mezun',
+        'yas',
+        'dogum',
+        'deneyim',
+        'staj',
+        'sertifika',
+        'dil',
+        'iletisim',
+    ];
+    return containsAnySignal(normalized, profileSignals);
+}
+
+function hasProjectIntent(message: string): boolean {
+    const normalized = simplifyText(message);
+    const projectSignals = [
+        'proje',
+        'repo',
+        'github',
+        'stack',
+        'teknoloji',
+        'mimari',
+        'demo',
+        'link',
+        'talep ai',
+        'panotour',
+        'immersive ar',
+        'ganged reality',
+        'thermozoning',
+    ];
+    return containsAnySignal(normalized, projectSignals);
+}
+
+type ChatIntent = 'profile' | 'projects' | 'mixed';
+
+function detectIntent(message: string): ChatIntent {
+    const profileIntent = hasProfileIntent(message);
+    const projectIntent = hasProjectIntent(message);
+
+    if (profileIntent && projectIntent) return 'mixed';
+    if (profileIntent) return 'profile';
+    return 'projects';
 }
 
 function isClearlyOutOfScope(message: string, history: ChatMessage[]): boolean {
@@ -344,15 +425,39 @@ function buildProjectContext(projects: PortfolioProject[]): string {
         .join('\n');
 }
 
-function buildSystemInstruction(relevantProjects: PortfolioProject[]) {
+function buildProfileContext(): string {
+    return [
+        'Profil bilgi tabanı:',
+        '- Erden Erim Aydoğdu, Yeditepe Üniversitesi Elektrik-Elektronik Mühendisliği (İngilizce, burslu) mezunu (2021-2025).',
+        '- İstanbul Üniversitesi Web Tasarımı ve Kodlama ön lisans derecesi bulunuyor.',
+        '- Atatürk Üniversitesi İşletme lisansına devam ediyor.',
+        '- Şu an Üsküdar Belediyesi KENTAŞ\'ta Elektrik-Elektronik Mühendisi olarak Ar-Ge ve yazılım geliştirme yapıyor.',
+        '- Önceki deneyimler: Kafein Yazılım (DevOps stajı), CONSULTA (PLM danışmanlığı).',
+        '- Teknik odak: AI/ML, XR, IoT, full-stack web, CesiumJS, Unreal Engine, Three.js, LLM/RAG sistemleri.',
+        '- İngilizce C1, Almanca A2, İspanyolca A1.',
+        '- Doğum tarihi/yaş bilgisi kaynakta yer almıyor; kullanıcı yaş sorarsa bu detayı bilmediğini açıkça belirt.',
+    ].join('\n');
+}
+
+function buildSystemInstruction(intent: ChatIntent, relevantProjects: PortfolioProject[]) {
+    const intentRule =
+        intent === 'profile'
+            ? 'Kullanıcının sorusu profil odaklı. Önce profil bilgi tabanını kullan; proje listesine sadece soru özellikle projeye dönerse geç.'
+            : intent === 'mixed'
+                ? 'Kullanıcının sorusu hem profil hem proje içeriyor. Cevabı iki kısa bölümle ver: önce profil, sonra ilgili proje.'
+                : 'Kullanıcının sorusu proje odaklı. Önce ilgili projeleri ve teknik detayları anlat.';
+
     return [
         'Sen ERIM-AI: Erden Erim Aydoğdu için üst düzey teknik portfolyo asistanısın.',
         `Kapsam dışı sorularda SADECE şu cümleyi yaz: "${SCOPE_REJECTION}"`,
+        intentRule,
         'Yanıt ilkeleri:',
         '- Türkçe yaz, kısa ama teknik netlik içeren cevaplar ver.',
         '- Kullanıcı teknoloji, mimari, tarih veya repo sorarsa maddeli ve karşılaştırmalı anlat.',
         '- Doğrulanmamış bilgi uydurma; emin değilsen "mevcut veride bu detay net değil" de.',
-        '- Cevaplarını Erim projeleri, teknik birikimi ve teslim tarihleri odağında tut.',
+        '- Kullanıcı yaş/doğum tarihi sorarsa, kaynakta net veri yoksa bunu açıkça belirt.',
+        '- Cevaplarını soru niyetine göre profil bilgisi veya proje bilgisi odağında tut.',
+        buildProfileContext(),
         'Portfolyo bilgi tabanı (güncel kaynak özet):',
         buildProjectContext(relevantProjects),
     ].join('\n');
@@ -381,6 +486,7 @@ export default async function handler(req: any, res: any) {
     }
 
     const history = normalizeHistory(body.history);
+    const intent = detectIntent(message);
     const relevantProjects = findRelevantProjects(message, history);
     const outOfScope = isClearlyOutOfScope(message, history);
 
@@ -389,7 +495,7 @@ export default async function handler(req: any, res: any) {
     }
 
     const messages: ChatMessage[] = [
-        { role: 'system', content: buildSystemInstruction(relevantProjects) },
+        { role: 'system', content: buildSystemInstruction(intent, relevantProjects) },
         ...history,
         { role: 'user', content: message.slice(0, 1600) },
     ];
@@ -418,16 +524,20 @@ export default async function handler(req: any, res: any) {
         const modelReply = data?.choices?.[0]?.message?.content?.trim();
 
         if (!modelReply) {
-            const fallback = hasIdentityIntent(message)
-                ? IN_SCOPE_IDENTITY_FALLBACK
+            const fallback = simplifyText(message).includes('yas')
+                ? IN_SCOPE_PROFILE_AGE_FALLBACK
+                : hasIdentityIntent(message)
+                    ? IN_SCOPE_IDENTITY_FALLBACK
                 : buildProjectFallback(relevantProjects);
             return res.status(200).json({ message: fallback });
         }
 
         // Model bazen kapsam içi sorularda da sabit ret döndürebiliyor.
         if (!outOfScope && modelReply === SCOPE_REJECTION) {
-            const fallback = hasIdentityIntent(message)
-                ? IN_SCOPE_IDENTITY_FALLBACK
+            const fallback = simplifyText(message).includes('yas')
+                ? IN_SCOPE_PROFILE_AGE_FALLBACK
+                : hasIdentityIntent(message)
+                    ? IN_SCOPE_IDENTITY_FALLBACK
                 : buildProjectFallback(relevantProjects);
             return res.status(200).json({ message: fallback });
         }
