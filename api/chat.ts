@@ -4,6 +4,7 @@ const MAX_HISTORY = 12;
 const DEFAULT_ALLOWED_ORIGIN = 'https://erimkun.github.io';
 const ALLOWED_ORIGINS = new Set([
     'https://erimkun.github.io',
+    'https://erdenerim.vercel.app',
     'https://erimodasi.vercel.app',
     'http://localhost:5173',
     'http://127.0.0.1:5173',

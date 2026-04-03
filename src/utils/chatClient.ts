@@ -8,7 +8,7 @@ function resolveApiBaseUrl(): string {
 
     // GitHub Pages cannot run serverless /api routes; proxy to Vercel backend.
     if (window.location.hostname.endsWith('github.io')) {
-        return 'https://erimodasi.vercel.app';
+        return 'https://erdenerim.vercel.app';
     }
 
     return '';
