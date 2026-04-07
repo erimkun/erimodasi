@@ -17,8 +17,9 @@
 }
 
 .chat-avatar-trigger.is-open {
-    z-index: 320;
     pointer-events: none;
+    opacity: 0;
+    visibility: hidden;
 }
 
 .chat-avatar-trigger:hover {
@@ -29,8 +30,12 @@
 .chat-avatar {
     width: 100%;
     height: auto;
+    display: block;
     user-select: none;
     pointer-events: none;
+    image-rendering: auto;
+    backface-visibility: hidden;
+    transform: translateZ(0);
     transition: transform 0.16s ease;
 }
 
@@ -50,8 +55,8 @@
 
 .chat-panel {
     position: fixed;
-    right: 1.2rem;
-    bottom: 4.6rem;
+    right: 1.5rem;
+    bottom: 5rem;
     width: min(420px, calc(100vw - 1.6rem));
     height: min(560px, calc(100vh - 8rem));
     z-index: 360;
@@ -71,7 +76,7 @@
 }
 
 .chat-panel.is-open {
-    right: 6.8rem;
+    right: 7.35rem;
 }
 
 @keyframes chatPanelIn {
@@ -215,22 +220,22 @@
 
 @media (max-width: 768px) {
     .chat-avatar-trigger {
-        right: -0.75rem;
-        bottom: -0.45rem;
+        right: -0.6rem;
+        bottom: -0.2rem;
         width: 210px;
         height: 210px;
     }
 
     .chat-panel {
-        right: 0.5rem;
-        bottom: 4.2rem;
-        width: calc(100vw - 1rem);
+        right: 0.85rem;
+        bottom: 4.85rem;
+        width: calc(100vw - 1.7rem);
         height: min(520px, calc(100vh - 7.6rem));
     }
 
     .chat-panel.is-open {
-        right: 0.5rem;
-        bottom: 5.4rem;
+        right: 0.85rem;
+        bottom: 5.85rem;
     }
 
     .chat-input-row textarea {

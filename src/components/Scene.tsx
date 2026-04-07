@@ -62,22 +62,22 @@ function getQualitySettings(tier: QualityTier, isEditor: boolean, profile: Quali
         shadowMapSize: [number, number];
     }> = {
         high: {
-            dpr: [0.84, 1.05],
+            dpr: [0.88, 1.08],
             antialias: true,
             enableShadows: true,
-            shadowMapSize: [1024, 1024],
+            shadowMapSize: [1152, 1152],
         },
         medium: {
-            dpr: [0.74, 0.9],
+            dpr: [0.78, 0.94],
             antialias: false,
             enableShadows: true,
-            shadowMapSize: [768, 768],
+            shadowMapSize: [896, 896],
         },
         low: {
-            dpr: [0.6, 0.76],
+            dpr: [0.64, 0.82],
             antialias: false,
             enableShadows: true,
-            shadowMapSize: [512, 512],
+            shadowMapSize: [640, 640],
         },
     };
 
@@ -88,22 +88,22 @@ function getQualitySettings(tier: QualityTier, isEditor: boolean, profile: Quali
         shadowMapSize: [number, number];
     }> = {
         high: {
-            dpr: [0.9, 1.12],
+            dpr: [0.94, 1.18],
             antialias: true,
             enableShadows: true,
-            shadowMapSize: [1280, 1280],
+            shadowMapSize: [1408, 1408],
         },
         medium: {
-            dpr: [0.8, 0.98],
+            dpr: [0.84, 1.02],
             antialias: true,
             enableShadows: true,
-            shadowMapSize: [1024, 1024],
+            shadowMapSize: [1152, 1152],
         },
         low: {
-            dpr: [0.66, 0.82],
+            dpr: [0.7, 0.86],
             antialias: false,
             enableShadows: true,
-            shadowMapSize: [768, 768],
+            shadowMapSize: [896, 896],
         },
     };
 
@@ -114,22 +114,22 @@ function getQualitySettings(tier: QualityTier, isEditor: boolean, profile: Quali
         shadowMapSize: [number, number];
     }> = {
         high: {
-            dpr: [1.0, 1.3],
+            dpr: [1.06, 1.34],
             antialias: true,
             enableShadows: true,
-            shadowMapSize: [1536, 1536],
+            shadowMapSize: [1664, 1664],
         },
         medium: {
-            dpr: [0.9, 1.1],
+            dpr: [0.96, 1.16],
             antialias: true,
             enableShadows: true,
-            shadowMapSize: [1280, 1280],
+            shadowMapSize: [1408, 1408],
         },
         low: {
-            dpr: [0.78, 0.96],
+            dpr: [0.84, 1.0],
             antialias: true,
             enableShadows: true,
-            shadowMapSize: [768, 768],
+            shadowMapSize: [896, 896],
         },
     };
 
@@ -140,22 +140,22 @@ function getQualitySettings(tier: QualityTier, isEditor: boolean, profile: Quali
         shadowMapSize: [number, number];
     }> = {
         high: {
-            dpr: [1.06, 1.35],
+            dpr: [1.1, 1.42],
             antialias: true,
             enableShadows: true,
-            shadowMapSize: [1792, 1792],
+            shadowMapSize: [1920, 1920],
         },
         medium: {
-            dpr: [0.96, 1.16],
+            dpr: [1.0, 1.22],
             antialias: true,
             enableShadows: true,
-            shadowMapSize: [1536, 1536],
+            shadowMapSize: [1664, 1664],
         },
         low: {
-            dpr: [0.82, 1.0],
+            dpr: [0.88, 1.06],
             antialias: true,
             enableShadows: true,
-            shadowMapSize: [1024, 1024],
+            shadowMapSize: [1152, 1152],
         },
     };
 
