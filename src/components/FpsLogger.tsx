@@ -118,12 +118,13 @@ export function FpsLogger() {
         URL.revokeObjectURL(url);
     };
 
-    useEffect(() => {
-        if (typeof navigator !== 'undefined' && navigator.webdriver) {
-            window.__FPS_LOGGER_AUTO__ = true;
-            setActive(true);
-        }
-    }, []);
+    // Test/automation auto-start was used during perf development.
+    // useEffect(() => {
+    //     if (typeof navigator !== 'undefined' && navigator.webdriver) {
+    //         window.__FPS_LOGGER_AUTO__ = true;
+    //         setActive(true);
+    //     }
+    // }, []);
 
     useEffect(() => {
         const onKeyDown = (event: KeyboardEvent) => {
@@ -135,22 +136,23 @@ export function FpsLogger() {
                 return;
             }
 
-            if (key !== 'l') return;
+            // Test-only JSON download shortcut is intentionally disabled in production.
+            // if (key !== 'l') return;
 
-            const liveSnapshot = getSnapshot();
-            if (liveSnapshot) {
-                downloadSnapshot(liveSnapshot, liveSnapshot.active ? 'live' : 'session');
-                console.log('[FPS Tool] JSON indirildi:', liveSnapshot);
-                return;
-            }
+            // const liveSnapshot = getSnapshot();
+            // if (liveSnapshot) {
+            //     downloadSnapshot(liveSnapshot, liveSnapshot.active ? 'live' : 'session');
+            //     console.log('[FPS Tool] JSON indirildi:', liveSnapshot);
+            //     return;
+            // }
 
-            if (window.__FPS_TOOL__) {
-                downloadSnapshot(window.__FPS_TOOL__, 'last');
-                console.log('[FPS Tool] Son oturum JSON indirildi:', window.__FPS_TOOL__);
-                return;
-            }
+            // if (window.__FPS_TOOL__) {
+            //     downloadSnapshot(window.__FPS_TOOL__, 'last');
+            //     console.log('[FPS Tool] Son oturum JSON indirildi:', window.__FPS_TOOL__);
+            //     return;
+            // }
 
-            console.log('[FPS Tool] İndirilecek veri yok. Önce F ile kayıt başlatın.');
+            // console.log('[FPS Tool] İndirilecek veri yok. Önce F ile kayıt başlatın.');
         };
 
         window.addEventListener('keydown', onKeyDown);

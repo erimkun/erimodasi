@@ -51,7 +51,15 @@ export function ChatWidget({ isOpen, onToggle }: ChatWidgetProps) {
             return () => window.clearInterval(frameTimer);
         }
 
-        setAvatarFrameIndex(isOpen ? 2 : 0);
+        if (isOpen) {
+            const frameTimer = window.setInterval(() => {
+                setAvatarFrameIndex((prev) => (prev + 1) % AVATAR_FRAMES.length);
+            }, 360);
+
+            return () => window.clearInterval(frameTimer);
+        }
+
+        setAvatarFrameIndex(0);
     }, [loading, isWritingResponse, isOpen]);
 
     useEffect(() => {

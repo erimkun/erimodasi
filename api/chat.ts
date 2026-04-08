@@ -316,6 +316,59 @@ function containsAnySignal(text: string, signals: string[]): boolean {
     return signals.some((signal) => signal.length >= 2 && text.includes(signal));
 }
 
+function hasEditDistanceAtMostOne(a: string, b: string): boolean {
+    if (a === b) return true;
+    const lenA = a.length;
+    const lenB = b.length;
+    if (Math.abs(lenA - lenB) > 1) return false;
+
+    let i = 0;
+    let j = 0;
+    let mismatch = 0;
+
+    while (i < lenA && j < lenB) {
+        if (a[i] === b[j]) {
+            i += 1;
+            j += 1;
+            continue;
+        }
+
+        mismatch += 1;
+        if (mismatch > 1) return false;
+
+        if (lenA > lenB) {
+            i += 1;
+        } else if (lenB > lenA) {
+            j += 1;
+        } else {
+            i += 1;
+            j += 1;
+        }
+    }
+
+    if (i < lenA || j < lenB) mismatch += 1;
+    return mismatch <= 1;
+}
+
+function containsAnySignalFuzzy(text: string, signals: string[]): boolean {
+    if (containsAnySignal(text, signals)) return true;
+
+    const tokens = text.split(' ').filter((token) => token.length >= 4);
+    const normalizedSignals = signals
+        .map((signal) => simplifyText(signal))
+        .filter((signal) => signal.length >= 4 && !signal.includes(' '));
+
+    for (const token of tokens) {
+        for (const signal of normalizedSignals) {
+            if (hasEditDistanceAtMostOne(token, signal)) {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
 function hasIdentityIntent(message: string): boolean {
     const normalized = simplifyText(message);
     const identitySignals = [
@@ -336,7 +389,7 @@ function hasIdentityIntent(message: string): boolean {
         'nerede okudu',
         'hangi okul',
     ];
-    return containsAnySignal(normalized, identitySignals);
+    return containsAnySignalFuzzy(normalized, identitySignals);
 }
 
 function hasProfileIntent(message: string): boolean {
@@ -360,7 +413,7 @@ function hasProfileIntent(message: string): boolean {
         'dil',
         'iletisim',
     ];
-    return containsAnySignal(normalized, profileSignals);
+    return containsAnySignalFuzzy(normalized, profileSignals);
 }
 
 function hasProjectIntent(message: string): boolean {
@@ -380,7 +433,7 @@ function hasProjectIntent(message: string): boolean {
         'ganged reality',
         'thermozoning',
     ];
-    return containsAnySignal(normalized, projectSignals);
+    return containsAnySignalFuzzy(normalized, projectSignals);
 }
 
 type ChatIntent = 'profile' | 'projects' | 'mixed';
@@ -409,22 +462,22 @@ function detectIntent(message: string): ChatIntent {
 function detectQuestionArchetype(message: string, intent: ChatIntent): QuestionArchetype {
     const normalized = simplifyText(message);
 
-    if (containsAnySignal(normalized, ['kac yas', 'yasinda', 'dogum'])) return 'age';
-    if (containsAnySignal(normalized, ['nerede okudu', 'hangi okul', 'egitim', 'mezun', 'universite'])) return 'education';
-    if (containsAnySignal(normalized, ['deneyim', 'staj', 'is gecmisi', 'nerede calisiyor', 'ne is yapiyor', 'calisiyor'])) {
+    if (containsAnySignalFuzzy(normalized, ['kac yas', 'yasinda', 'dogum'])) return 'age';
+    if (containsAnySignalFuzzy(normalized, ['nerede okudu', 'hangi okul', 'egitim', 'mezun', 'universite'])) return 'education';
+    if (containsAnySignalFuzzy(normalized, ['deneyim', 'staj', 'is gecmisi', 'nerede calisiyor', 'ne is yapiyor', 'calisiyor'])) {
         return 'experience';
     }
-    if (containsAnySignal(normalized, ['sertifika', 'teknik beceri', 'skill set', 'hangi teknolojiler', 'uzmanlik'])) {
+    if (containsAnySignalFuzzy(normalized, ['sertifika', 'teknik beceri', 'skill set', 'hangi teknolojiler', 'uzmanlik'])) {
         return 'skills';
     }
-    if (containsAnySignal(normalized, ['iletisim', 'mail', 'e posta', 'eposta', 'linkedin', 'github', 'ulas'])) {
+    if (containsAnySignalFuzzy(normalized, ['iletisim', 'mail', 'e posta', 'eposta', 'linkedin', 'github', 'ulas'])) {
         return 'contact';
     }
-    if (containsAnySignal(normalized, ['karsilastir', 'karsilastirma', 'farki', 'hangisi daha'])) return 'project_compare';
-    if (containsAnySignal(normalized, ['hangi proje', 'oner', 'oneri', 'uygun proje', 'nereden baslayayim'])) {
+    if (containsAnySignalFuzzy(normalized, ['karsilastir', 'karsilastirma', 'farki', 'hangisi daha'])) return 'project_compare';
+    if (containsAnySignalFuzzy(normalized, ['hangi proje', 'oner', 'oneri', 'uygun proje', 'nereden baslayayim'])) {
         return 'project_recommendation';
     }
-    if (containsAnySignal(normalized, ['ne zaman', 'tarih', 'timeline', 'zaman cizelgesi', 'kilometre'])) {
+    if (containsAnySignalFuzzy(normalized, ['ne zaman', 'tarih', 'timeline', 'zaman cizelgesi', 'kilometre'])) {
         return 'project_timeline';
     }
 
@@ -460,35 +513,35 @@ function buildArchetypeGuidance(archetype: QuestionArchetype): string {
 function buildDirectProfileAnswer(message: string): string | null {
     const normalized = simplifyText(message);
 
-    if (containsAnySignal(normalized, ['kac yas', 'yasinda', 'dogum'])) {
+    if (containsAnySignalFuzzy(normalized, ['kac yas', 'yasinda', 'dogum'])) {
         return IN_SCOPE_PROFILE_AGE_FALLBACK;
     }
 
-    if (containsAnySignal(normalized, ['nerede okudu', 'hangi okul', 'egitim', 'mezun', 'universite'])) {
+    if (containsAnySignalFuzzy(normalized, ['nerede okudu', 'hangi okul', 'egitim', 'mezun', 'universite'])) {
         return PROFILE_FACTS.education;
     }
 
-    if (containsAnySignal(normalized, ['nerede calisiyor', 'ne is yapiyor', 'calisiyor', 'gorevi', 'kentas'])) {
+    if (containsAnySignalFuzzy(normalized, ['nerede calisiyor', 'ne is yapiyor', 'calisiyor', 'gorevi', 'kentas'])) {
         return `${PROFILE_FACTS.currentRole}\n${PROFILE_FACTS.previousExperience}`;
     }
 
-    if (containsAnySignal(normalized, ['deneyim', 'staj', 'is gecmisi', 'onceki'])) {
+    if (containsAnySignalFuzzy(normalized, ['deneyim', 'staj', 'is gecmisi', 'onceki'])) {
         return `${PROFILE_FACTS.currentRole}\n${PROFILE_FACTS.previousExperience}`;
     }
 
-    if (containsAnySignal(normalized, ['sertifika', 'belge'])) {
+    if (containsAnySignalFuzzy(normalized, ['sertifika', 'belge'])) {
         return PROFILE_FACTS.certifications;
     }
 
-    if (containsAnySignal(normalized, ['hangi dilleri', 'dil biliyor', 'ingilizce', 'almanca', 'ispanyolca'])) {
+    if (containsAnySignalFuzzy(normalized, ['hangi dilleri', 'dil biliyor', 'ingilizce', 'almanca', 'ispanyolca'])) {
         return PROFILE_FACTS.languages;
     }
 
-    if (containsAnySignal(normalized, ['iletisim', 'mail', 'email', 'linkedin', 'github', 'ulas'])) {
+    if (containsAnySignalFuzzy(normalized, ['iletisim', 'mail', 'email', 'linkedin', 'github', 'ulas'])) {
         return PROFILE_FACTS.contact;
     }
 
-    if (containsAnySignal(normalized, ['kim', 'kimdir', 'hakkinda', 'ozgecmis', 'cv', 'biyografi'])) {
+    if (containsAnySignalFuzzy(normalized, ['kim', 'kimdir', 'hakkinda', 'ozgecmis', 'cv', 'biyografi'])) {
         return [PROFILE_FACTS.education, PROFILE_FACTS.currentRole, PROFILE_FACTS.skills].join('\n');
     }
 
@@ -678,6 +731,49 @@ function buildFallbackReply(
     return buildProjectFallback(relevantProjects);
 }
 
+function buildQuickIntentReply(
+    message: string,
+    intent: ChatIntent,
+    archetype: QuestionArchetype,
+    relevantProjects: PortfolioProject[],
+): string | null {
+    const normalized = simplifyText(message);
+    const tokenCount = normalized.split(' ').filter(Boolean).length;
+
+    if (containsAnySignalFuzzy(normalized, ['egitim', 'okul', 'universite', 'mezun'])) {
+        return PROFILE_FACTS.education;
+    }
+
+    if (containsAnySignalFuzzy(normalized, ['deneyim', 'staj', 'calisiyor', 'is gecmisi'])) {
+        return `${PROFILE_FACTS.currentRole}\n${PROFILE_FACTS.previousExperience}`;
+    }
+
+    if (containsAnySignalFuzzy(normalized, ['yetkinlik', 'beceri', 'skill', 'teknoloji'])) {
+        return PROFILE_FACTS.skills;
+    }
+
+    if (containsAnySignalFuzzy(normalized, ['iletisim', 'mail', 'email', 'linkedin', 'github'])) {
+        return PROFILE_FACTS.contact;
+    }
+
+    if (containsAnySignalFuzzy(normalized, ['proje', 'projeler', 'portfolio', 'portfolyo'])) {
+        return buildProjectFallback(relevantProjects);
+    }
+
+    if (tokenCount <= 2 && intent === 'profile') {
+        return [PROFILE_FACTS.education, PROFILE_FACTS.currentRole].join('\n');
+    }
+
+    if (tokenCount <= 2 && intent === 'projects') {
+        if (archetype === 'project_compare') return buildProjectComparisonFallback(relevantProjects);
+        if (archetype === 'project_recommendation') return buildProjectRecommendationFallback(relevantProjects);
+        if (archetype === 'project_timeline') return buildProjectTimelineFallback(relevantProjects);
+        return buildProjectFallback(relevantProjects);
+    }
+
+    return null;
+}
+
 export default async function handler(req: any, res: any) {
     applyCors(req, res);
 
@@ -704,7 +800,12 @@ export default async function handler(req: any, res: any) {
     const intent = detectIntent(message);
     const archetype = detectQuestionArchetype(message, intent);
     const relevantProjects = findRelevantProjects(message, history);
+    const quickReply = buildQuickIntentReply(message, intent, archetype, relevantProjects);
     const outOfScope = isClearlyOutOfScope(message, history);
+
+    if (quickReply) {
+        return res.status(200).json({ message: quickReply });
+    }
 
     // Yüksek güvenli profil sorularını modele gitmeden deterministic yanıtla.
     if (intent === 'profile') {

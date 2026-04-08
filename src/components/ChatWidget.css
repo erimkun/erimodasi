@@ -18,8 +18,9 @@
 
 .chat-avatar-trigger.is-open {
     pointer-events: none;
-    opacity: 0;
-    visibility: hidden;
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) scale(0.96);
 }
 
 .chat-avatar-trigger:hover {
