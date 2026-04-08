@@ -1,4 +1,7 @@
-const SCOPE_REJECTION = "Dostum, bu soru kapsam dışı kaldı; sadece Erim'in projeleri hakkında bilgi verebilirim.";
+const SCOPE_REJECTION =
+    "Bu soru portfolyo kapsamının dışında görünüyor. Erden Erim'in projeleri, deneyimi, eğitimi ve teknik yetkinlikleri hakkında yardımcı olabilirim.";
+const LOW_INFO_REDIRECT =
+    'Mesajını aldım. Daha net yardımcı olmam için şu başlıklardan birini sorabilirsin: projeler, eğitim, deneyim, teknik yetkinlikler veya iletişim.';
 const DEFAULT_MODEL = process.env.GROQ_MODEL || 'llama-3.3-70b-versatile';
 const MAX_HISTORY = 12;
 const DEFAULT_ALLOWED_ORIGIN = 'https://erimkun.github.io';
@@ -731,14 +734,13 @@ function buildFallbackReply(
     return buildProjectFallback(relevantProjects);
 }
 
-function buildQuickIntentReply(
-    message: string,
-    intent: ChatIntent,
-    archetype: QuestionArchetype,
-    relevantProjects: PortfolioProject[],
-): string | null {
+function buildQuickIntentReply(message: string, relevantProjects: PortfolioProject[]): string | null {
     const normalized = simplifyText(message);
     const tokenCount = normalized.split(' ').filter(Boolean).length;
+
+    if (containsAnySignalFuzzy(normalized, ['test', 'deneme', 'selam', 'merhaba', 'hey'])) {
+        return LOW_INFO_REDIRECT;
+    }
 
     if (containsAnySignalFuzzy(normalized, ['egitim', 'okul', 'universite', 'mezun'])) {
         return PROFILE_FACTS.education;
@@ -760,15 +762,8 @@ function buildQuickIntentReply(
         return buildProjectFallback(relevantProjects);
     }
 
-    if (tokenCount <= 2 && intent === 'profile') {
-        return [PROFILE_FACTS.education, PROFILE_FACTS.currentRole].join('\n');
-    }
-
-    if (tokenCount <= 2 && intent === 'projects') {
-        if (archetype === 'project_compare') return buildProjectComparisonFallback(relevantProjects);
-        if (archetype === 'project_recommendation') return buildProjectRecommendationFallback(relevantProjects);
-        if (archetype === 'project_timeline') return buildProjectTimelineFallback(relevantProjects);
-        return buildProjectFallback(relevantProjects);
+    if (tokenCount <= 2 && !containsAnySignalFuzzy(normalized, IN_SCOPE_SIGNALS)) {
+        return LOW_INFO_REDIRECT;
     }
 
     return null;
@@ -800,7 +795,7 @@ export default async function handler(req: any, res: any) {
     const intent = detectIntent(message);
     const archetype = detectQuestionArchetype(message, intent);
     const relevantProjects = findRelevantProjects(message, history);
-    const quickReply = buildQuickIntentReply(message, intent, archetype, relevantProjects);
+    const quickReply = buildQuickIntentReply(message, relevantProjects);
     const outOfScope = isClearlyOutOfScope(message, history);
 
     if (quickReply) {

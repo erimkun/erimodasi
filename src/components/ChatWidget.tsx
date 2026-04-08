@@ -37,13 +37,7 @@ export function ChatWidget({ isOpen, onToggle }: ChatWidgetProps) {
     }, [loading]);
 
     useEffect(() => {
-        if (loading) {
-            // While preparing the response, keep a calm idle face (erimai0).
-            setAvatarFrameIndex(0);
-            return;
-        }
-
-        if (isWritingResponse) {
+        if (loading || isWritingResponse) {
             const frameTimer = window.setInterval(() => {
                 setAvatarFrameIndex((prev) => (prev + 1) % AVATAR_FRAMES.length);
             }, 280);
@@ -51,15 +45,8 @@ export function ChatWidget({ isOpen, onToggle }: ChatWidgetProps) {
             return () => window.clearInterval(frameTimer);
         }
 
-        if (isOpen) {
-            const frameTimer = window.setInterval(() => {
-                setAvatarFrameIndex((prev) => (prev + 1) % AVATAR_FRAMES.length);
-            }, 360);
-
-            return () => window.clearInterval(frameTimer);
-        }
-
-        setAvatarFrameIndex(0);
+        // Keep a stable expression when there is no active assistant response.
+        setAvatarFrameIndex(isOpen ? 2 : 0);
     }, [loading, isWritingResponse, isOpen]);
 
     useEffect(() => {
@@ -150,7 +137,7 @@ export function ChatWidget({ isOpen, onToggle }: ChatWidgetProps) {
                 aria-label={isOpen ? 'Sohbeti kapat' : 'Sohbeti ac'}
             >
                 <img
-                    className={`chat-avatar ${isWritingResponse ? 'is-speaking' : ''}`}
+                    className={`chat-avatar ${loading || isWritingResponse ? 'is-speaking' : ''}`}
                     src={AVATAR_FRAMES[avatarFrameIndex]}
                     alt="ERIM AI"
                     draggable={false}
