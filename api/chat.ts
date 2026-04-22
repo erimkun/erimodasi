@@ -648,125 +648,20 @@ function buildProfileContext(): string {
     ].join('\n');
 }
 
-function buildSystemInstruction(intent: ChatIntent, archetype: QuestionArchetype, relevantProjects: PortfolioProject[]) {
-    const intentRule =
-        intent === 'profile'
-            ? 'Kullanıcının sorusu profil odaklı. Önce profil bilgi tabanını kullan; proje listesine sadece soru özellikle projeye dönerse geç.'
-            : intent === 'mixed'
-                ? 'Kullanıcının sorusu hem profil hem proje içeriyor. Cevabı iki kısa bölümle ver: önce profil, sonra ilgili proje.'
-                : 'Kullanıcının sorusu proje odaklı. Önce ilgili projeleri ve teknik detayları anlat.';
-    const archetypeRule = buildArchetypeGuidance(archetype);
-
+function buildSystemInstruction(relevantProjects: PortfolioProject[]) {
     return [
-        'Sen ERIM-AI: Erden Erim Aydoğdu için üst düzey teknik portfolyo asistanısın.',
-        `Kapsam dışı sorularda SADECE şu cümleyi yaz: "${SCOPE_REJECTION}"`,
-        intentRule,
-        archetypeRule,
-        'Yanıt ilkeleri:',
-        '- Türkçe yaz, kısa ama teknik netlik içeren cevaplar ver.',
-        '- Kullanıcı teknoloji, mimari, tarih veya repo sorarsa maddeli ve karşılaştırmalı anlat.',
-        '- Doğrulanmamış bilgi uydurma; emin değilsen "mevcut veride bu detay net değil" de.',
-        '- Kullanıcı yaş/doğum tarihi sorarsa, kaynakta net veri yoksa bunu açıkça belirt.',
-        '- Cevaplarını soru niyetine göre profil bilgisi veya proje bilgisi odağında tut.',
-        '- Sık gelebilecek soru türleri: eğitim, deneyim, yetkinlik, sertifika, diller, iletişim, proje özeti, proje karşılaştırma, proje önerisi, proje zaman çizelgesi.',
+        "Sen ERIM-AI'sın, Erden Erim Aydoğdu'nun kişisel yapay zeka asistanı ve portfolyo temsilcisisin.",
+        "Amacın, kullanıcıların her türlü sorusunu (teknik, genel sohbet, yazılım, tavsiye) en iyi şekilde cevaplarken, doğal ve akıcı bir diyalog kurmaktır.",
+        "ÖNEMLİ: Soruları reddetme ('Bu konu kapsam dışı' vb. DEME). Kullanıcı genel veya farklı bir konudan bahsetse bile cevap ver, fakat konuyu zekice ve doğal bir şekilde Erden Erim'in yetkinliklerine, vizyonuna veya projelerine bağlamaya çalış.",
+        "Sohbet Kuralları:",
+        "- Kullanıcıyla doğal, zeki ve samimi bir dille konuş.",
+        "- Erden'in uzmanlık alanları (AI/ML, Local LLM, WebXR, Unreal Engine, Three.js, React, CesiumJS vs.) ile ilgili fırsatları değerlendirip projelerinden örnekler ver.",
+        "- Erden'in projelerini överken veya anlatırken abartıya kaçmadan, teknik detaylarıyla (hangi aracı neden kullandığıyla) bahset.",
+        "- Erden adına yanlış veya uydurma bir bilgi verme. Profilinde yazmayan özelliklerini uydurma.",
         buildProfileContext(),
-        'Portfolyo bilgi tabanı (güncel kaynak özet):',
+        "Bağlam ile ilgili bazı Projeler:",
         buildProjectContext(relevantProjects),
-    ].join('\n');
-}
-
-function buildProjectFallback(relevantProjects: PortfolioProject[]): string {
-    const top = relevantProjects.slice(0, 3);
-    const lines = top.map((project) => `- ${project.name}: ${project.summary}`);
-    return `Bu konuda öne çıkan projeler:\n${lines.join('\n')}`;
-}
-
-function buildProjectComparisonFallback(relevantProjects: PortfolioProject[]): string {
-    const [a, b] = relevantProjects;
-    if (!a || !b) return buildProjectFallback(relevantProjects);
-
-    return [
-        'Kısa karşılaştırma:',
-        `1) ${a.name}`,
-        `- Özet: ${a.summary}`,
-        `- Teknoloji: ${a.tech}`,
-        `2) ${b.name}`,
-        `- Özet: ${b.summary}`,
-        `- Teknoloji: ${b.tech}`,
-        'İstersen kullanım senaryona göre hangisinin daha uygun olduğunu da net önerebilirim.',
-    ].join('\n');
-}
-
-function buildProjectRecommendationFallback(relevantProjects: PortfolioProject[]): string {
-    const top = relevantProjects.slice(0, 3);
-    if (top.length === 0) return buildProjectFallback(relevantProjects);
-
-    return [
-        'Hedefe göre başlayabileceğin proje önerileri:',
-        ...top.map((project, index) => `${index + 1}. ${project.name} - ${project.summary}`),
-    ].join('\n');
-}
-
-function buildProjectTimelineFallback(relevantProjects: PortfolioProject[]): string {
-    const top = relevantProjects.slice(0, 4);
-    if (top.length === 0) return buildProjectFallback(relevantProjects);
-
-    return [
-        'Zaman çizelgesi odaklı kısa özet:',
-        ...top.map((project) => `- ${project.name}: ${project.milestones}`),
-    ].join('\n');
-}
-
-function buildFallbackReply(
-    message: string,
-    intent: ChatIntent,
-    archetype: QuestionArchetype,
-    relevantProjects: PortfolioProject[],
-): string {
-    if (intent === 'profile') {
-        return buildDirectProfileAnswer(message) || IN_SCOPE_IDENTITY_FALLBACK;
-    }
-
-    if (archetype === 'project_compare') return buildProjectComparisonFallback(relevantProjects);
-    if (archetype === 'project_recommendation') return buildProjectRecommendationFallback(relevantProjects);
-    if (archetype === 'project_timeline') return buildProjectTimelineFallback(relevantProjects);
-
-    return buildProjectFallback(relevantProjects);
-}
-
-function buildQuickIntentReply(message: string, relevantProjects: PortfolioProject[]): string | null {
-    const normalized = simplifyText(message);
-    const tokenCount = normalized.split(' ').filter(Boolean).length;
-
-    if (containsAnySignalFuzzy(normalized, ['test', 'deneme', 'selam', 'merhaba', 'hey'])) {
-        return LOW_INFO_REDIRECT;
-    }
-
-    if (containsAnySignalFuzzy(normalized, ['egitim', 'okul', 'universite', 'mezun'])) {
-        return PROFILE_FACTS.education;
-    }
-
-    if (containsAnySignalFuzzy(normalized, ['deneyim', 'staj', 'calisiyor', 'is gecmisi'])) {
-        return `${PROFILE_FACTS.currentRole}\n${PROFILE_FACTS.previousExperience}`;
-    }
-
-    if (containsAnySignalFuzzy(normalized, ['yetkinlik', 'beceri', 'skill', 'teknoloji'])) {
-        return PROFILE_FACTS.skills;
-    }
-
-    if (containsAnySignalFuzzy(normalized, ['iletisim', 'mail', 'email', 'linkedin', 'github'])) {
-        return PROFILE_FACTS.contact;
-    }
-
-    if (containsAnySignalFuzzy(normalized, ['proje', 'projeler', 'portfolio', 'portfolyo'])) {
-        return buildProjectFallback(relevantProjects);
-    }
-
-    if (tokenCount <= 2 && !containsAnySignalFuzzy(normalized, IN_SCOPE_SIGNALS)) {
-        return LOW_INFO_REDIRECT;
-    }
-
-    return null;
+    ].join('\\n');
 }
 
 export default async function handler(req: any, res: any) {
@@ -792,30 +687,10 @@ export default async function handler(req: any, res: any) {
     }
 
     const history = normalizeHistory(body.history);
-    const intent = detectIntent(message);
-    const archetype = detectQuestionArchetype(message, intent);
     const relevantProjects = findRelevantProjects(message, history);
-    const quickReply = buildQuickIntentReply(message, relevantProjects);
-    const outOfScope = isClearlyOutOfScope(message, history);
-
-    if (quickReply) {
-        return res.status(200).json({ message: quickReply });
-    }
-
-    // Yüksek güvenli profil sorularını modele gitmeden deterministic yanıtla.
-    if (intent === 'profile') {
-        const directProfileAnswer = buildDirectProfileAnswer(message);
-        if (directProfileAnswer) {
-            return res.status(200).json({ message: directProfileAnswer });
-        }
-    }
-
-    if (outOfScope) {
-        return res.status(200).json({ message: SCOPE_REJECTION });
-    }
 
     const messages: ChatMessage[] = [
-        { role: 'system', content: buildSystemInstruction(intent, archetype, relevantProjects) },
+        { role: 'system', content: buildSystemInstruction(relevantProjects) },
         ...history,
         { role: 'user', content: message.slice(0, 1600) },
     ];
@@ -829,8 +704,8 @@ export default async function handler(req: any, res: any) {
             },
             body: JSON.stringify({
                 model: DEFAULT_MODEL,
-                temperature: 0.2,
-                max_tokens: 700,
+                temperature: 0.6, // Biraz daha yaratici ve dogal olmasi icin hafif artirildi
+                max_tokens: 800,
                 messages,
             }),
         });
@@ -844,14 +719,7 @@ export default async function handler(req: any, res: any) {
         const modelReply = data?.choices?.[0]?.message?.content?.trim();
 
         if (!modelReply) {
-            const fallback = buildFallbackReply(message, intent, archetype, relevantProjects);
-            return res.status(200).json({ message: fallback });
-        }
-
-        // Model bazen kapsam içi sorularda da sabit ret döndürebiliyor.
-        if (!outOfScope && modelReply === SCOPE_REJECTION) {
-            const fallback = buildFallbackReply(message, intent, archetype, relevantProjects);
-            return res.status(200).json({ message: fallback });
+            return res.status(200).json({ message: "Şu an kısa bir kesinti yaşıyorum, lütfen tekrar sorar mısın?" });
         }
 
         return res.status(200).json({

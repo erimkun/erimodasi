@@ -9,3 +9,8 @@ dist
 atılanmail.md
 ozetimsi.md
 github-project-teknik-ozet.md
+/tests
+/scripts
+/.agent
+/.agents
+/.claude
