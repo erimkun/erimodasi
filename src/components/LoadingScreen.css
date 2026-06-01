@@ -31,271 +31,146 @@
     opacity: 0;
     pointer-events: none;
 }
-
-/* Noise texture overlay for organic feel */
-.css-fluid-bg::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    z-index: 5;
-    opacity: 0.035;
-    mix-blend-mode: overlay;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-    background-size: 128px 128px;
-    pointer-events: none;
-}
-
-/* Subtle vignette */
-.css-fluid-bg::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    z-index: 4;
-    background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.6) 100%);
-    pointer-events: none;
-}
-
-/* Blob 1 — Deep indigo, top-left anchor */
-.fluid-blob {
-    position: absolute;
-    border-radius: 40% 60% 55% 45% / 55% 40% 60% 45%;
-    will-change: transform;
-    pointer-events: none;
-}
-
-.fluid-blob--1 {
-    width: 55vmax;
-    height: 55vmax;
-    top: -18%;
-    left: -12%;
-    background: radial-gradient(circle at 40% 40%, 
-        rgba(30, 20, 120, 0.9) 0%, 
-        rgba(80, 20, 160, 0.5) 40%, 
-        rgba(20, 0, 80, 0.2) 70%, 
-        transparent 100%);
-    filter: blur(60px);
-    animation: blobDrift1 20s cubic-bezier(0.45, 0, 0.55, 1) infinite;
-}
-
-/* Blob 2 — Cyan tide, bottom-right */
-.fluid-blob--2 {
-    width: 50vmax;
-    height: 50vmax;
-    bottom: -22%;
-    right: -8%;
-    background: radial-gradient(circle at 60% 60%,
-        rgba(0, 180, 200, 0.7) 0%,
-        rgba(0, 100, 160, 0.4) 35%,
-        rgba(0, 40, 80, 0.15) 65%,
-        transparent 100%);
-    filter: blur(70px);
-    border-radius: 55% 45% 50% 50% / 45% 55% 45% 55%;
-    animation: blobDrift2 24s cubic-bezier(0.45, 0, 0.55, 1) infinite;
-}
-
-/* Blob 3 — Magenta pulse, center */
-.fluid-blob--3 {
-    width: 40vmax;
-    height: 40vmax;
-    top: 35%;
-    left: 30%;
-    background: radial-gradient(circle at 50% 50%,
-        rgba(160, 20, 120, 0.6) 0%,
-        rgba(100, 0, 180, 0.35) 40%,
-        rgba(60, 0, 100, 0.1) 70%,
-        transparent 100%);
-    filter: blur(80px);
-    border-radius: 50% 50% 45% 55% / 60% 40% 55% 45%;
-    animation: blobDrift3 28s cubic-bezier(0.45, 0, 0.55, 1) infinite;
-}
-
-/* Blob 4 — Electric blue accent, small & fast */
-.fluid-blob--4 {
-    width: 30vmax;
-    height: 30vmax;
-    top: 10%;
-    right: 20%;
-    background: radial-gradient(circle at 50% 50%,
-        rgba(0, 110, 255, 0.5) 0%,
-        rgba(0, 60, 200, 0.25) 45%,
-        transparent 80%);
-    filter: blur(65px);
-    border-radius: 60% 40% 50% 50% / 50% 60% 40% 50%;
-    animation: blobDrift4 16s cubic-bezier(0.45, 0, 0.55, 1) infinite;
-}
-
-/* Blob 5 — Warm violet, creates depth overlap */
-.fluid-blob--5 {
-    width: 35vmax;
-    height: 35vmax;
-    bottom: 5%;
-    left: 15%;
-    background: radial-gradient(circle at 45% 55%,
-        rgba(90, 0, 200, 0.45) 0%,
-        rgba(40, 0, 120, 0.2) 50%,
-        transparent 85%);
-    filter: blur(75px);
-    border-radius: 45% 55% 60% 40% / 50% 45% 55% 50%;
-    animation: blobDrift5 22s cubic-bezier(0.45, 0, 0.55, 1) infinite;
-}
-
-/* Organic blob morphing + drifting animations */
-@keyframes blobDrift1 {
-    0%   { transform: translate(0, 0) scale(1) rotate(0deg); border-radius: 40% 60% 55% 45% / 55% 40% 60% 45%; }
-    20%  { transform: translate(8vw, 6vh) scale(1.08) rotate(15deg); border-radius: 55% 45% 40% 60% / 45% 60% 40% 55%; }
-    40%  { transform: translate(3vw, 14vh) scale(0.95) rotate(-10deg); border-radius: 45% 55% 60% 40% / 60% 45% 55% 40%; }
-    60%  { transform: translate(-6vw, 10vh) scale(1.12) rotate(25deg); border-radius: 60% 40% 45% 55% / 40% 55% 60% 45%; }
-    80%  { transform: translate(-3vw, 3vh) scale(1.02) rotate(5deg); border-radius: 50% 50% 55% 45% / 50% 45% 50% 55%; }
-    100% { transform: translate(0, 0) scale(1) rotate(0deg); border-radius: 40% 60% 55% 45% / 55% 40% 60% 45%; }
-}
-
-@keyframes blobDrift2 {
-    0%   { transform: translate(0, 0) scale(1) rotate(0deg); }
-    25%  { transform: translate(-10vw, -8vh) scale(1.1) rotate(-20deg); border-radius: 45% 55% 50% 50% / 55% 45% 50% 50%; }
-    50%  { transform: translate(-6vw, -15vh) scale(0.92) rotate(10deg); border-radius: 50% 50% 45% 55% / 40% 60% 55% 45%; }
-    75%  { transform: translate(4vw, -6vh) scale(1.05) rotate(-15deg); border-radius: 55% 45% 55% 45% / 50% 50% 45% 55%; }
-    100% { transform: translate(0, 0) scale(1) rotate(0deg); }
-}
-
-@keyframes blobDrift3 {
-    0%   { transform: translate(0, 0) scale(1) rotate(0deg); opacity: 0.8; }
-    20%  { transform: translate(-12vw, -8vh) scale(1.15) rotate(30deg); opacity: 1; }
-    40%  { transform: translate(8vw, -12vh) scale(0.85) rotate(-20deg); opacity: 0.6; }
-    60%  { transform: translate(15vw, 5vh) scale(1.1) rotate(45deg); opacity: 0.9; }
-    80%  { transform: translate(-5vw, 8vh) scale(0.95) rotate(10deg); opacity: 0.7; }
-    100% { transform: translate(0, 0) scale(1) rotate(0deg); opacity: 0.8; }
-}
-
-@keyframes blobDrift4 {
-    0%   { transform: translate(0, 0) scale(1); }
-    33%  { transform: translate(-14vw, 10vh) scale(1.2) rotate(40deg); }
-    66%  { transform: translate(6vw, 18vh) scale(0.88) rotate(-25deg); }
-    100% { transform: translate(0, 0) scale(1); }
-}
-
-@keyframes blobDrift5 {
-    0%   { transform: translate(0, 0) scale(1) rotate(0deg); }
-    25%  { transform: translate(12vw, -6vh) scale(1.08) rotate(-35deg); }
-    50%  { transform: translate(18vw, 4vh) scale(0.9) rotate(20deg); }
-    75%  { transform: translate(5vw, 10vh) scale(1.15) rotate(-10deg); }
-    100% { transform: translate(0, 0) scale(1) rotate(0deg); }
-}
-
-.loading-screen.melting {
-    transform: translateY(100%);
-}
-
-.loading-screen.loading-lite .fluid-blob {
-    animation-play-state: paused;
-    opacity: 0.55;
-    filter: blur(45px);
-}
-
-.loading-screen.loading-lite .css-fluid-bg::before {
-    opacity: 0.015;
-}
-
-.loading-screen.loading-lite .enter-blob {
-    animation-duration: 16s, 18s;
-}
-
-.content-wrapper {
-    position: relative;
-    z-index: 10;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    padding: 2rem;
-    box-sizing: border-box;
-    /* backdrop-filter: blur(2px); Optionally blur bg slightly */
-}
-
-/* Top Indicator */
-.top-indicator {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    /* height: 60px; Removed fixed height to fit content */
-    min-height: 60px;
-    margin-bottom: 20px;
-}
-
-.loading-text {
-    font-size: 0.9rem;
-    letter-spacing: 4px;
-    font-weight: 300;
-    opacity: 0.8;
-}
-
-/* ===== ENTER BUTTON — Fluid Morphing Blob ===== */
+/* ===== ENTER BUTTON — Neon Draw Lines ===== */
 .enter-btn {
     position: relative;
-    background: transparent;
     border: none;
-    color: white;
-    padding: 0;
+    background: rgba(6, 10, 18, 0.55);
+    padding: 16px 42px;
     cursor: pointer;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0;
-    /* No isolation — let the glow bleed */
+    text-transform: uppercase;
+    letter-spacing: 6px;
+    font-weight: 500;
+    font-size: 0.78rem;
+    font-family: "Share Tech Mono", "JetBrains Mono", "Courier New", monospace;
+    color: #a8fffb;
+    border-radius: 10px;
+    box-shadow:
+        0 0 0 1px rgba(0, 255, 244, 0.18),
+        0 0 16px rgba(0, 255, 244, 0.08),
+        inset 0 0 24px rgba(0, 255, 244, 0.08);
+    transition: transform 0.35s ease, box-shadow 0.35s ease, color 0.35s ease;
+    isolation: isolate;
+    overflow: hidden;
 }
 
-/* Main fluid container \u2014 also morphs as a whole */
-.enter-fluid {
+.enter-btn--neon .enter-label {
     position: relative;
-    width: 160px;
-    height: 160px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    animation: containerMorph 10s ease-in-out infinite;
+    z-index: 2;
+    text-shadow:
+        0 0 6px rgba(0, 255, 244, 0.7),
+        0 0 16px rgba(0, 255, 244, 0.45),
+        0 0 36px rgba(0, 140, 255, 0.35);
 }
 
-@keyframes containerMorph {
-    0%   { border-radius: 50%; transform: scale(1) rotate(0deg); }
-    25%  { border-radius: 46% 54% 52% 48% / 54% 46% 50% 50%; transform: scale(1.03) rotate(2deg); }
-    50%  { border-radius: 52% 48% 46% 54% / 48% 52% 54% 46%; transform: scale(0.97) rotate(-1deg); }
-    75%  { border-radius: 48% 52% 54% 46% / 52% 48% 46% 54%; transform: scale(1.02) rotate(1deg); }
-    100% { border-radius: 50%; transform: scale(1) rotate(0deg); }
+.enter-aura {
+    position: absolute;
+    inset: -50% -20%;
+    background: radial-gradient(circle at 30% 30%, rgba(0, 255, 244, 0.22), transparent 60%),
+        radial-gradient(circle at 70% 70%, rgba(0, 140, 255, 0.18), transparent 55%);
+    filter: blur(18px);
+    opacity: 0.6;
+    z-index: 0;
+    animation: auraPulse 4s ease-in-out infinite;
 }
 
-/* ── Flowing blob layers ── */
-.enter-blob {
+.enter-sheen {
     position: absolute;
     inset: 0;
-    border-radius: 50%;
-    pointer-events: none;
+    background: linear-gradient(120deg, transparent 0%, rgba(255, 255, 255, 0.12) 45%, transparent 60%);
+    transform: translateX(-130%);
+    animation: sheenSweep 3.5s ease-in-out infinite;
+    z-index: 1;
+    mix-blend-mode: screen;
 }
 
-/* Outer blob — large, slow morph */
-.enter-blob--outer {
-    background: conic-gradient(
-        from 0deg,
-        rgba(0, 200, 220, 0.25) 0deg,
-        rgba(120, 0, 255, 0.2) 90deg,
-        rgba(200, 50, 180, 0.15) 180deg,
-        rgba(0, 140, 255, 0.2) 270deg,
-        rgba(0, 200, 220, 0.25) 360deg
-    );
-    filter: blur(20px);
-    animation:
-        blobMorph1 8s ease-in-out infinite,
-        blobRotate 12s linear infinite;
+.enter-line {
+    position: absolute;
+    background: linear-gradient(90deg, transparent, rgba(0, 255, 244, 0.95), transparent);
+    opacity: 0.9;
+    z-index: 1;
+    filter: drop-shadow(0 0 10px rgba(0, 255, 244, 0.75));
 }
 
-/* Middle blob — medium, offset morph */
-.enter-blob--mid {
-    inset: 12px;
-    background: conic-gradient(
-        from 120deg,
-        rgba(100, 0, 255, 0.35) 0deg,
-        rgba(0, 180, 200, 0.3) 120deg,
-        rgba(180, 30, 200, 0.25) 240deg,
-        rgba(100, 0, 255, 0.35) 360deg
+.enter-line--top,
+.enter-line--bottom {
+    height: 2px;
+    left: 10px;
+    right: 10px;
+    transform: scaleX(0);
+    transform-origin: left;
+    animation: lineDrawX 0.65s ease forwards, lineGlow 2.2s 0.7s ease-in-out infinite;
+}
+
+.enter-line--top {
+    top: 10px;
+}
+
+.enter-line--bottom {
+    bottom: 10px;
+    animation-delay: 0.35s, 0.95s;
+}
+
+.enter-line--left,
+.enter-line--right {
+    width: 2px;
+    top: 10px;
+    bottom: 10px;
+    background: linear-gradient(180deg, transparent, rgba(0, 255, 244, 0.95), transparent);
+    transform: scaleY(0);
+    transform-origin: top;
+    animation: lineDrawY 0.65s ease forwards, lineGlow 2.2s 0.8s ease-in-out infinite;
+}
+
+.enter-line--left {
+    left: 10px;
+    animation-delay: 0.15s, 0.9s;
+}
+
+.enter-line--right {
+    right: 10px;
+    animation-delay: 0.5s, 1.05s;
+}
+
+.enter-btn:hover {
+    transform: translateY(-2px) scale(1.02);
+    color: #e6fffe;
+    box-shadow:
+        0 0 0 1px rgba(0, 255, 244, 0.45),
+        0 0 26px rgba(0, 255, 244, 0.25),
+        inset 0 0 35px rgba(0, 255, 244, 0.2);
+}
+
+.enter-btn:active {
+    transform: translateY(1px) scale(0.98);
+}
+
+@keyframes lineDrawX {
+    from { transform: scaleX(0); }
+    to { transform: scaleX(1); }
+}
+
+@keyframes lineDrawY {
+    from { transform: scaleY(0); }
+    to { transform: scaleY(1); }
+}
+
+@keyframes lineGlow {
+    0%, 100% { opacity: 0.65; }
+    50% { opacity: 1; }
+}
+
+@keyframes auraPulse {
+    0%, 100% { opacity: 0.45; transform: scale(0.92); }
+    50% { opacity: 0.8; transform: scale(1.04); }
+}
+
+@keyframes sheenSweep {
+    0% { transform: translateX(-130%); opacity: 0; }
+    40% { opacity: 0.5; }
+    70% { opacity: 0.9; }
+    100% { transform: translateX(130%); opacity: 0; }
+}
     );
     filter: blur(14px);
     animation:

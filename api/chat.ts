@@ -105,21 +105,21 @@ const PORTFOLIO_PROJECTS: PortfolioProject[] = [
         name: 'PanoTour 360',
         aliases: ['panotour', 'panotour 360', 'sanal tur', '360 tur'],
         summary:
-            'Web tabanlı 360° panoramik tur platformu; WebXR/VR desteği, hotspot yönetimi ve ZIP tabanlı içerik yükleme özellikleri sunar.',
-        tech: 'Next.js, WebXR, VR, panoramik render, içerik yönetimi',
+            'Web tabanlı 360° panoramik tur platformu. Tarayıcı üzerinden sunulan VR deneyimlerinde bellek (memory) problemlerini çözen özel performans optimizasyonları ve bellek yönetimi (garbage collection) stratejileri içerir.',
+        tech: 'Next.js, WebXR, VR, bellek yönetimi, performans optimizasyonu',
         milestones: '21 Kas 2025 ilk yayın; 8 Ocak sunuma hazır; 16 Mart güncel sürüm.',
         links: ['https://panotour.vercel.app/', 'https://github.com/erimkun/panotour'],
-        keywords: ['panoramik', 'vr', 'webxr', 'hotspot', 'zip'],
+        keywords: ['panoramik', 'vr', 'webxr', 'hotspot', 'zip', 'bellek', 'performans', 'optimizasyon'],
     },
     {
         name: 'Immersive AR',
         aliases: ['immersive ar', 'immersivear', 'ar', 'artirilmis gerceklik'],
         summary:
-            'Gayrimenkul ve mimari projeler için mobil odaklı AR/WebXR inceleme deneyimi; kamera odaklı panoramik tur ve 3D model görüntüleme sağlar.',
-        tech: 'WebXR, AR, panorama, mobil web',
+            'Özellikle iPhone üzerinde USDZ formatıyla AR deneyimi sunan mobil odaklı platform. Model kalitesini kaybetmeden boyutları 40 MB altında tutan model sıkıştırma ve AR performans çözümleri içerir.',
+        tech: 'WebXR, AR, USDZ, model sıkıştırma (compression), mobil web',
         milestones: '7 Ocak sunuma hazır; 29 Ocak v2; 6 Mart 2026 görsel/ambient revize.',
         links: ['https://immersivear.vercel.app/', 'https://github.com/erimkun/AR'],
-        keywords: ['ar', 'kamera', 'panoramik', 'gayrimenkul', 'webxr'],
+        keywords: ['ar', 'kamera', 'panoramik', 'gayrimenkul', 'webxr', 'usdz', 'sikistirma', '40mb', 'mobil'],
     },
     {
         name: 'ThermoZoning AI',

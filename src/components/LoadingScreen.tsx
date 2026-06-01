@@ -190,28 +190,22 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({ onComplete, isLoad
                                     />
                                 </motion.div>
 
-                                {/* Giriş Yap butonu — fluid morphing blob */}
+                                {/* Giriş Yap butonu — neon draw lines */}
                                 <motion.button
                                     key="ready"
-                                    className="enter-btn"
+                                    className="enter-btn enter-btn--neon"
                                     initial={{ opacity: 0, scale: 0.8 }}
                                     animate={{ opacity: 1, scale: 1 }}
                                     transition={{ delay: 0.5, duration: 0.8, type: 'spring', stiffness: 100, damping: 12 }}
                                     onClick={handleReadyClick}
                                 >
-                                    <div className="enter-fluid">
-                                        <span className="enter-ambient" />
-                                        <div className="enter-blob enter-blob--outer" />
-                                        <div className="enter-blob enter-blob--mid" />
-                                        <div className="enter-blob enter-blob--inner" />
-                                        <div className="enter-core">
-                                            <svg className="enter-core-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                <path d="M5 12h14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                                                <path d="M13 5l7 7-7 7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                                            </svg>
-                                        </div>
-                                    </div>
-                                    <span className="enter-label">GİRİŞ</span>
+                                    <span className="enter-aura" aria-hidden="true" />
+                                    <span className="enter-line enter-line--top" aria-hidden="true" />
+                                    <span className="enter-line enter-line--right" aria-hidden="true" />
+                                    <span className="enter-line enter-line--bottom" aria-hidden="true" />
+                                    <span className="enter-line enter-line--left" aria-hidden="true" />
+                                    <span className="enter-sheen" aria-hidden="true" />
+                                    <span className="enter-label">GİRİŞ YAP</span>
                                 </motion.button>
                             </div>
                         )}

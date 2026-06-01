@@ -169,7 +169,21 @@ export function ChatWidget({ isOpen, onToggle }: ChatWidgetProps) {
                         {messages.map((msg, index) => (
                             <article key={`${msg.role}-${index}`} className={`chat-message ${msg.role}`}>
                                 <span className="chat-role">{msg.role === 'user' ? 'SEN' : 'ERIM-AI'}</span>
-                                <p>{msg.content}</p>
+                                <p className="chat-content">
+                                    {msg.content.split(/(\*\*.*?\*\*)/g).map((part, i) => {
+                                        if (part.startsWith('**') && part.endsWith('**')) {
+                                            return <strong key={i}>{part.slice(2, -2)}</strong>;
+                                        }
+                                        return <span key={i}>{
+                                            part.split('\n').map((line, j, arr) => (
+                                                <span key={`${i}-${j}`}>
+                                                    {line}
+                                                    {j < arr.length - 1 && <br />}
+                                                </span>
+                                            ))
+                                        }</span>;
+                                    })}
+                                </p>
                             </article>
                         ))}
 
@@ -195,7 +209,7 @@ export function ChatWidget({ isOpen, onToggle }: ChatWidgetProps) {
                             }}
                         />
                         <button onClick={() => void handleSend()} disabled={loading || isWritingResponse || !input.trim()}>
-                            Gonder
+                            Gönder
                         </button>
                     </footer>
                 </section>
