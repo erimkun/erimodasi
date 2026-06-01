@@ -36,7 +36,7 @@ const items: Item[] = [
     { id: 1, text: "BİR", image: withBase('me01.webp') },
     { id: 2, text: "SORUN", image: withBase('me02.webp') },
     { id: 3, text: "VARSA", image: withBase('me03.webp') },
-    { id: 4, text: "ERİMİ", image: withBase('me04.webp') },
+    { id: 4, text: "ERİM'İ", image: withBase('me04.webp') },
     { id: 5, text: "DE", image: withBase('me05.webp') },
     { id: 6, text: "VAR", image: withBase('me06.webp') },
 ];
@@ -270,7 +270,7 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({ onComplete, isLoad
                                     className="dynamic-text full"
                                     style={{ fontSize: '1.5rem', letterSpacing: '2px' }}
                                 >
-                                    BİR SORUN VARSA ERİMİ DE VAR
+                                    BİR SORUN VARSA ERİM'İ DE VAR
                                 </motion.div>
                             ) : (
                                 <motion.div

@@ -12,7 +12,7 @@ interface ChatWidgetProps {
 const AVATAR_FRAMES = [withBase('erimai0.png'), withBase('erimai1.png'), withBase('erimai2.png')];
 
 const INITIAL_ASSISTANT_MESSAGE =
-    'Merhaba, ben ERIM AI. Erden Erim\'in portfolyo asistaniyim; projeleri, deneyimi ve teknik yetkinlikleri hakkinda soru sorabilirsin.';
+    'Merhaba, ben ERIM AI. Erden Erim\'in portfolyo asistanıyım; projeleri, deneyimi ve teknik yetkinlikleri hakkında soru sorabilirsin.';
 
 export function ChatWidget({ isOpen, onToggle }: ChatWidgetProps) {
     const [messages, setMessages] = useState<ChatMessage[]>([
@@ -119,7 +119,7 @@ export function ChatWidget({ isOpen, onToggle }: ChatWidgetProps) {
         setLoading(false);
 
         if (response.error) {
-            await writeAssistantMessage('Su an baglanti sorunu var. Birazdan tekrar dener misin?');
+            await writeAssistantMessage('Şu an bağlantı sorunu var. Birazdan tekrar dener misin?');
             return;
         }
 
@@ -134,7 +134,7 @@ export function ChatWidget({ isOpen, onToggle }: ChatWidgetProps) {
                     e.stopPropagation();
                     onToggle(!isOpen);
                 }}
-                aria-label={isOpen ? 'Sohbeti kapat' : 'Sohbeti ac'}
+                aria-label={isOpen ? 'Sohbeti kapat' : 'Sohbeti aç'}
             >
                 <img
                     className={`chat-avatar ${loading || isWritingResponse ? 'is-speaking' : ''}`}
@@ -149,12 +149,12 @@ export function ChatWidget({ isOpen, onToggle }: ChatWidgetProps) {
                     className="chat-panel is-open"
                     onClick={(e) => e.stopPropagation()}
                     role="dialog"
-                    aria-label="Erden Erim portfolyo asistani"
+                    aria-label="Erden Erim portfolyo asistanı"
                 >
                     <header className="chat-header">
                         <div>
                             <p className="chat-kicker">ERIM AI TERMINAL</p>
-                            <h3>Portfolyo Asistani</h3>
+                            <h3>Portfolyo Asistanı</h3>
                         </div>
                         <button
                             className="chat-close"
@@ -199,7 +199,7 @@ export function ChatWidget({ isOpen, onToggle }: ChatWidgetProps) {
                         <textarea
                             value={input}
                             onChange={(e) => setInput(e.target.value)}
-                            placeholder="Erden Erim'in projeleri hakkinda sor"
+                            placeholder="Erden Erim'in projeleri hakkında sor"
                             rows={2}
                             onKeyDown={(e) => {
                                 if (e.key === 'Enter' && !e.shiftKey) {
