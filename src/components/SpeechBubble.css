@@ -225,6 +225,8 @@
         /* Safe area padding */
         padding-left: env(safe-area-inset-left, 0px);
         padding-right: env(safe-area-inset-right, 0px);
+        /* Story panel (z-index:140) üstünde kalması için */
+        z-index: 150;
     }
 
     .speech-bubble {

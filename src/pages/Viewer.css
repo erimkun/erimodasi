@@ -291,11 +291,12 @@
 
 @media (max-width: 768px) {
     .story-panel {
-        top: auto;
-        bottom: 5.6rem;
-        width: min(430px, calc(100vw - 1.2rem));
+        /* Mobilde üstte tut — altta chat avatar (z-index:322) butonları kapatıyor */
+        top: 0.6rem;
+        bottom: auto;
         left: 50%;
         transform: translateX(-50%);
+        width: min(430px, calc(100vw - 1.2rem));
         padding: 0.8rem 0.85rem;
     }
 
