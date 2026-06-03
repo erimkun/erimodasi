@@ -16,6 +16,23 @@
     overflow: hidden;
 }
 
+/* Aşağı kayarak yok olma animasyonu */
+.loading-screen.melting {
+    transform: translateY(100%);
+}
+
+/* Baking sırasında GPU yükünü azaltmak için animasyonları yavaşlat */
+.loading-screen.loading-lite .fluid-blob {
+    animation-duration: 30s !important;
+}
+.loading-screen.loading-lite .gallery-item {
+    transition: none !important;
+}
+.loading-screen.loading-lite .enter-aura,
+.loading-screen.loading-lite .enter-sheen {
+    animation: none !important;
+}
+
 /* ===== Premium CSS Fluid Background ===== */
 .css-fluid-bg {
     position: absolute;

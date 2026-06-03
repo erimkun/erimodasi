@@ -80,7 +80,7 @@ export function ChatWidget({ isOpen, onToggle }: ChatWidgetProps) {
                 let cursor = 0;
 
                 const tick = () => {
-                    cursor = Math.min(content.length, cursor + 2);
+                    cursor = Math.min(content.length, cursor + 5);
 
                     setMessages((prev) => {
                         if (prev.length === 0) return prev;
@@ -97,7 +97,7 @@ export function ChatWidget({ isOpen, onToggle }: ChatWidgetProps) {
                         return;
                     }
 
-                    writeTimerRef.current = window.setTimeout(tick, 26);
+                    writeTimerRef.current = window.setTimeout(tick, 18);
                 };
 
                 tick();
