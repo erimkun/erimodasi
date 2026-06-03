@@ -17,9 +17,9 @@ export const PROJECTS: ProjectData[] = [
     {
         id: 'sayistay-ai',
         boxId: 'box_2',
-        title: 'Sayıştay Denetim Analiz & Karar Destek',
+        title: 'Kurumsal Denetim Analiz & Karar Destek',
         description:
-            'Sayıştay raporları üzerinde çalışan çok katmanlı AI sistemi. OCR entegrasyonu, vektör tabanlı indeksleme ve MCP (Model Context Protocol) ile modelin dış veri kaynaklarına güvenli erişimi.',
+            'Kurumsal dokümanlar ve denetim raporları üzerinde çalışan çok katmanlı AI sistemi. OCR entegrasyonu, vektör tabanlı indeksleme ve MCP (Model Context Protocol) ile modelin dış veri kaynaklarına güvenli erişimi.',
         technologies: ['OCR', 'RAG', 'MCP', 'Vektör DB', 'LLM'],
         color: '#ffae00',
     },

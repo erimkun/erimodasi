@@ -66,9 +66,9 @@ export function ProfilePopup({ isVisible, onClose }: ProfilePopupProps) {
                             <span>İstanbul, Türkiye</span>
                         </div>
                         <div className="profile-detail-row">
-                            <a href="mailto:erdennilsu1965@gmail.com" className="detail-link">
-                                <span className="detail-icon">📧</span>
-                                <span>erdennilsu1965@gmail.com</span>
+                            <a href="mailto:erdenerimaydogdu@gmail.com" className="detail-link">
+                                <span className="icon">✉️</span>
+                                <span>erdenerimaydogdu@gmail.com</span>
                             </a>
                         </div>
                         <div className="profile-detail-row">

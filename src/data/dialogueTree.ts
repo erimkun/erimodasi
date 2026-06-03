@@ -103,7 +103,7 @@ export const DIALOGUE_TREE: DialogueTree = {
 
     tour_boxes: {
         id: 'tour_boxes',
-        message: "O kutular Erim'in öne çıkan projelerini temsil ediyor. Digital Showroom XR'dan, Sayıştay AI sistemine kadar... Her kutunun rengi farklı bir projeye ait. Tıklayınca detayları görürsün.",
+        message: "O kutular Erim'in öne çıkan projelerini temsil ediyor. Digital Showroom XR'dan, AI Denetim sistemine kadar... Her kutunun rengi farklı bir projeye ait. Tıklayınca detayları görürsün.",
         options: [
             { label: 'En dikkat çekici projeyi göster! 🟢', nextNodeId: 'project_detail_1', action: { type: 'highlightBox', boxId: 'box_1' } },
             { label: 'Kendim keşfedeyim 🔍', nextNodeId: 'tour_boxes_explore' },
@@ -146,7 +146,7 @@ export const DIALOGUE_TREE: DialogueTree = {
         message: "Erim'in projeleri ciddi çeşitlilik gösteriyor — XR ekosistemi, AI karar destek, IoT ve daha fazlası. Kutuların her biri bir projeye ait. Hangisi ilgini çekti?",
         options: [
             { label: '🟢 XR Showroom', nextNodeId: 'project_detail_1', action: { type: 'highlightBox', boxId: 'box_1' } },
-            { label: '🟠 Sayıştay AI', nextNodeId: 'project_detail_2', action: { type: 'highlightBox', boxId: 'box_2' } },
+            { label: '🟠 Kurumsal AI Denetim', nextNodeId: 'project_detail_2', action: { type: 'highlightBox', boxId: 'box_2' } },
             { label: 'Tüm projeleri göster', nextNodeId: 'projects_all' },
         ],
     },
@@ -163,7 +163,7 @@ export const DIALOGUE_TREE: DialogueTree = {
 
     project_detail_2: {
         id: 'project_detail_2',
-        message: "Sayıştay projesi, Erim'in AI mimarisindeki derinliğini gösteriyor. Sayıştay raporları üzerinde çalışan çok katmanlı bir AI sistemi: OCR entegrasyonu, vektör tabanlı indeksleme ve MCP ile modelin dış veri kaynaklarına güvenli erişimi. Hâlâ geliştirilmeye devam ediyor.",
+        message: "AI Analiz platformu, Erim'in AI mimarisindeki derinliğini gösteriyor. Kurumsal denetim raporları üzerinde çalışan çok katmanlı bir AI sistemi: OCR entegrasyonu, vektör tabanlı indeksleme ve MCP ile modelin dış veri kaynaklarına güvenli erişimi. Hâlâ geliştirilmeye devam ediyor.",
         options: [
             { label: 'Detayları gör 🔍', nextNodeId: 'greeting', action: { type: 'openProject', boxId: 'box_2' } },
             { label: 'Diğer projeye bak ⏩', nextNodeId: 'project_detail_3' },
@@ -234,7 +234,7 @@ export const DIALOGUE_TREE: DialogueTree = {
 
     contact_quick: {
         id: 'contact_quick',
-        message: "📧 erdennilsu1965@gmail.com\n💼 linkedin.com/in/erden-erim-aydoğdu\n🐙 github.com/erimkun\n📍 İstanbul, Türkiye\n\nHerhangi bir kanaldan ulaşabilirsin!",
+        message: "📧 erdenerimaydogdu@gmail.com\n💼 linkedin.com/in/erden-erim-aydoğdu\n🐙 github.com/erimkun\n📍 İstanbul, Türkiye\n\nHerhangi bir kanaldan ulaşabilirsin!",
         options: [
             { label: 'Teşekkürler! 👋', nextNodeId: 'farewell' },
             { label: '← Ana menüye dön', nextNodeId: 'greeting' },
