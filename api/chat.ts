@@ -29,7 +29,7 @@ const PROFILE_FACTS = {
         'Teknik odak: AI/ML, XR, IoT, full-stack web, CesiumJS, Unreal Engine, Three.js, LLM/RAG sistemleri.',
     languages: 'İngilizce C1, Almanca A2, İspanyolca A1.',
     contact:
-        'İletişim: erdennilsu1965@gmail.com | linkedin.com/in/erden-erim-aydoğdu | github.com/erimkun | İstanbul, Türkiye.',
+        'İletişim: erdenerimaydogdu@gmail.com | linkedin.com/in/erden-erim-aydoğdu | github.com/erimkun | İstanbul, Türkiye.',
 };
 
 type Role = 'system' | 'user' | 'assistant';
@@ -148,7 +148,7 @@ const PORTFOLIO_PROJECTS: PortfolioProject[] = [
             'Toplu SMS, anket yönetimi ve istatistik raporlama odaklı kurumsal geri bildirim platformu; yetkili görüntüleme seviyeleri içerir.',
         tech: 'Admin panel, anket yönetimi, istatistik, SMS entegrasyonu',
         milestones: '28 Ocak ilk yayın; 17 Şubat 2026 canlı ve güvenlik iyileştirmeleri.',
-        links: ['https://anket.uskudarkentas.com.tr/', 'https://github.com/erimkun/feedback'],
+        links: ['Şirket içi (Internal) platform'],
         keywords: ['anket', 'sms', 'istatistik', 'geri bildirim', 'admin'],
     },
     {
@@ -158,7 +158,7 @@ const PORTFOLIO_PROJECTS: PortfolioProject[] = [
             'İnşaat projelerinin 3D dijital ikiz, drone fotoğrafı ve kat planlarını bir arada yöneten gelişmiş web portalı.',
         tech: 'Cesium.js, 3D model görüntüleme, ölçüm araçları, admin panel',
         milestones: '12 Eylül 2025 production; sürekli iyileştirme.',
-        links: ['https://mportal.uskudarkentas.com.tr/'],
+        links: ['Kurumsal B2B Platform (mportal.uskudarkentas.com.tr)'],
         keywords: ['insaat', 'dijital ikiz', 'cesium', 'drone', 'kat plani'],
     },
     {
@@ -168,7 +168,7 @@ const PORTFOLIO_PROJECTS: PortfolioProject[] = [
             'Vatandaş-kurum etkileşimi için çok kiracılı (multi-tenant) katılımcı planlama platformu; moderasyon ve güvenlik odaklıdır.',
         tech: 'PPGIS, multi-tenant mimari, moderasyon paneli, rate limit',
         milestones: 'V2 ile multi-tenant altyapı yayında.',
-        links: ['https://github.com/uskudarkentas/sizinleuskudar_v2'],
+        links: ['Kapalı Kaynak (Private Repo)'],
         keywords: ['ppgis', 'multi tenant', 'vatandas', 'moderasyon', 'rate limit'],
     },
     {
@@ -178,7 +178,7 @@ const PORTFOLIO_PROJECTS: PortfolioProject[] = [
             'React+Vite frontend ve Express API ile dinamik CBS uygulamaları üreten modüler platform; LDAP/JWT ve RBAC içerir.',
         tech: 'React, TypeScript, Vite, Node.js, Express, PostgreSQL, LDAP, JWT, RBAC',
         milestones: 'Dinamik uygulama altyapısı ve app editor/logs yapısı yayında.',
-        links: ['https://github.com/uskudarkentas/mbs-arcgisfree'],
+        links: ['Kapalı Kaynak (Private Repo)'],
         keywords: ['cbs', 'maplibre', 'rbac', 'ldap', 'jwt', 'widget'],
     },
     {
@@ -188,7 +188,7 @@ const PORTFOLIO_PROJECTS: PortfolioProject[] = [
             'Şantiye operasyonlarında maliyet, iştirak ve işçi kontrolü için genişletilmiş yönetim modülleri içeren saha yönetim uygulaması.',
         tech: 'Operasyon paneli, maliyet/iş gücü takibi, raporlama',
         milestones: '24 Şubat 2026 v2 özellikleri tamamlandı.',
-        links: ['https://github.com/uskudarkentas/santiyeyonetim'],
+        links: ['Kapalı Kaynak (Private Repo)'],
         keywords: ['santiye', 'maliyet', 'isci', 'isgucu', 'rapor'],
     },
     {
@@ -215,7 +215,7 @@ const PORTFOLIO_PROJECTS: PortfolioProject[] = [
         name: 'AI PDF Analyzer',
         aliases: ['pdf analyzer', 'pdf_analyzer', 'ai pdf analyzer'],
         summary:
-            'Belediye dokümanları üzerinde Türkçe odaklı soru-cevap ve karşılaştırma yapan yapay zeka analiz sistemi (şu an askıda).',
+            'Kurumsal dokümanlar ve PDF belgeleri üzerinde Türkçe odaklı soru-cevap ve analiz yapan yapay zeka sistemi.',
         tech: 'Python, belge analizi, OCR, LLM tabanlı soru-cevap',
         milestones: '27 Ağustos 2025 başlangıç; Kasım 2025 sonrası askıda.',
         links: ['https://github.com/erimkun/pdf_analyzer'],
