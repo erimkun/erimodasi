@@ -190,23 +190,40 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({ onComplete, isLoad
                                     />
                                 </motion.div>
 
-                                {/* Giriş Yap butonu — neon draw lines */}
-                                <motion.button
-                                    key="ready"
-                                    className="enter-btn enter-btn--neon"
-                                    initial={{ opacity: 0, scale: 0.8 }}
-                                    animate={{ opacity: 1, scale: 1 }}
-                                    transition={{ delay: 0.5, duration: 0.8, type: 'spring', stiffness: 100, damping: 12 }}
-                                    onClick={handleReadyClick}
-                                >
-                                    <span className="enter-aura" aria-hidden="true" />
-                                    <span className="enter-line enter-line--top" aria-hidden="true" />
-                                    <span className="enter-line enter-line--right" aria-hidden="true" />
-                                    <span className="enter-line enter-line--bottom" aria-hidden="true" />
-                                    <span className="enter-line enter-line--left" aria-hidden="true" />
-                                    <span className="enter-sheen" aria-hidden="true" />
-                                    <span className="enter-label">GİRİŞ YAP</span>
-                                </motion.button>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', alignItems: 'center', width: '100%' }}>
+                                    {/* Giriş Yap butonu — neon draw lines */}
+                                    <motion.button
+                                        key="ready"
+                                        className="enter-btn enter-btn--neon"
+                                        initial={{ opacity: 0, scale: 0.8 }}
+                                        animate={{ opacity: 1, scale: 1 }}
+                                        transition={{ delay: 0.5, duration: 0.8, type: 'spring', stiffness: 100, damping: 12 }}
+                                        onClick={handleReadyClick}
+                                    >
+                                        <span className="enter-aura" aria-hidden="true" />
+                                        <span className="enter-line enter-line--top" aria-hidden="true" />
+                                        <span className="enter-line enter-line--right" aria-hidden="true" />
+                                        <span className="enter-line enter-line--bottom" aria-hidden="true" />
+                                        <span className="enter-line enter-line--left" aria-hidden="true" />
+                                        <span className="enter-sheen" aria-hidden="true" />
+                                        <span className="enter-label">GİRİŞ YAP</span>
+                                    </motion.button>
+
+                                    {/* CV İndir Butonu */}
+                                    <motion.a
+                                        key="cv"
+                                        href={withBase('cv_linktera_ai_engineer.pdf')}
+                                        download="cv_linktera_ai_engineer.pdf"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="cv-btn"
+                                        initial={{ opacity: 0, scale: 0.8 }}
+                                        animate={{ opacity: 1, scale: 1 }}
+                                        transition={{ delay: 0.6, duration: 0.8, type: 'spring', stiffness: 100, damping: 12 }}
+                                    >
+                                        <span className="cv-label">ÖZGEÇMİŞ</span>
+                                    </motion.a>
+                                </div>
                             </div>
                         )}
                     </AnimatePresence>
